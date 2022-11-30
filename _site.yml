@@ -7,4 +7,5 @@ navbar:
       href: age.html
 output:
   html_document:
-    theme: cerulean
+    code_folding: hide
+    theme: readable

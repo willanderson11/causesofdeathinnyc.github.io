@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/cerulean.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -33,6 +33,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
@@ -226,6 +227,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -338,6 +342,14 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore">Age as a predictor of Death</h1>
@@ -347,47 +359,19 @@ div.tocify {
 
 <pre class="r"><code>#datasets for exploratory analysis
 death_in_nys = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;%
-  janitor::clean_names()</code></pre>
-<pre><code>## Rows: 8472 Columns: 6
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr (4): Sex, Age Group, Race or Ethnicity, Selected Cause of Death
-## dbl (2): Year, Deaths
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>death_by_age = read_csv(&quot;data/Vital_Statistics_Deaths_by_Resident_County__Region__and_Age-Group__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names()
+
+death_by_age = read_csv(&quot;data/Vital_Statistics_Deaths_by_Resident_County__Region__and_Age-Group__Beginning_2003.csv&quot;) %&gt;%
   janitor::clean_names() %&gt;%
-  filter(region == &quot;NYC&quot;)</code></pre>
-<pre><code>## Rows: 12158 Columns: 5
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr (3): County Name, Region, Age Group
-## dbl (2): Year, Deaths
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>opiod_death = read_csv(&quot;data/Vital_Statistics__Opioid-Related_Deaths_by_Age_Group__Beginning_2003.csv&quot;) %&gt;%
-  janitor::clean_names()</code></pre>
-<pre><code>## Rows: 4052 Columns: 6
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr (4): Region, Race or Ethnicity, Sex, Age Group
-## dbl (2): Year, Opioid Poisoning Deaths
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>suicide_death = read_csv(&quot;data/Vital_Statistics_Suicide_Deaths_by_Age-Group__Race_Ethnicity__Resident_Region__and_Gender__Beginning_2003.csv&quot;) %&gt;%
-  janitor::clean_names()</code></pre>
-<pre><code>## Rows: 2561 Columns: 8
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr (4): Region, Race or Ethnicity, Sex, Age Group
-## dbl (4): Year, Firearm Deaths, Alcohol-Related Deaths, Suicide Deaths
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>#merging datasets for statistical analysis
+  filter(region == &quot;NYC&quot;)
+
+opiod_death = read_csv(&quot;data/Vital_Statistics__Opioid-Related_Deaths_by_Age_Group__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names()
+
+suicide_death = read_csv(&quot;data/Vital_Statistics_Suicide_Deaths_by_Age-Group__Race_Ethnicity__Resident_Region__and_Gender__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names()
+
+#merging datasets for statistical analysis
 predictor_age = left_join(opiod_death, suicide_death, by = c(&quot;year&quot;, &quot;sex&quot;, &quot;region&quot;, &quot;race_or_ethnicity&quot;, &quot;age_group&quot;)) %&gt;%
   filter(region == &quot;NYC&quot;)</code></pre>
 <div id="leading-causes-of-death-in-new-york-state-by-age-group"
@@ -400,7 +384,7 @@ group_by(year, age_group, selected_cause_of_death)%&gt;%
   geom_bar(stat=&quot;identity&quot;)+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   facet_grid(~age_group)</code></pre>
-<p><img src="age_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<p><img src="age_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
 </div>
 <div
 id="trend-of-the-number-of-deaths-by-age-group-by-county-in-the-nyc-region-over-the-years"
@@ -413,7 +397,7 @@ region over the years</h3>
   ggplot(aes(x=year, y = deaths, color = age_group)) +
   geom_line()+
   facet_grid(~county_name)</code></pre>
-<p><img src="age_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<p><img src="age_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 </div>
 
 
@@ -451,6 +435,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {

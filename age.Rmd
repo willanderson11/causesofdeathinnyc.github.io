@@ -32,7 +32,7 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-```{r, loading and cleaning data}
+```{r, message=FALSE, warning=FALSE}
 #datasets for exploratory analysis
 death_in_nys = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv") %>%
   janitor::clean_names()
