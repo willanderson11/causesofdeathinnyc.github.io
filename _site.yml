@@ -1,0 +1,10 @@
+name: "Data Science Final Project"
+output_dir: "."
+navbar:
+  title: "Home"
+  right:
+    - text: "Age as a predictor"
+      href: age.html
+output:
+  html_document:
+    theme: cerulean
