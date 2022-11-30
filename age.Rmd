@@ -65,7 +65,7 @@ group_by(year, age_group, selected_cause_of_death)%>%
 
 ```
 
-### Trends of the number of deaths by age group by county in the NYC region over the years
+### Trend of the number of deaths by age group by county in the NYC region over the years
 
 ```{r, message=FALSE, warning=FALSE}
 death_by_age %>%
