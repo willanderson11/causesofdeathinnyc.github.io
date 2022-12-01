@@ -380,8 +380,8 @@ suicide_death = read_csv(&quot;data/Vital_Statistics_Suicide_Deaths_by_Age-Group
 predictor_age = left_join(opiod_death, suicide_death, by = c(&quot;year&quot;, &quot;sex&quot;, &quot;region&quot;, &quot;race_or_ethnicity&quot;, &quot;age_group&quot;)) %&gt;%
   filter(region == &quot;NYC&quot;)</code></pre>
 <div id="motivation-to-view-age-group-as-a-predictor"
-class="section level3">
-<h3>Motivation to view Age Group as a Predictor</h3>
+class="section level2">
+<h2>Motivation to view Age Group as a Predictor</h2>
 <p>Though we find that Heart Disease, Cancer, Unintentional Injury,
 Accidents and Chronic Lower Respiratory Diseases to be the leading
 causes of death for the overall population of New York City, it is a
@@ -393,8 +393,14 @@ relationship between age group on deaths caused by suicides and opioids.
 Though suicide and opioid related deaths are not leading causes of death
 in New York City, the growing death rate in these categories has been a
 concern to the medical and public health community.</p>
-<p><br></p>
-</div>
+<pre class="r"><code>death_by_age %&gt;%
+  filter(age_group !=&quot;Total&quot; &amp; age_group !=&quot;Unknown&quot;) %&gt;%
+  group_by(county_name, age_group) %&gt;%
+  ggplot(aes(x=year, y = deaths, color = age_group)) +
+  geom_line()+
+  facet_grid(~county_name)+
+  labs(title=&quot;Death Rate by Age Group in New York City&quot;,   fill=&quot;Age Group&quot;)</code></pre>
+<p><img src="age_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
 <div id="selected-causes-of-death-in-new-york-state-by-age-group"
 class="section level3">
 <h3>Selected causes of death in New York State by Age Group</h3>
@@ -406,7 +412,7 @@ group_by(year, age_group, selected_cause_of_death)%&gt;%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   facet_grid(~age_group)+
   theme(legend.position = &quot;none&quot;)</code></pre>
-<p><img src="age_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<p><img src="age_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <pre class="r"><code>death_in_nys %&gt;%
   filter(age_group == &quot;25-34&quot; | age_group == &quot;35-44&quot; | age_group == &quot;45-54&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;%
 group_by(year, age_group, selected_cause_of_death)%&gt;%
@@ -415,7 +421,7 @@ group_by(year, age_group, selected_cause_of_death)%&gt;%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   facet_grid(~age_group)+
   theme(legend.position = &quot;none&quot;)</code></pre>
-<p><img src="age_files/figure-html/unnamed-chunk-3-2.png" width="90%" /></p>
+<p><img src="age_files/figure-html/unnamed-chunk-4-2.png" width="90%" /></p>
 <pre class="r"><code>death_in_nys %&gt;%
   filter(age_group == &quot;55-64&quot; | age_group == &quot;65-74&quot; | age_group == &quot;75-84&quot; | age_group == &quot;85+&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;%
 group_by(year, age_group, selected_cause_of_death)%&gt;%
@@ -426,7 +432,7 @@ group_by(year, age_group, selected_cause_of_death)%&gt;%
   theme(legend.position = &quot;bottom&quot;,  legend.key.size=unit(5,&quot;point&quot;))+
   guides(fill=guide_legend(nrow=5, byrow=TRUE))+
   labs(fill=&quot;Selected Causes&quot;)</code></pre>
-<p><img src="age_files/figure-html/unnamed-chunk-3-3.png" width="90%" /></p>
+<p><img src="age_files/figure-html/unnamed-chunk-4-3.png" width="90%" /></p>
 <p>Using the vital statistics of death data from the New York State
 Bureau of Vital and Health Statistics, our visual points to visible
 differences in leading causes of death among the age groups. Accidents
@@ -436,19 +442,6 @@ diseases of the heart and malignant neoplasms are larger. While among
 the youth accidents have a higher cases of death in New York City.</p>
 <p><br></p>
 </div>
-<div
-id="trend-of-the-number-of-deaths-by-age-group-by-county-in-the-nyc-region-over-the-years"
-class="section level3">
-<h3>Trend of the number of deaths by age group by county in the NYC
-region over the years</h3>
-<pre class="r"><code>death_by_age %&gt;%
-  filter(age_group !=&quot;Total&quot; &amp; age_group !=&quot;Unknown&quot;) %&gt;%
-  group_by(county_name, age_group) %&gt;%
-  ggplot(aes(x=year, y = deaths, color = age_group)) +
-  geom_line()+
-  facet_grid(~county_name)+
-  labs(fill=&quot;Age Group&quot;)</code></pre>
-<p><img src="age_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 </div>
 
 
