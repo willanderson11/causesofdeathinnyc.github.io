@@ -1,9 +1,9 @@
-name: "Data Science Final Project"
+name: "NYC Bills of Mortality: Investigating the leading causes of death in New York City"
 output_dir: "."
 navbar:
   title: "Home"
   right:
-    - text: "Age as a predictor"
+    - text: "Predictor: Age Group"
       href: age.html
 output:
   html_document:
