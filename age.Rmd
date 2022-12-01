@@ -35,7 +35,9 @@ scale_fill_discrete = scale_fill_viridis_d
 ```{r, message=FALSE, warning=FALSE}
 #datasets for exploratory analysis
 death_in_nys = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv") %>%
-  janitor::clean_names()
+  janitor::clean_names() %>%
+  mutate(selected_cause_of_death = recode(selected_cause_of_death,
+       "CLRD" = "Chronic Lower Respiratory Disease"))
 
 death_by_age = read_csv("data/Vital_Statistics_Deaths_by_Resident_County__Region__and_Age-Group__Beginning_2003.csv") %>%
   janitor::clean_names() %>%
@@ -56,15 +58,16 @@ predictor_age = left_join(opiod_death, suicide_death, by = c("year", "sex", "reg
 ### Motivation to view Age Group as a Predictor
 
 Though we find that Heart Disease, Cancer, Unintentional Injury, Accidents and Chronic Lower Respiratory Diseases to be the leading causes of death for the overall population of New York City, it is a known fact that the elderly are more likely to be victims to this disease. The purpose of age group as a predictor of death, is to analyze if there are differences in leading causes of death among different age groups. Additionally a further analysis is performed to view the relationship between age group on deaths caused by suicides and opioids. Though suicide and opioid related deaths are not leading causes of death in New York City, the growing death rate in these categories has been a concern to the medical and public health community. 
+
 <br>
 
 
-### Leading causes of death in New York State by Age Group
+### Selected causes of death in New York State by Age Group
 ```{r}
  death_in_nys %>%
   filter(age_group == "<1" | age_group == "1-9" | age_group == "10-19" | age_group == "20-24", selected_cause_of_death != "Total",selected_cause_of_death != "All Other Causes") %>%
 group_by(year, age_group, selected_cause_of_death)%>%
-  ggplot(aes(x=year, y=deaths, color=selected_cause_of_death))+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+
   geom_bar(stat="identity")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   facet_grid(~age_group)+
@@ -73,7 +76,7 @@ group_by(year, age_group, selected_cause_of_death)%>%
 death_in_nys %>%
   filter(age_group == "25-34" | age_group == "35-44" | age_group == "45-54", selected_cause_of_death != "Total",selected_cause_of_death != "All Other Causes") %>%
 group_by(year, age_group, selected_cause_of_death)%>%
-  ggplot(aes(x=year, y=deaths, color=selected_cause_of_death))+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+
   geom_bar(stat="identity")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   facet_grid(~age_group)+
@@ -83,18 +86,18 @@ group_by(year, age_group, selected_cause_of_death)%>%
 death_in_nys %>%
   filter(age_group == "55-64" | age_group == "65-74" | age_group == "75-84" | age_group == "85+", selected_cause_of_death != "Total",selected_cause_of_death != "All Other Causes") %>%
 group_by(year, age_group, selected_cause_of_death)%>%
-  ggplot(aes(x=year, y=deaths, color=selected_cause_of_death))+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+
   geom_bar(stat="identity")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
   facet_grid(~age_group)+
-  theme(legend.position = "bottom")+
-  labs(fill="Selected Causes")+
-  guides(color=guide_legend(nrow=4, byrow=TRUE))
-
-#youth_causes / adult_causes/ elder_causes 
+  theme(legend.position = "bottom",  legend.key.size=unit(5,"point"))+
+  guides(fill=guide_legend(nrow=5, byrow=TRUE))+
+  labs(fill="Selected Causes")
 ```
 
 Using the vital statistics of death data from the New York State Bureau of Vital and Health Statistics, our visual points to visible differences in leading causes of death among the age groups. Accidents seem to be a more frequent cause of death for the age groups of 25-34 and 35-44, which for individuals who are 45+ the frequency of death by diseases of the heart and malignant neoplasms are larger. While among the youth accidents have a higher cases of death in New York City.
+
+<br>
 
 ### Trend of the number of deaths by age group by county in the NYC region over the years
 
@@ -104,5 +107,6 @@ death_by_age %>%
   group_by(county_name, age_group) %>%
   ggplot(aes(x=year, y = deaths, color = age_group)) +
   geom_line()+
-  facet_grid(~county_name)
+  facet_grid(~county_name)+
+  labs(fill="Age Group")
 ```

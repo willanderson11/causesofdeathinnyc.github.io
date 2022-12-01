@@ -3,6 +3,8 @@ output_dir: "."
 navbar:
   title: "Home"
   right:
+    - text: "Report"
+      href: index.html
     - text: "Predictor: Age Group"
       href: age.html
 output:
