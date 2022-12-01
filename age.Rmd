@@ -64,7 +64,7 @@ Though we find that Heart Disease, Cancer, Unintentional Injury, Accidents and C
 
 ### Selected causes of death in New York State by Age Group
 ```{r}
- death_in_nys %>%
+death_in_nys %>%
   filter(age_group == "<1" | age_group == "1-9" | age_group == "10-19" | age_group == "20-24", selected_cause_of_death != "Total",selected_cause_of_death != "All Other Causes") %>%
 group_by(year, age_group, selected_cause_of_death)%>%
   ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+

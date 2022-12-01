@@ -398,7 +398,7 @@ concern to the medical and public health community.</p>
 <div id="selected-causes-of-death-in-new-york-state-by-age-group"
 class="section level3">
 <h3>Selected causes of death in New York State by Age Group</h3>
-<pre class="r"><code> death_in_nys %&gt;%
+<pre class="r"><code>death_in_nys %&gt;%
   filter(age_group == &quot;&lt;1&quot; | age_group == &quot;1-9&quot; | age_group == &quot;10-19&quot; | age_group == &quot;20-24&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;%
 group_by(year, age_group, selected_cause_of_death)%&gt;%
   ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+
