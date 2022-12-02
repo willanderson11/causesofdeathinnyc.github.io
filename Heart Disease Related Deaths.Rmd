@@ -1,0 +1,21 @@
+---
+title: "Heart Disease Related Deaths"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+```
+
+```{r}
+deaths = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv") %>% 
+  janitor::clean_names() %>% 
+  filter(selected_cause_of_death == "Diseases of the Heart")
+```
+

@@ -7,6 +7,9 @@ navbar:
       href: index.html
     - text: "Predictor: Age Group"
       href: age.html
+    - text: "Heart Disease Related Deaths"
+      href: Heart-Disease-Related-Deaths.html
+    
 output:
   html_document:
     code_folding: hide
