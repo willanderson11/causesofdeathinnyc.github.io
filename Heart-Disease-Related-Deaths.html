@@ -389,8 +389,18 @@ library(plotly)</code></pre>
 ## The following object is masked from &#39;package:graphics&#39;:
 ## 
 ##     layout</code></pre>
+<pre class="r"><code>library(glmnet)</code></pre>
+<pre><code>## Loading required package: Matrix
+## 
+## Attaching package: &#39;Matrix&#39;
+## 
+## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack
+## 
+## Loaded glmnet 4.1-4</code></pre>
 <pre class="r"><code>#load data and clean data
-deaths = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;% 
+death_df = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;% 
   janitor::clean_names() %&gt;% 
   filter(selected_cause_of_death == &quot;Diseases of the Heart&quot;,
          race_or_ethnicity != &quot;Not Stated&quot;) %&gt;%
@@ -404,7 +414,9 @@ deaths = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_
     race_or_ethnicity = fct_recode(race_or_ethnicity, &quot;White Non Hispanic&quot; = &quot;1&quot;, 
                                    &quot;Black Non Hispanic&quot; = &quot;2&quot;, &quot;Hispanic&quot; = &quot;3&quot;, 
                                    &quot;Other Non Hispanic&quot; = &quot;4&quot;)
-    )</code></pre>
+    ) %&gt;% 
+  sample_n(200) %&gt;% 
+  select(deaths, sex, age_group, race_or_ethnicity)</code></pre>
 <pre><code>## Rows: 8472 Columns: 6
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
@@ -416,6 +428,9 @@ deaths = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_
 <pre><code>## Warning: Unknown levels in `f`: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11</code></pre>
 <pre><code>## Warning: Unknown levels in `f`: 1, 2</code></pre>
 <pre><code>## Warning: Unknown levels in `f`: 1, 2, 3, 4</code></pre>
+<pre class="r"><code>#fit a lasso model
+x = model.matrix(deaths ~ ., death_df)[,-1] #create a matrix of predictors 
+y = death_df$deaths #create outcome vector</code></pre>
 
 
 
