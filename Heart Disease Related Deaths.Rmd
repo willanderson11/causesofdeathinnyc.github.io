@@ -15,6 +15,10 @@ library(glmnet)
 ```
 
 ```{r}
+set.seed(7)
+```
+
+```{r}
 #load data and clean data
 death_df = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv") %>% 
   janitor::clean_names() %>% 
@@ -42,6 +46,7 @@ y = death_df$deaths #create outcome vector
 ```
 
 ```{r}
+#fit model and cross validation
 lambda = 10^(seq(3, -2, -0.1))
 
 lasso_fit =
@@ -51,5 +56,34 @@ lasso_cv =
   cv.glmnet(x, y, lambda = lambda)
 
 lambda_opt = lasso_cv$lambda.min
+```
+
+```{r}
+#plot lasso 
+lasso_plot = broom::tidy(lasso_fit) %>% 
+  select(term, lambda, estimate) %>% 
+  complete(term, lambda, fill = list(estimate = 0) ) %>% 
+  filter(term != "(Intercept)") %>% 
+  ggplot(aes(x = log(lambda, 10), y = estimate, group = term, color = term)) + 
+  geom_path() + 
+  geom_vline(xintercept = log(lambda_opt, 10), color = "blue", size = 1.2) +
+  theme(legend.position = "none")
+
+lasso_plot
+```
+
+```{r}
+#Generate lasso result
+lasso_fit = 
+  glmnet(x, y, lambda = lambda_opt)
+
+lasso_result = lasso_fit %>% broom::tidy()
+```
+
+```{r}
+#run MLR model
+MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df)
+
+summary(MLR)
 ```
 
