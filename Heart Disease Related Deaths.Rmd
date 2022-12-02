@@ -14,8 +14,22 @@ library(plotly)
 ```
 
 ```{r}
+#load data and clean data
 deaths = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv") %>% 
   janitor::clean_names() %>% 
-  filter(selected_cause_of_death == "Diseases of the Heart")
+  filter(selected_cause_of_death == "Diseases of the Heart",
+         race_or_ethnicity != "Not Stated") %>%
+  mutate(
+    age_group = as.factor(age_group),
+    age_group = fct_recode(
+      age_group, "<1" = "1", "1-9" = "2", "10-19" = "3", "20-24" = "4", "25-34" = "5", "35-44"="6",                  "45-54" = "7", "55-64" = "8", "65-74" = "9", "75-84" = "10", "85+" = "11"),
+    sex = as.factor(sex),
+    sex = fct_recode(sex, "M" = "1", "F" = "2"),
+    race_or_ethnicity = as.factor(race_or_ethnicity),
+    race_or_ethnicity = fct_recode(race_or_ethnicity, "White Non Hispanic" = "1", 
+                                   "Black Non Hispanic" = "2", "Hispanic" = "3", 
+                                   "Other Non Hispanic" = "4")
+    )
 ```
+
 

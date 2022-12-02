@@ -338,6 +338,9 @@ div.tocify {
 <li>
   <a href="age.html">Predictor: Age Group</a>
 </li>
+<li>
+  <a href="Heart-Disease-Related-Deaths.html">Heart Disease Related Deaths</a>
+</li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -386,9 +389,22 @@ library(plotly)</code></pre>
 ## The following object is masked from &#39;package:graphics&#39;:
 ## 
 ##     layout</code></pre>
-<pre class="r"><code>deaths = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;% 
+<pre class="r"><code>#load data and clean data
+deaths = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;% 
   janitor::clean_names() %&gt;% 
-  filter(selected_cause_of_death == &quot;Diseases of the Heart&quot;)</code></pre>
+  filter(selected_cause_of_death == &quot;Diseases of the Heart&quot;,
+         race_or_ethnicity != &quot;Not Stated&quot;) %&gt;%
+  mutate(
+    age_group = as.factor(age_group),
+    age_group = fct_recode(
+      age_group, &quot;&lt;1&quot; = &quot;1&quot;, &quot;1-9&quot; = &quot;2&quot;, &quot;10-19&quot; = &quot;3&quot;, &quot;20-24&quot; = &quot;4&quot;, &quot;25-34&quot; = &quot;5&quot;, &quot;35-44&quot;=&quot;6&quot;,                  &quot;45-54&quot; = &quot;7&quot;, &quot;55-64&quot; = &quot;8&quot;, &quot;65-74&quot; = &quot;9&quot;, &quot;75-84&quot; = &quot;10&quot;, &quot;85+&quot; = &quot;11&quot;),
+    sex = as.factor(sex),
+    sex = fct_recode(sex, &quot;M&quot; = &quot;1&quot;, &quot;F&quot; = &quot;2&quot;),
+    race_or_ethnicity = as.factor(race_or_ethnicity),
+    race_or_ethnicity = fct_recode(race_or_ethnicity, &quot;White Non Hispanic&quot; = &quot;1&quot;, 
+                                   &quot;Black Non Hispanic&quot; = &quot;2&quot;, &quot;Hispanic&quot; = &quot;3&quot;, 
+                                   &quot;Other Non Hispanic&quot; = &quot;4&quot;)
+    )</code></pre>
 <pre><code>## Rows: 8472 Columns: 6
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
@@ -397,6 +413,9 @@ library(plotly)</code></pre>
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre><code>## Warning: Unknown levels in `f`: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11</code></pre>
+<pre><code>## Warning: Unknown levels in `f`: 1, 2</code></pre>
+<pre><code>## Warning: Unknown levels in `f`: 1, 2, 3, 4</code></pre>
 
 
 
