@@ -42,6 +42,14 @@ y = death_df$deaths #create outcome vector
 ```
 
 ```{r}
+lambda = 10^(seq(3, -2, -0.1))
 
+lasso_fit =
+  glmnet(x, y, lambda = lambda)
+
+lasso_cv =
+  cv.glmnet(x, y, lambda = lambda)
+
+lambda_opt = lasso_cv$lambda.min
 ```
 

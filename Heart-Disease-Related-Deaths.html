@@ -431,6 +431,15 @@ death_df = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_b
 <pre class="r"><code>#fit a lasso model
 x = model.matrix(deaths ~ ., death_df)[,-1] #create a matrix of predictors 
 y = death_df$deaths #create outcome vector</code></pre>
+<pre class="r"><code>lambda = 10^(seq(3, -2, -0.1))
+
+lasso_fit =
+  glmnet(x, y, lambda = lambda)
+
+lasso_cv =
+  cv.glmnet(x, y, lambda = lambda)
+
+lambda_opt = lasso_cv$lambda.min</code></pre>
 
 
 
