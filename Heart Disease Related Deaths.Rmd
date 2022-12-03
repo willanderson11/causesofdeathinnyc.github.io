@@ -88,12 +88,28 @@ summary(MLR)
 ```
 
 ```{r}
+#plot age_groups with heart disease related deaths
 death_df %>% 
   ggplot(aes(y = deaths, x = reorder(age_group, deaths), color = age_group))+
   geom_boxplot()+
   theme_classic()+
   labs(x = "Age Groups",
        y = "Number of Deaths",
-       title = "Number of Heart Disease Related Death in NYC From 2003 to 2019")
+       title = "Number of Heart Disease Related Death with Age in NYC From 2003 to 2019")
+```
+
+```{r}
+#plot race with heart disease related deaths
+death_df %>% 
+  ggplot(aes(y = deaths, x = reorder(race_or_ethnicity, deaths), color = race_or_ethnicity))+
+  geom_boxplot()+
+  theme_classic()+
+  labs(x = "Race or Ethnicity",
+       y = "Number of Deaths",
+       title = "Number of Heart Disease Related Death with Race in NYC From 2003 to 2019")
+```
+
+```{r}
+
 ```
 
