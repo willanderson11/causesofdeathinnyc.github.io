@@ -84,7 +84,10 @@ lasso_result = lasso_fit %>% broom::tidy()
 #run MLR model
 MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df)
 
-summary(MLR)
+MLR_result = MLR %>% 
+  broom::tidy() %>% 
+  filter(p.value < 0.05) %>% 
+  knitr::kable()
 ```
 
 ```{r}
