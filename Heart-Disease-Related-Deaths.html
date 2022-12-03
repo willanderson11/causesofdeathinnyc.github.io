@@ -512,6 +512,15 @@ death_df %&gt;%
        y = &quot;Number of Deaths&quot;,
        title = &quot;Number of Heart Disease Related Death with Race in NYC From 2003 to 2019&quot;)</code></pre>
 <p><img src="Heart-Disease-Related-Deaths_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>#plot sex with heart disease related deaths
+death_df %&gt;% 
+  ggplot(aes(y = deaths, x = reorder(sex, deaths), color = sex))+
+  geom_boxplot()+
+  theme_classic()+
+  labs(x = &quot;Sex&quot;,
+       y = &quot;Number of Deaths&quot;,
+       title = &quot;Number of Heart Disease Related Death with Sex in NYC From 2003 to 2019&quot;)</code></pre>
+<p><img src="Heart-Disease-Related-Deaths_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 
 
 

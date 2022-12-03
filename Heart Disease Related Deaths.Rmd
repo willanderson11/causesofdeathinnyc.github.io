@@ -110,6 +110,13 @@ death_df %>%
 ```
 
 ```{r}
-
+#plot sex with heart disease related deaths
+death_df %>% 
+  ggplot(aes(y = deaths, x = reorder(sex, deaths), color = sex))+
+  geom_boxplot()+
+  theme_classic()+
+  labs(x = "Sex",
+       y = "Number of Deaths",
+       title = "Number of Heart Disease Related Death with Sex in NYC From 2003 to 2019")
 ```
 
