@@ -12,6 +12,19 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(glmnet)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ```{r}
@@ -39,6 +52,9 @@ death_df = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Sel
   select(deaths, sex, age_group, race_or_ethnicity)
 ```
 
+## Motivation to Investigate Heart Disease Related Death
+Heart Disease Related Death is the top leading causes of death in NYC. Therefore, understanding the relationship between age groups, sex, race and Heart Disease Related Death is critical.
+
 ```{r}
 #fit a lasso model
 x = model.matrix(deaths ~ ., death_df)[,-1] #create a matrix of predictors 
@@ -58,6 +74,7 @@ lasso_cv =
 lambda_opt = lasso_cv$lambda.min
 ```
 
+## Fit a Lasso Model for Variable Selection
 ```{r}
 #plot lasso 
 lasso_plot = broom::tidy(lasso_fit) %>% 
@@ -71,6 +88,7 @@ lasso_plot = broom::tidy(lasso_fit) %>%
 
 lasso_plot
 ```
+From the Lasso plot, we can see that most of our variables did not reach zero before optimal lambda value. Therefore, we could include all the variables.
 
 ```{r}
 #Generate lasso result
@@ -80,6 +98,7 @@ lasso_fit =
 lasso_result = lasso_fit %>% broom::tidy()
 ```
 
+## Fit a MLR Model to Understand the Major Factors of NYC Heart Disease Related Death
 ```{r}
 #run MLR model
 MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df)
@@ -91,6 +110,7 @@ MLR_result = MLR %>%
 
 MLR_result
 ```
+From the MLR result, we can see that age groups 75-84, 85+ and race group Hispanic are significant.
 
 ```{r}
 #plot age_groups with heart disease related deaths
@@ -102,6 +122,7 @@ death_df %>%
        y = "Number of Deaths",
        title = "Number of Heart Disease Related Death with Age in NYC From 2003 to 2019")
 ```
+From the plot, we can see that age groups 75-84 and 85+ are the groups with the most heart disease related deaths, which correspond to our MLR results.
 
 ```{r}
 #plot race with heart disease related deaths
@@ -113,6 +134,7 @@ death_df %>%
        y = "Number of Deaths",
        title = "Number of Heart Disease Related Death with Race in NYC From 2003 to 2019")
 ```
+From the plot, we can see that race group Hispanic is the group with the most heart disease related deaths, which correspond to our MLR results.
 
 ```{r}
 #plot sex with heart disease related deaths
@@ -124,4 +146,7 @@ death_df %>%
        y = "Number of Deaths",
        title = "Number of Heart Disease Related Death with Sex in NYC From 2003 to 2019")
 ```
+From the plot, we can see that there is no significant difference of heart disease related death between male and female, which correspond to our MLR results.
 
+## Results and Interpretation
+From our preliminary analysis, we can conclude that age groups 75-84, 85+ and race group Hispanic are most susceptible to heart disease related death in New York City between 2003 to 2019. This results indicated racial disparity in health in NYC. 
