@@ -86,8 +86,9 @@ MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df)
 
 MLR_result = MLR %>% 
   broom::tidy() %>% 
-  filter(p.value < 0.05) %>% 
-  knitr::kable()
+  filter(p.value < 0.05) 
+
+MLR_result
 ```
 
 ```{r}
