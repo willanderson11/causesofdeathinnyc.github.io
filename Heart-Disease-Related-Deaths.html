@@ -494,6 +494,14 @@ summary(MLR)</code></pre>
 ## Residual standard error: 2232 on 185 degrees of freedom
 ## Multiple R-squared:  0.3771, Adjusted R-squared:   0.33 
 ## F-statistic: 8.001 on 14 and 185 DF,  p-value: 3.336e-13</code></pre>
+<pre class="r"><code>death_df %&gt;% 
+  ggplot(aes(y = deaths, x = reorder(age_group, deaths), color = age_group))+
+  geom_boxplot()+
+  theme_classic()+
+  labs(x = &quot;Age Groups&quot;,
+       y = &quot;Number of Deaths&quot;,
+       title = &quot;Number of Heart Disease Related Death in NYC From 2003 to 2019&quot;)</code></pre>
+<p><img src="Heart-Disease-Related-Deaths_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 
 
 

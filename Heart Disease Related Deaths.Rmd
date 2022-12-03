@@ -87,3 +87,13 @@ MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df)
 summary(MLR)
 ```
 
+```{r}
+death_df %>% 
+  ggplot(aes(y = deaths, x = reorder(age_group, deaths), color = age_group))+
+  geom_boxplot()+
+  theme_classic()+
+  labs(x = "Age Groups",
+       y = "Number of Deaths",
+       title = "Number of Heart Disease Related Death in NYC From 2003 to 2019")
+```
+
