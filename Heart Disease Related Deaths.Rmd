@@ -6,7 +6,7 @@ output:
     toc_float: true
 ---
 
-```{r}
+```{r include = FALSE}
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
@@ -88,6 +88,7 @@ lasso_plot = broom::tidy(lasso_fit) %>%
 
 lasso_plot
 ```
+
 From the Lasso plot, we can see that most of our variables did not reach zero before optimal lambda value. Therefore, we could include all the variables.
 
 ```{r}
@@ -110,6 +111,7 @@ MLR_result = MLR %>%
 
 MLR_result
 ```
+
 From the MLR result, we can see that age groups 75-84, 85+ and race group Hispanic are significant.
 
 ```{r}
@@ -122,6 +124,7 @@ death_df %>%
        y = "Number of Deaths",
        title = "Number of Heart Disease Related Death with Age in NYC From 2003 to 2019")
 ```
+
 From the plot, we can see that age groups 75-84 and 85+ are the groups with the most heart disease related deaths, which correspond to our MLR results.
 
 ```{r}
@@ -134,6 +137,7 @@ death_df %>%
        y = "Number of Deaths",
        title = "Number of Heart Disease Related Death with Race in NYC From 2003 to 2019")
 ```
+
 From the plot, we can see that race group Hispanic is the group with the most heart disease related deaths, which correspond to our MLR results.
 
 ```{r}
@@ -146,6 +150,7 @@ death_df %>%
        y = "Number of Deaths",
        title = "Number of Heart Disease Related Death with Sex in NYC From 2003 to 2019")
 ```
+
 From the plot, we can see that there is no significant difference of heart disease related death between male and female, which correspond to our MLR results.
 
 ## Results and Interpretation
