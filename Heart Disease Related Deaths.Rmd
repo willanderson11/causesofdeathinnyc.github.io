@@ -31,7 +31,7 @@ scale_fill_discrete = scale_fill_viridis_d
 set.seed(7)
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #load data and clean data
 death_df = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv") %>% 
   janitor::clean_names() %>% 
@@ -55,13 +55,13 @@ death_df = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Sel
 ## Motivation to Investigate Heart Disease Related Death
 Heart Disease Related Death is the top leading causes of death in NYC. Therefore, understanding the relationship between age groups, sex, race and Heart Disease Related Death is critical.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #fit a lasso model
 x = model.matrix(deaths ~ ., death_df)[,-1] #create a matrix of predictors 
 y = death_df$deaths #create outcome vector
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #fit model and cross validation
 lambda = 10^(seq(3, -2, -0.1))
 
@@ -75,7 +75,7 @@ lambda_opt = lasso_cv$lambda.min
 ```
 
 ## Fit a Lasso Model for Variable Selection
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #plot lasso 
 lasso_plot = broom::tidy(lasso_fit) %>% 
   select(term, lambda, estimate) %>% 
@@ -91,7 +91,7 @@ lasso_plot
 
 From the Lasso plot, we can see that most of our variables did not reach zero before optimal lambda value. Therefore, we could include all the variables.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #Generate lasso result
 lasso_fit = 
   glmnet(x, y, lambda = lambda_opt)
@@ -100,7 +100,7 @@ lasso_result = lasso_fit %>% broom::tidy()
 ```
 
 ## Fit a MLR Model to Understand the Major Factors of NYC Heart Disease Related Death
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #run MLR model
 MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df)
 
@@ -114,7 +114,7 @@ MLR_result
 
 From the MLR result, we can see that age groups 75-84, 85+ and race group Hispanic are significant.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #plot age_groups with heart disease related deaths
 death_df %>% 
   ggplot(aes(y = deaths, x = reorder(age_group, deaths), color = age_group))+
@@ -127,7 +127,7 @@ death_df %>%
 
 From the plot, we can see that age groups 75-84 and 85+ are the groups with the most heart disease related deaths, which correspond to our MLR results.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #plot race with heart disease related deaths
 death_df %>% 
   ggplot(aes(y = deaths, x = reorder(race_or_ethnicity, deaths), color = race_or_ethnicity))+
@@ -140,7 +140,7 @@ death_df %>%
 
 From the plot, we can see that race group Hispanic is the group with the most heart disease related deaths, which correspond to our MLR results.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #plot sex with heart disease related deaths
 death_df %>% 
   ggplot(aes(y = deaths, x = reorder(sex, deaths), color = sex))+
