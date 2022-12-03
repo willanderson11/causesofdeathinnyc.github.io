@@ -464,15 +464,44 @@ MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df)
 
 MLR_result = MLR %&gt;% 
   broom::tidy() %&gt;% 
-  filter(p.value &lt; 0.05) 
+  filter(p.value &lt; 0.05) %&gt;% 
+  knitr::kable()
 
 MLR_result</code></pre>
-<pre><code>## # A tibble: 3 × 5
-##   term                      estimate std.error statistic      p.value
-##   &lt;chr&gt;                        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;        &lt;dbl&gt;
-## 1 age_group75-84               3113.      758.      4.11 0.0000601   
-## 2 age_group85+                 4206.      758.      5.55 0.0000000996
-## 3 race_or_ethnicityHispanic    1857.      504.      3.69 0.000299</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age_group75-84</td>
+<td align="right">3112.937</td>
+<td align="right">757.9744</td>
+<td align="right">4.106916</td>
+<td align="right">0.0000601</td>
+</tr>
+<tr class="even">
+<td align="left">age_group85+</td>
+<td align="right">4206.077</td>
+<td align="right">758.3465</td>
+<td align="right">5.546378</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">race_or_ethnicityHispanic</td>
+<td align="right">1856.683</td>
+<td align="right">503.7457</td>
+<td align="right">3.685755</td>
+<td align="right">0.0002994</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>#plot age_groups with heart disease related deaths
 death_df %&gt;% 
   ggplot(aes(y = deaths, x = reorder(age_group, deaths), color = age_group))+
