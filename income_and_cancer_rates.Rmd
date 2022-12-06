@@ -13,6 +13,7 @@ library(ggridges)
 library(readxl)
 library(patchwork)
 library(plotly)
+library(ggtext)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -33,11 +34,11 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ## Motivation for exploring relationship between Median Household Income and Cancer Incidence/Mortality Rates
 
-Median Income for households in New York City vary widely between and within boroughs. This is also the case for cancer incidence and mortality rates. Since New York City experiences large disparities in income levels within its neighborhoods as well as disparities for cancer rates across the city, it is sensible to determine if median household income plays a role in cancer incidence and mortality rates. 
+Cancer is the second leading cause of death in New York City as approximately 34,956 people living in NYC died from cancer in 2017. Median Income for households in New York City varies widely between and within boroughs. This is also the case for cancer incidence and mortality rates. Since New York City experiences large disparities in income levels within its neighborhoods as well as disparities for cancer rates across the city, it is sensible to determine if median household income plays a role in cancer incidence and mortality rates across the boroughs of New York City. 
 
 ## Analyzing Income Data for New York City
 
-Median Household Income Data for New York City and its boroughs was pulled from https://data.cccnewyork.org/data/download#0,8/0,29 
+Median Household Income Data for New York City and its boroughs was pulled from an organization called Citizens' Committee for Children of New York which organized tabular data on median household income between 2005 - 2019, for all neighborhoods and boroughs in New York City and for households with and without children: https://data.cccnewyork.org/data/download#0,8/0,29 
 
 ```{r, message = FALSE, warning = FALSE}
 income_data = 
@@ -460,12 +461,18 @@ lm(incidence_per_100k ~ median_income, data = cancer_data_by_income) %>%
   
   select(term, estimate, p.value)
 
+
 ggplot(cancer_data_by_income, aes(x = median_income, y = incidence_per_100k)) + geom_point() + 
   geom_smooth(se = FALSE, method = "lm") + 
-  labs(title = "Regression model of cancer incidence vs median income across NYC Neighborhoods 2015 - 2019")
+  labs(title = "Model of Cancer Incidence vs Median Income across NYC Neighborhoods from 2015 - 2019", y = "Cancer Incidence per 100k", x = "Median Income")   + theme(
+    plot.title = element_textbox(hjust = 0.5,
+                                 width = unit(0.5, "npc"),
+                                 margin = margin(b = 3)), 
+    plot.title.position = "plot"
+  )
 ```
 
-We see that the data does not observe a linear relationship and that median_income is a not a significant predictor for cancer incidence rates being evidenced by the p-value for the median_income estimate being insignificant at 0.129. 
+We see that median_income is a not a significant predictor for cancer incidence rates being evidenced by the p-value for the median_income estimate being insignificant at 0.129. The linear regression graph for cancer incidence and median income also does not appear to be correlated as there is not a clear proportional relationship between the two variables. 
 
 ## Conclusion and Limitations
 
