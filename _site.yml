@@ -9,6 +9,8 @@ navbar:
       href: age.html
     - text: "Heart Disease Related Deaths"
       href: Heart-Disease-Related-Deaths.html
+    - text: "Income as a Predictor for Cancer Rates"
+      href: income_and_cancer_rates.html
     
 output:
   html_document:
