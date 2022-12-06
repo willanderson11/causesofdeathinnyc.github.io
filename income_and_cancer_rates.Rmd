@@ -31,9 +31,9 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-# Motivation for exploring relationship between Median Household Income and Cancer Incidence/Mortality Rates
+## Motivation for exploring relationship between Median Household Income and Cancer Incidence/Mortality Rates
 
-Median Income for households in New York City vary widely between and within boroughs. This is also the case for cancer incidence and mortality rates. Since New York City experiences large disparities in income levels within its neighborhoods as well as disparities for cancer rates across the city, it is sensible to determine if median household income plays a role in cancer incidence and mortality rates in New York City. 
+Median Income for households in New York City vary widely between and within boroughs. This is also the case for cancer incidence and mortality rates. Since New York City experiences large disparities in income levels within its neighborhoods as well as disparities for cancer rates across the city, it is sensible to determine if median household income plays a role in cancer incidence and mortality rates. 
 
 ## Analyzing Income Data for New York City
 
@@ -145,7 +145,7 @@ income_data %>%
 
 ## Visualizing Cancer Data for New York City
 
-Now I will be loading and examining cancer incidence and mortality rates in New York City and its boroughs. This dataset was pulled from the New York State Department of Health's online cancer registry: https://www.health.ny.gov/statistics/cancer/registry/
+Now we will be loading and examining cancer incidence and mortality rates in New York City and its boroughs. This dataset was pulled from the New York State Department of Health's online cancer registry: https://www.health.ny.gov/statistics/cancer/registry/
 
 These datasets include the location within NYC for each cancer data recording from 2005 - 2019, the cancer incidence rate per 100,000 people for all types of cancer for both males and females and the cancer mortality rate per 100,000 people for all types of cancer for both males and females. Ethnicity, race, and age are not included in this dataset, the only identifying information is the person's sex. 
 
@@ -465,8 +465,10 @@ ggplot(cancer_data_by_income, aes(x = median_income, y = incidence_per_100k)) + 
   labs(title = "Regression model of cancer incidence vs median income across NYC Neighborhoods 2015 - 2019")
 ```
 
-We see that the data does not observe a linear relationship and that is further evidenced by the p-value for the median_income estimate being insignificant at 0.129. 
+We see that the data does not observe a linear relationship and that median_income is a not a significant predictor for cancer incidence rates being evidenced by the p-value for the median_income estimate being insignificant at 0.129. 
 
 ## Conclusion and Limitations
 
-From this analysis, there is not enough evidence to determine that median household income in New York City has an effect on cancer incidence rates. This could be due to a multitude of reasons, the modeling is rudimentary as the only predictor for cancer incidence rates was median household income. It is reasonable to suggest that cancer incidence should have multiple predictors to be accurately modeled as the development of cancer is often a multi-faceted occurrence. Additionally, income may not have any effect on cancer incidence regardless of better modeling techniques or more robust datasets. However, to accurately determine factors that lead to cancer incidence or mortality, a multitude of predictors would need to be implemented and from then it could be possible to determine if income plays a factor in cancer incidence. There were also many avenues of exploration that were not considered in terms of analyzing the race, ethnicity, sex, and age, among other factors, within the cancer and income data sets. These categories were either unavailable for public use or were not able to be analyzed in the given data sets. These factors play a role in both income levels and cancer rates and should be taken into consideration when performing analysis like this. While this analysis finds that median household income is not a significant predictor for cancer rates, this topic should be explored in more depth before drawing further conclusions.     
+From this analysis, there is not enough evidence to determine that median household income in New York City has an effect on cancer incidence rates. This could be due to a multitude of reasons, the modeling is rudimentary as the only predictor for cancer incidence rates was median household income. It is reasonable to suggest that cancer incidence should have multiple predictors to be accurately modeled as the development of cancer is often a multi-faceted occurrence. Additionally, income may not have any effect on cancer incidence regardless of better modeling techniques or more robust datasets. However, to accurately determine factors that lead to cancer incidence or mortality, a multitude of predictors would need to be implemented and that would make it more likely to determine if income plays a factor in cancer incidence. 
+
+There were also many avenues of exploration that were not considered in terms of analyzing the race, ethnicity, sex, and age, among other factors, within the cancer and income data sets. These categories were either unavailable for public use or were not able to be analyzed in the given data sets. These factors play a role in both income levels and cancer rates and should be taken into consideration when performing analysis like this. While this analysis finds that median household income is not a significant predictor for cancer rates, this topic should be explored in more depth before drawing further conclusions.     
