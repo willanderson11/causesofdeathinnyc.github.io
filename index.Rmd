@@ -25,8 +25,8 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ```{r include = FALSE}
-Disease = c("Heart Disease", "Cancer", "HIV", "Poisonings", "Suicide")
-Deaths = c(33294, 24627, 412, 4646, 1642)
+Disease = c("Heart Disease", "Cancer", "HIV", "Poisonings", "Suicide", "Maternal Mortality")
+Deaths = c(33294, 24627, 412, 4646, 1642, 513)
 leading = data.frame(Disease, Deaths) 
 ```
 
