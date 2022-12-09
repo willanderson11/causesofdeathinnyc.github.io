@@ -5,5 +5,42 @@ output:
     toc: true
     toc_float: true
 ---
+```{r include = FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
 
+```{r include = FALSE}
+Disease = c("Heart Disease", "Cancer", "HIV", "Poisonings", "Suicide")
+Deaths = c(33294, 24627, 412, 4646, 1642)
+leading = data.frame(Disease, Deaths) 
+```
 
+```{r}
+leading %>% 
+  ggplot(aes(y = Deaths, x = reorder(Disease, Deaths), fill = Disease))+
+  geom_bar(stat = "identity")+
+  theme_classic()+
+  labs(
+    x = "Causes of Death",
+    y = "Deaths",
+    title = "New York Leading Causes of Death"
+  )+
+  theme(legend.position = "none")
+```
+
+Source: https://www.worldlifeexpectancy.com/new-york-cause-of-death-by-age-and-gender
