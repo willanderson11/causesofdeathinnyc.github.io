@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Income as a Predictor for Cancer Rates</title>
+
+<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.10.1/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="index.html">Report</a>
+</li>
+<li>
+  <a href="age.html">Predictor: Age Group</a>
+</li>
+<li>
+  <a href="Heart-Disease-Related-Deaths.html">Heart Disease Related Deaths</a>
+</li>
+<li>
+  <a href="income_and_cancer_rates.html">Income as a Predictor for Cancer Rates</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Income as a Predictor for Cancer Rates</h1>
+
+</div>
+
+
+<pre class="r"><code>library(tidyverse)
+library(ggridges)
+library(readxl)
+library(patchwork)
+library(plotly)
+library(ggtext)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = &quot;90%&quot;
+)
+
+theme_set(theme_minimal() + theme(legend.position = &quot;bottom&quot;))
+
+options(
+  ggplot2.continuous.colour = &quot;viridis&quot;,
+  ggplot2.continuous.fill = &quot;viridis&quot;
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d</code></pre>
+<div
+id="motivation-for-exploring-relationship-between-median-household-income-and-cancer-incidencemortality-rates"
+class="section level2">
+<h2>Motivation for exploring relationship between Median Household
+Income and Cancer Incidence/Mortality Rates</h2>
+<p>Cancer is the second leading cause of death in New York City as
+approximately 34,956 people living in NYC died from cancer in 2017.
+Median Income for households in New York City varies widely between and
+within boroughs. This is also the case for cancer incidence and
+mortality rates. Since New York City experiences large disparities in
+income levels within its neighborhoods as well as disparities for cancer
+rates across the city, it is sensible to determine if median household
+income plays a role in cancer incidence and mortality rates across the
+boroughs of New York City.</p>
+</div>
+<div id="analyzing-income-data-for-new-york-city"
+class="section level2">
+<h2>Analyzing Income Data for New York City</h2>
+<p>Median Household Income Data for New York City and its boroughs was
+pulled from an organization called Citizens’ Committee for Children of
+New York which organized tabular data on median household income between
+2005 - 2019, for all neighborhoods and boroughs in New York City and for
+households with and without children: <a
+href="https://data.cccnewyork.org/data/download#0,8/0,29"
+class="uri">https://data.cccnewyork.org/data/download#0,8/0,29</a></p>
+<pre class="r"><code>income_data = 
+  read_csv(&quot;data/median_income_nyc.csv&quot;, skip = 5, na = &quot;&quot;) %&gt;%
+  
+  janitor::clean_names() %&gt;%
+  
+  select(-data_format, -fips) %&gt;%
+  
+  rename(year = time_frame, median_income = data) %&gt;%
+  
+  filter(household_type %in% &quot;All Households&quot;) %&gt;%
+  
+  mutate(median_income = as.numeric(median_income))</code></pre>
+<p>This dataset includes variables listed as location, household_type,
+year, median_income with a size of 1518, 4. This dataset contains median
+household income for different types of households, including families
+with and without children, spanning the years of 2005 - 2019 for
+approximately all neighborhoods in each of New York City’s five
+boroughs. The dataset also includes median household income for each
+borough as an entity and New York City as a whole. For the remaining
+analysis, I will be using data from the boroughs of Manhattan, Queens,
+Brooklyn, and the Bronx as well as the respective neighborhoods within
+each borough. To help streamline analysis, I only looked at households
+of type “All Households” which includes both families with and without
+children.</p>
+<p>Now we will visualize the income data per borough to get a better
+idea of any trends.</p>
+<pre class="r"><code>  income_data %&gt;%
+  filter(location %in% &quot;Manhattan&quot;) %&gt;%
+  ggplot(aes(x = year, y = median_income)) + 
+    geom_point() + 
+    geom_line() + 
+    labs(title = &quot;Median Household Income in Manhattan Per Year&quot;)</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<pre class="r"><code>   income_data %&gt;%
+  filter(location %in% &quot;Bronx&quot;) %&gt;%
+  ggplot(aes(x = year, y = median_income)) + 
+    geom_point() + 
+    geom_line() + 
+    labs(title = &quot;Median Household Income in the Bronx Per Year&quot;)</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-3-2.png" width="90%" /></p>
+<pre class="r"><code>      income_data %&gt;%
+  filter(location %in% &quot;Brooklyn&quot;) %&gt;%
+  ggplot(aes(x = year, y = median_income)) + 
+    geom_point() + 
+    geom_line() + 
+    labs(title = &quot;Median Household Income in Brooklyn Per Year&quot;)</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-3-3.png" width="90%" /></p>
+<pre class="r"><code>     income_data %&gt;%
+  filter(location %in% &quot;Queens&quot;) %&gt;%
+  ggplot(aes(x = year, y = median_income)) + 
+    geom_point() + 
+    geom_line() + 
+    labs(title = &quot;Median Household Income in Queens Per Year&quot;)</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-3-4.png" width="90%" /></p>
+<pre class="r"><code>   income_data %&gt;%
+  filter(location %in% c(&quot;Manhattan&quot;, &quot;Bronx&quot;)) %&gt;%
+  ggplot(aes(x = median_income, fill = location)) + 
+    geom_density() + 
+     labs(title = &quot;Median Household Income Density in the Bronx and Manhattan from 2005 - 2019&quot;, x = &quot;Median Household Income&quot;) +
+     facet_wrap(~ location) + 
+     theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-3-5.png" width="90%" /></p>
+<pre class="r"><code>   income_data %&gt;%
+     
+     filter(location %in% c(&quot;Manhattan&quot;, &quot;Bronx&quot;, &quot;Queens&quot;, &quot;Brooklyn&quot;, year == &quot;2013&quot;)) %&gt;%
+     
+   ggplot(aes(x = median_income, y = reorder(location, median_income), fill = location, group = location)) + 
+  geom_density_ridges() +
+     labs(title = &quot;Median Household Income Distribution Per Borough in 2013&quot;, 
+          x = &quot;Median Household Income&quot;, 
+          y = &quot;Borough&quot;) +
+     theme(legend.position = &quot;right&quot;)</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-3-6.png" width="90%" /></p>
+<pre class="r"><code>   income_data %&gt;%
+
+     filter(location %in% c(&quot;Manhattan&quot;, &quot;Bronx&quot;, &quot;Queens&quot;, &quot;Brooklyn&quot;)) %&gt;%
+     
+     ggplot(aes(x = year, y = median_income, fill = reorder(location, median_income))) + 
+     
+     geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) + 
+     
+     labs(title = &quot;Median Household Income by Borough per Year&quot;, x = &quot;Year&quot;, y = &quot;Median Household Income&quot;) +
+     
+     theme(legend.position = &quot;right&quot;) + 
+  
+  scale_fill_discrete(name = &quot;Borough&quot;)</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-3-7.png" width="90%" /></p>
+<pre class="r"><code>income_data %&gt;%
+
+     filter(location %in% c(&quot;Manhattan&quot;, &quot;Bronx&quot;, &quot;Queens&quot;, &quot;Brooklyn&quot;)) %&gt;%
+  
+  group_by(year, location) %&gt;%
+  summarize(median_income = mean(median_income, na.rm = TRUE)) %&gt;%
+  
+  ggplot(aes(x = reorder(location, median_income), y = median_income, fill = location)) +
+  
+  geom_violin() + 
+  
+  labs(title = &quot;Median Household Income Per NYC Borough from 2005 - 2019&quot;, x = &quot;Borough&quot;, y = &quot;Average Median Income&quot;) +
+  
+  theme(legend.position = &quot;none&quot;) </code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-3-8.png" width="90%" /></p>
+</div>
+<div id="visualizing-cancer-data-for-new-york-city"
+class="section level2">
+<h2>Visualizing Cancer Data for New York City</h2>
+<p>Now we will be loading and examining cancer incidence and mortality
+rates in New York City and its boroughs. This dataset was pulled from
+the New York State Department of Health’s online cancer registry: <a
+href="https://www.health.ny.gov/statistics/cancer/registry/"
+class="uri">https://www.health.ny.gov/statistics/cancer/registry/</a></p>
+<p>These datasets include the location within NYC for each cancer data
+recording from 2005 - 2019, the cancer incidence rate per 100,000 people
+for all types of cancer for both males and females and the cancer
+mortality rate per 100,000 people for all types of cancer for both males
+and females. Ethnicity, race, and age are not included in this dataset,
+the only identifying information is the person’s sex.</p>
+<p>I used datasets containing cancer incidence data per New York City
+boroughs and neighborhoods from 2015 - 2019, as well as cancer incidence
+and mortality rates in Queens, Brooklyn, Manhattan, and the Bronx over
+time from 2005 - 2019 from the following links:</p>
+<ul>
+<li><p><a
+href="https://www.health.ny.gov/statistics/cancer/registry/vol1n.htm"
+class="uri">https://www.health.ny.gov/statistics/cancer/registry/vol1n.htm</a></p></li>
+<li><p><a
+href="https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalbronx.htm"
+class="uri">https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalbronx.htm</a></p></li>
+<li><p><a
+href="https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalkings.htm"
+class="uri">https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalkings.htm</a></p></li>
+<li><p><a
+href="https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalnewyork.htm"
+class="uri">https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalnewyork.htm</a></p></li>
+<li><p><a
+href="https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalqueens.htm"
+class="uri">https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalqueens.htm</a></p></li>
+</ul>
+<p>We will now load the datasets for cancer incidence and mortality
+rates per borough.</p>
+<pre class="r"><code>cancer_data_bronx = read_excel(&quot;data/nyc_cancer_data.xlsx&quot;, sheet = &quot;Bronx&quot;, skip = 2) %&gt;% 
+  
+  janitor::clean_names() %&gt;%
+  
+  select(x1, rate_per_100_000_population_3, rate_per_100_000_population_12) %&gt;%
+  
+  rename(year = x1, incidence_per_100k = rate_per_100_000_population_3, mortality_per_100k = rate_per_100_000_population_12) %&gt;%
+  
+   filter(year %in% c(&quot;2005&quot;, &quot;2006&quot;, &quot;2007&quot;, &quot;2008&quot;, &quot;2009&quot;, &quot;2010&quot;, &quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;, &quot;2014&quot;, &quot;2015&quot;, &quot;2016&quot;, &quot;2017&quot;, &quot;2018&quot;, &quot;2019&quot;))</code></pre>
+<p>The columns for the Bronx cancer dataset are year,
+incidence_per_100k, mortality_per_100k, the size is 15, 3</p>
+<pre class="r"><code>cancer_data_brooklyn = read_excel(&quot;data/nyc_cancer_data.xlsx&quot;, sheet = &quot;Brooklyn&quot;, skip = 2) %&gt;% 
+  
+  janitor::clean_names() %&gt;%
+  
+  select(x1, rate_per_100_000_population_3, rate_per_100_000_population_12) %&gt;%
+  
+  rename(year = x1, incidence_per_100k = rate_per_100_000_population_3, mortality_per_100k = rate_per_100_000_population_12) %&gt;%
+  
+  filter(year %in% c(&quot;2005&quot;, &quot;2006&quot;, &quot;2007&quot;, &quot;2008&quot;, &quot;2009&quot;, &quot;2010&quot;, &quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;, &quot;2014&quot;, &quot;2015&quot;, &quot;2016&quot;, &quot;2017&quot;, &quot;2018&quot;, &quot;2019&quot;))</code></pre>
+<p>The columns for the Brooklyn cancer dataset are year,
+incidence_per_100k, mortality_per_100k, the size is 15, 3</p>
+<pre class="r"><code>cancer_data_manhattan = read_excel(&quot;data/nyc_cancer_data.xlsx&quot;, sheet = &quot;Manhattan&quot;, skip = 2) %&gt;% 
+  
+  janitor::clean_names() %&gt;%
+  
+  select(x1, rate_per_100_000_population_3, rate_per_100_000_population_12) %&gt;%
+  
+  rename(year = x1, incidence_per_100k = rate_per_100_000_population_3, mortality_per_100k = rate_per_100_000_population_12) %&gt;% 
+  
+   filter(year %in% c(&quot;2005&quot;, &quot;2006&quot;, &quot;2007&quot;, &quot;2008&quot;, &quot;2009&quot;, &quot;2010&quot;, &quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;, &quot;2014&quot;, &quot;2015&quot;, &quot;2016&quot;, &quot;2017&quot;, &quot;2018&quot;, &quot;2019&quot;))</code></pre>
+<p>The columns for the Manhattan cancer dataset are year,
+incidence_per_100k, mortality_per_100k, the size is 15, 3</p>
+<pre class="r"><code>cancer_data_queens = read_excel(&quot;data/nyc_cancer_data.xlsx&quot;, sheet = &quot;Queens&quot;, skip = 2) %&gt;% 
+  
+  janitor::clean_names() %&gt;%
+  
+  select(x1, rate_per_100_000_population_3, rate_per_100_000_population_12) %&gt;%
+  
+  rename(year = x1, incidence_per_100k = rate_per_100_000_population_3, mortality_per_100k = rate_per_100_000_population_12) %&gt;%
+  
+   filter(year %in% c(&quot;2005&quot;, &quot;2006&quot;, &quot;2007&quot;, &quot;2008&quot;, &quot;2009&quot;, &quot;2010&quot;, &quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;, &quot;2014&quot;, &quot;2015&quot;, &quot;2016&quot;, &quot;2017&quot;, &quot;2018&quot;, &quot;2019&quot;))</code></pre>
+<p>The columns for the Queens cancer dataset are year,
+incidence_per_100k, mortality_per_100k, the size is 15, 3</p>
+</div>
+<div
+id="visualizing-cancer-incidence-mortality-rates-and-median-household-income"
+class="section level2">
+<h2>Visualizing Cancer Incidence, Mortality Rates, and Median Household
+Income</h2>
+<p>Now we will visualize cancer incidence, mortality rates, and median
+household incomes per borough to observe any trends.</p>
+<pre class="r"><code>income_data_queens_graph = 
+  income_data %&gt;%
+  filter(location %in% &quot;Queens&quot;) %&gt;%
+  ggplot(aes(x = year, y = median_income)) + 
+    geom_point() + 
+    geom_line() + 
+  labs(title = &quot;Queens Median Income&quot;)
+
+cancer_data_queens_graph =  
+  
+  cancer_data_queens %&gt;%
+  
+  ggplot(aes(x = year, y = incidence_per_100k)) + geom_point() + geom_line() + 
+  labs(title = &quot;Queens Cancer Incidence&quot;, y = &quot;Inc. per 100k&quot;)
+
+mortality_cancer_queens_graph = 
+  
+  cancer_data_queens %&gt;%
+  
+  ggplot(aes(x = year, y = mortality_per_100k)) + geom_point() + geom_line() +
+  labs(title = &quot;Queens Cancer Mortality&quot;, y = &quot;Deaths per 100k&quot;)
+
+income_data_queens_graph + cancer_data_queens_graph /
+mortality_cancer_queens_graph</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<pre class="r"><code>income_data_manhattan_graph = 
+  income_data %&gt;%
+  filter(location %in% &quot;Manhattan&quot;) %&gt;%
+  ggplot(aes(x = year, y = median_income)) + 
+    geom_point() + 
+    geom_line() + 
+     labs(title = &quot;Manhattan Median Income&quot;)
+
+cancer_data_manhattan_graph =  
+  
+  cancer_data_manhattan %&gt;%
+  
+  ggplot(aes(x = year, y = incidence_per_100k)) + geom_point() + geom_line() +
+  labs(title = &quot;Manhattan Cancer Incidence&quot;, y = &quot;Inc. per 100k&quot;)
+
+mortality_cancer_manhattan_graph = 
+  
+  cancer_data_manhattan %&gt;%
+  
+  ggplot(aes(x = year, y = mortality_per_100k)) + geom_point() + geom_line() +
+  labs(title = &quot;Manhattan Cancer Mortality&quot;, y = &quot;Deaths per 100k&quot;)
+
+income_data_manhattan_graph + cancer_data_manhattan_graph / 
+mortality_cancer_manhattan_graph</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<pre class="r"><code>income_data_brooklyn_graph = 
+  income_data %&gt;%
+  filter(location %in% &quot;Brooklyn&quot;) %&gt;%
+  ggplot(aes(x = year, y = median_income)) + 
+    geom_point() + 
+    geom_line() + 
+     labs(title = &quot;Brooklyn Median Income&quot;)
+
+cancer_data_brooklyn_graph =  
+  
+  cancer_data_brooklyn %&gt;%
+  
+  ggplot(aes(x = year, y = incidence_per_100k)) + geom_point() + geom_line() + 
+  labs(title = &quot;Brooklyn Cancer Incidence&quot;, y = &quot;Inc. per 100k&quot;)
+
+mortality_cancer_brooklyn_graph = 
+  
+  cancer_data_brooklyn %&gt;%
+  
+  ggplot(aes(x = year, y = mortality_per_100k)) + geom_point() + geom_line() +
+  labs(title = &quot;Brooklyn Cancer Mortality&quot;, y = &quot;Deaths per 100k&quot;)
+
+income_data_brooklyn_graph + cancer_data_brooklyn_graph /
+mortality_cancer_brooklyn_graph</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<pre class="r"><code>income_data_bronx_graph = 
+  income_data %&gt;%
+  filter(location %in% &quot;Bronx&quot;) %&gt;%
+  ggplot(aes(x = year, y = median_income)) + 
+    geom_point() + 
+    geom_line() + 
+     labs(title = &quot;Bronx Median Household Income&quot;)
+
+cancer_data_bronx_graph =  
+  
+  cancer_data_bronx %&gt;%
+  
+  ggplot(aes(x = year, y = incidence_per_100k)) + geom_point() + geom_line() + 
+  labs(title = &quot;Bronx Cancer Incidence&quot;, y = &quot;Inc. per 100k&quot;)
+
+mortality_cancer_bronx_graph = 
+  
+  cancer_data_bronx %&gt;%
+  
+  ggplot(aes(x = year, y = mortality_per_100k)) + geom_point() + geom_line() +
+  labs(title = &quot;Bronx Cancer Mortality&quot;, y = &quot;Deaths per 100k&quot;)
+
+income_data_bronx_graph + cancer_data_bronx_graph / 
+mortality_cancer_bronx_graph</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<p>Now we will visualize the median income distribution per borough to
+compare it to the distribution for cancer incidence</p>
+<pre class="r"><code>bar_plot_income = 
+income_data %&gt;%
+  filter(location %in% c(&quot;Manhattan&quot;, &quot;Brooklyn&quot;, &quot;Queens&quot;, &quot;Bronx&quot;)) %&gt;% 
+  group_by(location) %&gt;%
+  summarize(mean_income = mean(median_income, na.rm = TRUE)) %&gt;%
+  ggplot(aes(x = reorder(location, mean_income), y = mean_income, fill = location)) + 
+  geom_bar(stat = &quot;identity&quot;) + 
+  labs(title = &quot;Median Household Income&quot;, y = &quot;median_income&quot;, x = &quot;location&quot;) + theme(legend.position = &quot;none&quot;)
+
+cancer_data = 
+  tibble(
+  year = c(&quot;2005&quot;, &quot;2006&quot;, &quot;2007&quot;, &quot;2008&quot;, &quot;2009&quot;, &quot;2010&quot;, &quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;, &quot;2014&quot;, &quot;2015&quot;, &quot;2016&quot;, &quot;2017&quot;, &quot;2018&quot;, &quot;2019&quot;), 
+  incidence_bronx = cancer_data_bronx$incidence_per_100k,
+  incidence_brooklyn = cancer_data_brooklyn$incidence_per_100k,
+  incidence_manhattan = cancer_data_manhattan$incidence_per_100k,
+  incidence_queens = cancer_data_queens$incidence_per_100k) %&gt;%
+  
+  pivot_longer(-year, names_to = &quot;location&quot;, names_prefix = &quot;incidence_&quot;, values_to = &quot;incidence_rates&quot;) 
+
+bar_plot_incidence = 
+cancer_data %&gt;%
+  group_by(location) %&gt;%
+  summarize(mean_incidence = mean(incidence_rates)) %&gt;%
+  ggplot(aes(x = reorder(location, mean_incidence), y = mean_incidence, fill = location)) + 
+  geom_bar(stat = &quot;identity&quot;) + 
+  labs(title = &quot;Mean Cancer Incidence Rates&quot;, x = &quot;location&quot;) + theme(legend.position = &quot;none&quot;)
+
+
+bar_plot_income + bar_plot_incidence</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
+</div>
+<div
+id="developing-linear-models-for-median-household-income-and-cancer-incidence-rates"
+class="section level2">
+<h2>Developing Linear Models for Median Household Income and Cancer
+Incidence Rates</h2>
+<p>Now we will fit a linear model for cancer incidence rates using
+median household income for all households as a predictor</p>
+<pre class="r"><code>income_data_nyc = 
+  
+income_data %&gt;%
+  
+  filter(location %in% &quot;New York City&quot;)
+
+
+nyc_cancer_rates = read_excel(&quot;C:/Users/Will/Documents/nyc_cancer_data.xlsx&quot;, sheet = &quot;all NYC&quot;, skip = 2) %&gt;%
+  
+  janitor::clean_names() %&gt;%
+  
+  select(x1, rate_per_100_000_population_3, rate_per_100_000_population_12) %&gt;%
+  
+  rename(year = x1, incidence_per_100k = rate_per_100_000_population_3, mortality_per_100k = rate_per_100_000_population_12) %&gt;% 
+  
+   filter(year %in% c(&quot;2005&quot;, &quot;2006&quot;, &quot;2007&quot;, &quot;2008&quot;, &quot;2009&quot;, &quot;2010&quot;, &quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;, &quot;2014&quot;, &quot;2015&quot;, &quot;2016&quot;, &quot;2017&quot;, &quot;2018&quot;, &quot;2019&quot;)) %&gt;%
+  
+  cbind(income_data_nyc[&quot;median_income&quot;])
+
+
+lm(incidence_per_100k ~ median_income, data = nyc_cancer_rates) %&gt;%
+  broom::tidy() %&gt;%
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term           estimate     p.value
+##   &lt;chr&gt;             &lt;dbl&gt;       &lt;dbl&gt;
+## 1 (Intercept)   551.      0.000000405
+## 2 median_income  -0.00170 0.108</code></pre>
+<pre class="r"><code>ggplot(nyc_cancer_rates, aes(x = median_income, y = incidence_per_100k, color = year)) + geom_point() + 
+  geom_smooth(se = FALSE, method = &quot;lm&quot;) + 
+  labs(title = &quot;Cancer Incidence Rate vs Median Income&quot;, y = &quot;Incidence per 100k&quot;)</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-13-1.png" width="90%" /></p>
+<p>Now we will look at the highest and lowest median household income in
+each borough in 2017 and compare them to their respective cancer
+incidence rates from 2015 - 2019 and visualize this in a scatter
+plot.</p>
+<pre class="r"><code>income_data %&gt;%
+  
+     group_by(year, location) %&gt;%
+  
+     filter(!str_detect(location, &quot;Zip&quot;), year == &quot;2017&quot;) %&gt;%
+  
+     summarize(mean_income = mean(median_income)) %&gt;%
+
+     mutate(location = fct_reorder(location, mean_income)) %&gt;%
+  
+     plot_ly(x = ~location,
+       y = ~mean_income, type = &quot;scatter&quot;, mode = &quot;markers&quot;, color = ~location) %&gt;%
+  
+  layout(showlegend = FALSE, title = &quot;Median Household Income NYC Neighborhoods in 2017&quot;, xaxis = list(title = &quot;&quot;), yaxis = list(title = &quot;Median Household Income&quot;))</code></pre>
+<div id="htmlwidget-7ced9d7543f8072b87b6" style="width:90%;height:345.6px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7ced9d7543f8072b87b6">{"x":{"visdat":{"350074f46b05":["function () ","plotlyVisDat"]},"cur_data":"350074f46b05","attrs":{"350074f46b05":{"x":{},"y":{},"mode":"markers","color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"showlegend":false,"title":"Median Household Income NYC Neighborhoods in 2017","xaxis":{"domain":[0,1],"automargin":true,"title":"","type":"category","categoryorder":"array","categoryarray":["Brownsville","Hunts Point","Mott Haven","East Tremont","Morrisania","University Heights","Concourse/Highbridge","Bedford Park","Coney Island","East Harlem","East New York","Bronx","Lower East Side","Unionport/Soundview","Borough Park","Pelham Parkway","Central Harlem","East Flatbush","Manhattanville","Bushwick","Crown Heights South","Flushing","Bedford Stuyvesant","Elmhurst/Corona","Bensonhurst","Riverdale","The Rockaways","Washington Heights","Flatbush/Midwood","Jackson Heights","Sunset Park","Brooklyn","Williamsbridge","Throgs Neck","Crown Heights North","New York City","Sheepshead Bay","Jamaica/St. Albans","St. George","Fresh Meadows/Briarwood","Queens","Astoria","Sunnyside/Woodside","Bay Ridge","Woodhaven","Bayside","Ridgewood/Glendale","Howard Beach","Rego Park/Forest Hills","Williamsburg/Greenpoint","Canarsie","Staten Island","South Beach","Manhattan","Queens Village","Fort Greene/Brooklyn Hts","Tottenville","Chelsea/Clinton","Midtown Business District","Murray Hill/Stuyvesant","Upper West Side","Upper East Side","Park Slope","Battery Park/Tribeca","Greenwich Village"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Median Household Income"},"hovermode":"closest"},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Brownsville"],"y":[21123.63158],"mode":"markers","type":"scatter","name":"Brownsville","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"line":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Hunts Point"],"y":[21866.20222],"mode":"markers","type":"scatter","name":"Hunts Point","marker":{"color":"rgba(129,190,158,1)","line":{"color":"rgba(129,190,158,1)"}},"textfont":{"color":"rgba(129,190,158,1)"},"error_y":{"color":"rgba(129,190,158,1)"},"error_x":{"color":"rgba(129,190,158,1)"},"line":{"color":"rgba(129,190,158,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Mott Haven"],"y":[21866.20222],"mode":"markers","type":"scatter","name":"Mott Haven","marker":{"color":"rgba(150,185,150,1)","line":{"color":"rgba(150,185,150,1)"}},"textfont":{"color":"rgba(150,185,150,1)"},"error_y":{"color":"rgba(150,185,150,1)"},"error_x":{"color":"rgba(150,185,150,1)"},"line":{"color":"rgba(150,185,150,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["East Tremont"],"y":[27087.14127],"mode":"markers","type":"scatter","name":"East Tremont","marker":{"color":"rgba(168,180,143,1)","line":{"color":"rgba(168,180,143,1)"}},"textfont":{"color":"rgba(168,180,143,1)"},"error_y":{"color":"rgba(168,180,143,1)"},"error_x":{"color":"rgba(168,180,143,1)"},"line":{"color":"rgba(168,180,143,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Morrisania"],"y":[27087.14127],"mode":"markers","type":"scatter","name":"Morrisania","marker":{"color":"rgba(185,175,135,1)","line":{"color":"rgba(185,175,135,1)"}},"textfont":{"color":"rgba(185,175,135,1)"},"error_y":{"color":"rgba(185,175,135,1)"},"error_x":{"color":"rgba(185,175,135,1)"},"line":{"color":"rgba(185,175,135,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["University Heights"],"y":[31461.21607],"mode":"markers","type":"scatter","name":"University Heights","marker":{"color":"rgba(200,169,128,1)","line":{"color":"rgba(200,169,128,1)"}},"textfont":{"color":"rgba(200,169,128,1)"},"error_y":{"color":"rgba(200,169,128,1)"},"error_x":{"color":"rgba(200,169,128,1)"},"line":{"color":"rgba(200,169,128,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Concourse/Highbridge"],"y":[32226.7313],"mode":"markers","type":"scatter","name":"Concourse/Highbridge","marker":{"color":"rgba(213,163,121,1)","line":{"color":"rgba(213,163,121,1)"}},"textfont":{"color":"rgba(213,163,121,1)"},"error_y":{"color":"rgba(213,163,121,1)"},"error_x":{"color":"rgba(213,163,121,1)"},"line":{"color":"rgba(213,163,121,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Bedford Park"],"y":[36873.01247],"mode":"markers","type":"scatter","name":"Bedford Park","marker":{"color":"rgba(226,157,114,1)","line":{"color":"rgba(226,157,114,1)"}},"textfont":{"color":"rgba(226,157,114,1)"},"error_y":{"color":"rgba(226,157,114,1)"},"error_x":{"color":"rgba(226,157,114,1)"},"line":{"color":"rgba(226,157,114,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Coney Island"],"y":[37668.77285],"mode":"markers","type":"scatter","name":"Coney Island","marker":{"color":"rgba(239,150,106,1)","line":{"color":"rgba(239,150,106,1)"}},"textfont":{"color":"rgba(239,150,106,1)"},"error_y":{"color":"rgba(239,150,106,1)"},"error_x":{"color":"rgba(239,150,106,1)"},"line":{"color":"rgba(239,150,106,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["East Harlem"],"y":[38348.76731],"mode":"markers","type":"scatter","name":"East Harlem","marker":{"color":"rgba(250,142,99,1)","line":{"color":"rgba(250,142,99,1)"}},"textfont":{"color":"rgba(250,142,99,1)"},"error_y":{"color":"rgba(250,142,99,1)"},"error_x":{"color":"rgba(250,142,99,1)"},"line":{"color":"rgba(250,142,99,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["East New York"],"y":[38365.45429],"mode":"markers","type":"scatter","name":"East New York","marker":{"color":"rgba(244,143,108,1)","line":{"color":"rgba(244,143,108,1)"}},"textfont":{"color":"rgba(244,143,108,1)"},"error_y":{"color":"rgba(244,143,108,1)"},"error_x":{"color":"rgba(244,143,108,1)"},"line":{"color":"rgba(244,143,108,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Bronx"],"y":[39002.68837],"mode":"markers","type":"scatter","name":"Bronx","marker":{"color":"rgba(235,146,120,1)","line":{"color":"rgba(235,146,120,1)"}},"textfont":{"color":"rgba(235,146,120,1)"},"error_y":{"color":"rgba(235,146,120,1)"},"error_x":{"color":"rgba(235,146,120,1)"},"line":{"color":"rgba(235,146,120,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Lower East Side"],"y":[41283.59003],"mode":"markers","type":"scatter","name":"Lower East Side","marker":{"color":"rgba(225,148,131,1)","line":{"color":"rgba(225,148,131,1)"}},"textfont":{"color":"rgba(225,148,131,1)"},"error_y":{"color":"rgba(225,148,131,1)"},"error_x":{"color":"rgba(225,148,131,1)"},"line":{"color":"rgba(225,148,131,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Unionport/Soundview"],"y":[41722.6662],"mode":"markers","type":"scatter","name":"Unionport/Soundview","marker":{"color":"rgba(215,150,143,1)","line":{"color":"rgba(215,150,143,1)"}},"textfont":{"color":"rgba(215,150,143,1)"},"error_y":{"color":"rgba(215,150,143,1)"},"error_x":{"color":"rgba(215,150,143,1)"},"line":{"color":"rgba(215,150,143,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Borough Park"],"y":[47311.76177],"mode":"markers","type":"scatter","name":"Borough Park","marker":{"color":"rgba(204,152,154,1)","line":{"color":"rgba(204,152,154,1)"}},"textfont":{"color":"rgba(204,152,154,1)"},"error_y":{"color":"rgba(204,152,154,1)"},"error_x":{"color":"rgba(204,152,154,1)"},"line":{"color":"rgba(204,152,154,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Pelham Parkway"],"y":[50079.71468],"mode":"markers","type":"scatter","name":"Pelham Parkway","marker":{"color":"rgba(192,154,166,1)","line":{"color":"rgba(192,154,166,1)"}},"textfont":{"color":"rgba(192,154,166,1)"},"error_y":{"color":"rgba(192,154,166,1)"},"error_x":{"color":"rgba(192,154,166,1)"},"line":{"color":"rgba(192,154,166,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Central Harlem"],"y":[51165.41136],"mode":"markers","type":"scatter","name":"Central Harlem","marker":{"color":"rgba(178,156,177,1)","line":{"color":"rgba(178,156,177,1)"}},"textfont":{"color":"rgba(178,156,177,1)"},"error_y":{"color":"rgba(178,156,177,1)"},"error_x":{"color":"rgba(178,156,177,1)"},"line":{"color":"rgba(178,156,177,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["East Flatbush"],"y":[51467.86288],"mode":"markers","type":"scatter","name":"East Flatbush","marker":{"color":"rgba(164,158,188,1)","line":{"color":"rgba(164,158,188,1)"}},"textfont":{"color":"rgba(164,158,188,1)"},"error_y":{"color":"rgba(164,158,188,1)"},"error_x":{"color":"rgba(164,158,188,1)"},"line":{"color":"rgba(164,158,188,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Manhattanville"],"y":[52196.87535],"mode":"markers","type":"scatter","name":"Manhattanville","marker":{"color":"rgba(146,160,200,1)","line":{"color":"rgba(146,160,200,1)"}},"textfont":{"color":"rgba(146,160,200,1)"},"error_y":{"color":"rgba(146,160,200,1)"},"error_x":{"color":"rgba(146,160,200,1)"},"line":{"color":"rgba(146,160,200,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Bushwick"],"y":[52830.98061],"mode":"markers","type":"scatter","name":"Bushwick","marker":{"color":"rgba(149,159,202,1)","line":{"color":"rgba(149,159,202,1)"}},"textfont":{"color":"rgba(149,159,202,1)"},"error_y":{"color":"rgba(149,159,202,1)"},"error_x":{"color":"rgba(149,159,202,1)"},"line":{"color":"rgba(149,159,202,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Crown Heights South"],"y":[53264.84211],"mode":"markers","type":"scatter","name":"Crown Heights South","marker":{"color":"rgba(161,157,201,1)","line":{"color":"rgba(161,157,201,1)"}},"textfont":{"color":"rgba(161,157,201,1)"},"error_y":{"color":"rgba(161,157,201,1)"},"error_x":{"color":"rgba(161,157,201,1)"},"line":{"color":"rgba(161,157,201,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Flushing"],"y":[53485.9446],"mode":"markers","type":"scatter","name":"Flushing","marker":{"color":"rgba(171,155,201,1)","line":{"color":"rgba(171,155,201,1)"}},"textfont":{"color":"rgba(171,155,201,1)"},"error_y":{"color":"rgba(171,155,201,1)"},"error_x":{"color":"rgba(171,155,201,1)"},"line":{"color":"rgba(171,155,201,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Bedford Stuyvesant"],"y":[54135.69391],"mode":"markers","type":"scatter","name":"Bedford Stuyvesant","marker":{"color":"rgba(181,153,200,1)","line":{"color":"rgba(181,153,200,1)"}},"textfont":{"color":"rgba(181,153,200,1)"},"error_y":{"color":"rgba(181,153,200,1)"},"error_x":{"color":"rgba(181,153,200,1)"},"line":{"color":"rgba(181,153,200,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Elmhurst/Corona"],"y":[54224.34349],"mode":"markers","type":"scatter","name":"Elmhurst/Corona","marker":{"color":"rgba(191,150,199,1)","line":{"color":"rgba(191,150,199,1)"}},"textfont":{"color":"rgba(191,150,199,1)"},"error_y":{"color":"rgba(191,150,199,1)"},"error_x":{"color":"rgba(191,150,199,1)"},"line":{"color":"rgba(191,150,199,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Bensonhurst"],"y":[55789.79086],"mode":"markers","type":"scatter","name":"Bensonhurst","marker":{"color":"rgba(201,148,198,1)","line":{"color":"rgba(201,148,198,1)"}},"textfont":{"color":"rgba(201,148,198,1)"},"error_y":{"color":"rgba(201,148,198,1)"},"error_x":{"color":"rgba(201,148,198,1)"},"line":{"color":"rgba(201,148,198,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Riverdale"],"y":[56303.95845],"mode":"markers","type":"scatter","name":"Riverdale","marker":{"color":"rgba(210,145,197,1)","line":{"color":"rgba(210,145,197,1)"}},"textfont":{"color":"rgba(210,145,197,1)"},"error_y":{"color":"rgba(210,145,197,1)"},"error_x":{"color":"rgba(210,145,197,1)"},"line":{"color":"rgba(210,145,197,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["The Rockaways"],"y":[56331.07479],"mode":"markers","type":"scatter","name":"The Rockaways","marker":{"color":"rgba(219,142,196,1)","line":{"color":"rgba(219,142,196,1)"}},"textfont":{"color":"rgba(219,142,196,1)"},"error_y":{"color":"rgba(219,142,196,1)"},"error_x":{"color":"rgba(219,142,196,1)"},"line":{"color":"rgba(219,142,196,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Washington Heights"],"y":[58802.8338],"mode":"markers","type":"scatter","name":"Washington Heights","marker":{"color":"rgba(227,139,195,1)","line":{"color":"rgba(227,139,195,1)"}},"textfont":{"color":"rgba(227,139,195,1)"},"error_y":{"color":"rgba(227,139,195,1)"},"error_x":{"color":"rgba(227,139,195,1)"},"line":{"color":"rgba(227,139,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Flatbush/Midwood"],"y":[59029.15097],"mode":"markers","type":"scatter","name":"Flatbush/Midwood","marker":{"color":"rgba(228,144,189,1)","line":{"color":"rgba(228,144,189,1)"}},"textfont":{"color":"rgba(228,144,189,1)"},"error_y":{"color":"rgba(228,144,189,1)"},"error_x":{"color":"rgba(228,144,189,1)"},"line":{"color":"rgba(228,144,189,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Jackson Heights"],"y":[59031.23684],"mode":"markers","type":"scatter","name":"Jackson Heights","marker":{"color":"rgba(223,154,178,1)","line":{"color":"rgba(223,154,178,1)"}},"textfont":{"color":"rgba(223,154,178,1)"},"error_y":{"color":"rgba(223,154,178,1)"},"error_x":{"color":"rgba(223,154,178,1)"},"line":{"color":"rgba(223,154,178,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Sunset Park"],"y":[59225.22299],"mode":"markers","type":"scatter","name":"Sunset Park","marker":{"color":"rgba(218,163,167,1)","line":{"color":"rgba(218,163,167,1)"}},"textfont":{"color":"rgba(218,163,167,1)"},"error_y":{"color":"rgba(218,163,167,1)"},"error_x":{"color":"rgba(218,163,167,1)"},"line":{"color":"rgba(218,163,167,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Brooklyn"],"y":[59386.87812],"mode":"markers","type":"scatter","name":"Brooklyn","marker":{"color":"rgba(212,172,155,1)","line":{"color":"rgba(212,172,155,1)"}},"textfont":{"color":"rgba(212,172,155,1)"},"error_y":{"color":"rgba(212,172,155,1)"},"error_x":{"color":"rgba(212,172,155,1)"},"line":{"color":"rgba(212,172,155,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Williamsbridge"],"y":[61296.49446],"mode":"markers","type":"scatter","name":"Williamsbridge","marker":{"color":"rgba(205,180,144,1)","line":{"color":"rgba(205,180,144,1)"}},"textfont":{"color":"rgba(205,180,144,1)"},"error_y":{"color":"rgba(205,180,144,1)"},"error_x":{"color":"rgba(205,180,144,1)"},"line":{"color":"rgba(205,180,144,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Throgs Neck"],"y":[62077.65374],"mode":"markers","type":"scatter","name":"Throgs Neck","marker":{"color":"rgba(198,189,132,1)","line":{"color":"rgba(198,189,132,1)"}},"textfont":{"color":"rgba(198,189,132,1)"},"error_y":{"color":"rgba(198,189,132,1)"},"error_x":{"color":"rgba(198,189,132,1)"},"line":{"color":"rgba(198,189,132,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Crown Heights North"],"y":[62687.77147],"mode":"markers","type":"scatter","name":"Crown Heights North","marker":{"color":"rgba(190,197,120,1)","line":{"color":"rgba(190,197,120,1)"}},"textfont":{"color":"rgba(190,197,120,1)"},"error_y":{"color":"rgba(190,197,120,1)"},"error_x":{"color":"rgba(190,197,120,1)"},"line":{"color":"rgba(190,197,120,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["New York City"],"y":[63492.91828],"mode":"markers","type":"scatter","name":"New York City","marker":{"color":"rgba(182,204,107,1)","line":{"color":"rgba(182,204,107,1)"}},"textfont":{"color":"rgba(182,204,107,1)"},"error_y":{"color":"rgba(182,204,107,1)"},"error_x":{"color":"rgba(182,204,107,1)"},"line":{"color":"rgba(182,204,107,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Sheepshead Bay"],"y":[63904.87812],"mode":"markers","type":"scatter","name":"Sheepshead Bay","marker":{"color":"rgba(172,212,93,1)","line":{"color":"rgba(172,212,93,1)"}},"textfont":{"color":"rgba(172,212,93,1)"},"error_y":{"color":"rgba(172,212,93,1)"},"error_x":{"color":"rgba(172,212,93,1)"},"line":{"color":"rgba(172,212,93,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Jamaica/St. Albans"],"y":[64317.88089],"mode":"markers","type":"scatter","name":"Jamaica/St. Albans","marker":{"color":"rgba(171,216,83,1)","line":{"color":"rgba(171,216,83,1)"}},"textfont":{"color":"rgba(171,216,83,1)"},"error_y":{"color":"rgba(171,216,83,1)"},"error_x":{"color":"rgba(171,216,83,1)"},"line":{"color":"rgba(171,216,83,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["St. George"],"y":[65569.40443],"mode":"markers","type":"scatter","name":"St. George","marker":{"color":"rgba(181,217,79,1)","line":{"color":"rgba(181,217,79,1)"}},"textfont":{"color":"rgba(181,217,79,1)"},"error_y":{"color":"rgba(181,217,79,1)"},"error_x":{"color":"rgba(181,217,79,1)"},"line":{"color":"rgba(181,217,79,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Fresh Meadows/Briarwood"],"y":[66753.13712],"mode":"markers","type":"scatter","name":"Fresh Meadows/Briarwood","marker":{"color":"rgba(192,217,76,1)","line":{"color":"rgba(192,217,76,1)"}},"textfont":{"color":"rgba(192,217,76,1)"},"error_y":{"color":"rgba(192,217,76,1)"},"error_x":{"color":"rgba(192,217,76,1)"},"line":{"color":"rgba(192,217,76,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Queens"],"y":[67278.77701],"mode":"markers","type":"scatter","name":"Queens","marker":{"color":"rgba(202,217,72,1)","line":{"color":"rgba(202,217,72,1)"}},"textfont":{"color":"rgba(202,217,72,1)"},"error_y":{"color":"rgba(202,217,72,1)"},"error_x":{"color":"rgba(202,217,72,1)"},"line":{"color":"rgba(202,217,72,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Astoria"],"y":[69232.19668],"mode":"markers","type":"scatter","name":"Astoria","marker":{"color":"rgba(211,217,68,1)","line":{"color":"rgba(211,217,68,1)"}},"textfont":{"color":"rgba(211,217,68,1)"},"error_y":{"color":"rgba(211,217,68,1)"},"error_x":{"color":"rgba(211,217,68,1)"},"line":{"color":"rgba(211,217,68,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Sunnyside/Woodside"],"y":[70251.14543],"mode":"markers","type":"scatter","name":"Sunnyside/Woodside","marker":{"color":"rgba(221,217,64,1)","line":{"color":"rgba(221,217,64,1)"}},"textfont":{"color":"rgba(221,217,64,1)"},"error_y":{"color":"rgba(221,217,64,1)"},"error_x":{"color":"rgba(221,217,64,1)"},"line":{"color":"rgba(221,217,64,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Bay Ridge"],"y":[71627.82133],"mode":"markers","type":"scatter","name":"Bay Ridge","marker":{"color":"rgba(230,217,60,1)","line":{"color":"rgba(230,217,60,1)"}},"textfont":{"color":"rgba(230,217,60,1)"},"error_y":{"color":"rgba(230,217,60,1)"},"error_x":{"color":"rgba(230,217,60,1)"},"line":{"color":"rgba(230,217,60,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Woodhaven"],"y":[72917.93352],"mode":"markers","type":"scatter","name":"Woodhaven","marker":{"color":"rgba(240,217,56,1)","line":{"color":"rgba(240,217,56,1)"}},"textfont":{"color":"rgba(240,217,56,1)"},"error_y":{"color":"rgba(240,217,56,1)"},"error_x":{"color":"rgba(240,217,56,1)"},"line":{"color":"rgba(240,217,56,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Bayside"],"y":[73167.19529],"mode":"markers","type":"scatter","name":"Bayside","marker":{"color":"rgba(249,217,51,1)","line":{"color":"rgba(249,217,51,1)"}},"textfont":{"color":"rgba(249,217,51,1)"},"error_y":{"color":"rgba(249,217,51,1)"},"error_x":{"color":"rgba(249,217,51,1)"},"line":{"color":"rgba(249,217,51,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Ridgewood/Glendale"],"y":[74292.52355],"mode":"markers","type":"scatter","name":"Ridgewood/Glendale","marker":{"color":"rgba(254,216,52,1)","line":{"color":"rgba(254,216,52,1)"}},"textfont":{"color":"rgba(254,216,52,1)"},"error_y":{"color":"rgba(254,216,52,1)"},"error_x":{"color":"rgba(254,216,52,1)"},"line":{"color":"rgba(254,216,52,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Howard Beach"],"y":[77063.60526],"mode":"markers","type":"scatter","name":"Howard Beach","marker":{"color":"rgba(252,214,67,1)","line":{"color":"rgba(252,214,67,1)"}},"textfont":{"color":"rgba(252,214,67,1)"},"error_y":{"color":"rgba(252,214,67,1)"},"error_x":{"color":"rgba(252,214,67,1)"},"line":{"color":"rgba(252,214,67,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Rego Park/Forest Hills"],"y":[78686.41413],"mode":"markers","type":"scatter","name":"Rego Park/Forest Hills","marker":{"color":"rgba(250,212,80,1)","line":{"color":"rgba(250,212,80,1)"}},"textfont":{"color":"rgba(250,212,80,1)"},"error_y":{"color":"rgba(250,212,80,1)"},"error_x":{"color":"rgba(250,212,80,1)"},"line":{"color":"rgba(250,212,80,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Williamsburg/Greenpoint"],"y":[79897.26316],"mode":"markers","type":"scatter","name":"Williamsburg/Greenpoint","marker":{"color":"rgba(247,209,92,1)","line":{"color":"rgba(247,209,92,1)"}},"textfont":{"color":"rgba(247,209,92,1)"},"error_y":{"color":"rgba(247,209,92,1)"},"error_x":{"color":"rgba(247,209,92,1)"},"line":{"color":"rgba(247,209,92,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Canarsie"],"y":[79937.93767],"mode":"markers","type":"scatter","name":"Canarsie","marker":{"color":"rgba(244,207,102,1)","line":{"color":"rgba(244,207,102,1)"}},"textfont":{"color":"rgba(244,207,102,1)"},"error_y":{"color":"rgba(244,207,102,1)"},"error_x":{"color":"rgba(244,207,102,1)"},"line":{"color":"rgba(244,207,102,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Staten Island"],"y":[82601.59695],"mode":"markers","type":"scatter","name":"Staten Island","marker":{"color":"rgba(242,205,112,1)","line":{"color":"rgba(242,205,112,1)"}},"textfont":{"color":"rgba(242,205,112,1)"},"error_y":{"color":"rgba(242,205,112,1)"},"error_x":{"color":"rgba(242,205,112,1)"},"line":{"color":"rgba(242,205,112,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["South Beach"],"y":[84985.74931],"mode":"markers","type":"scatter","name":"South Beach","marker":{"color":"rgba(239,202,122,1)","line":{"color":"rgba(239,202,122,1)"}},"textfont":{"color":"rgba(239,202,122,1)"},"error_y":{"color":"rgba(239,202,122,1)"},"error_x":{"color":"rgba(239,202,122,1)"},"line":{"color":"rgba(239,202,122,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Manhattan"],"y":[88723.63296],"mode":"markers","type":"scatter","name":"Manhattan","marker":{"color":"rgba(235,200,131,1)","line":{"color":"rgba(235,200,131,1)"}},"textfont":{"color":"rgba(235,200,131,1)"},"error_y":{"color":"rgba(235,200,131,1)"},"error_x":{"color":"rgba(235,200,131,1)"},"line":{"color":"rgba(235,200,131,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Queens Village"],"y":[89543.38089],"mode":"markers","type":"scatter","name":"Queens Village","marker":{"color":"rgba(232,198,140,1)","line":{"color":"rgba(232,198,140,1)"}},"textfont":{"color":"rgba(232,198,140,1)"},"error_y":{"color":"rgba(232,198,140,1)"},"error_x":{"color":"rgba(232,198,140,1)"},"line":{"color":"rgba(232,198,140,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Fort Greene/Brooklyn Hts"],"y":[96536.2687],"mode":"markers","type":"scatter","name":"Fort Greene/Brooklyn Hts","marker":{"color":"rgba(228,196,149,1)","line":{"color":"rgba(228,196,149,1)"}},"textfont":{"color":"rgba(228,196,149,1)"},"error_y":{"color":"rgba(228,196,149,1)"},"error_x":{"color":"rgba(228,196,149,1)"},"line":{"color":"rgba(228,196,149,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Tottenville"],"y":[100952.0609],"mode":"markers","type":"scatter","name":"Tottenville","marker":{"color":"rgba(223,194,152,1)","line":{"color":"rgba(223,194,152,1)"}},"textfont":{"color":"rgba(223,194,152,1)"},"error_y":{"color":"rgba(223,194,152,1)"},"error_x":{"color":"rgba(223,194,152,1)"},"line":{"color":"rgba(223,194,152,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Chelsea/Clinton"],"y":[106359.6856],"mode":"markers","type":"scatter","name":"Chelsea/Clinton","marker":{"color":"rgba(218,192,156,1)","line":{"color":"rgba(218,192,156,1)"}},"textfont":{"color":"rgba(218,192,156,1)"},"error_y":{"color":"rgba(218,192,156,1)"},"error_x":{"color":"rgba(218,192,156,1)"},"line":{"color":"rgba(218,192,156,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Midtown Business District"],"y":[106359.6856],"mode":"markers","type":"scatter","name":"Midtown Business District","marker":{"color":"rgba(213,190,159,1)","line":{"color":"rgba(213,190,159,1)"}},"textfont":{"color":"rgba(213,190,159,1)"},"error_y":{"color":"rgba(213,190,159,1)"},"error_x":{"color":"rgba(213,190,159,1)"},"line":{"color":"rgba(213,190,159,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Murray Hill/Stuyvesant"],"y":[117208.3089],"mode":"markers","type":"scatter","name":"Murray Hill/Stuyvesant","marker":{"color":"rgba(207,188,162,1)","line":{"color":"rgba(207,188,162,1)"}},"textfont":{"color":"rgba(207,188,162,1)"},"error_y":{"color":"rgba(207,188,162,1)"},"error_x":{"color":"rgba(207,188,162,1)"},"line":{"color":"rgba(207,188,162,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Upper West Side"],"y":[129213.5485],"mode":"markers","type":"scatter","name":"Upper West Side","marker":{"color":"rgba(202,186,166,1)","line":{"color":"rgba(202,186,166,1)"}},"textfont":{"color":"rgba(202,186,166,1)"},"error_y":{"color":"rgba(202,186,166,1)"},"error_x":{"color":"rgba(202,186,166,1)"},"line":{"color":"rgba(202,186,166,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Upper East Side"],"y":[136987.5956],"mode":"markers","type":"scatter","name":"Upper East Side","marker":{"color":"rgba(196,185,169,1)","line":{"color":"rgba(196,185,169,1)"}},"textfont":{"color":"rgba(196,185,169,1)"},"error_y":{"color":"rgba(196,185,169,1)"},"error_x":{"color":"rgba(196,185,169,1)"},"line":{"color":"rgba(196,185,169,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Park Slope"],"y":[140591.9834],"mode":"markers","type":"scatter","name":"Park Slope","marker":{"color":"rgba(191,183,172,1)","line":{"color":"rgba(191,183,172,1)"}},"textfont":{"color":"rgba(191,183,172,1)"},"error_y":{"color":"rgba(191,183,172,1)"},"error_x":{"color":"rgba(191,183,172,1)"},"line":{"color":"rgba(191,183,172,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Battery Park/Tribeca"],"y":[151098.5236],"mode":"markers","type":"scatter","name":"Battery Park/Tribeca","marker":{"color":"rgba(185,181,176,1)","line":{"color":"rgba(185,181,176,1)"}},"textfont":{"color":"rgba(185,181,176,1)"},"error_y":{"color":"rgba(185,181,176,1)"},"error_x":{"color":"rgba(185,181,176,1)"},"line":{"color":"rgba(185,181,176,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Greenwich Village"],"y":[151098.5236],"mode":"markers","type":"scatter","name":"Greenwich Village","marker":{"color":"rgba(179,179,179,1)","line":{"color":"rgba(179,179,179,1)"}},"textfont":{"color":"rgba(179,179,179,1)"},"error_y":{"color":"rgba(179,179,179,1)"},"error_x":{"color":"rgba(179,179,179,1)"},"line":{"color":"rgba(179,179,179,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p>Now we will examine all the neighborhoods within the four boroughs
+and plot their respective median household income vs cancer incidence
+rates from 2015 - 2019 to examine any trends.</p>
+<pre class="r"><code>cancer_data_by_income = read_excel(&quot;C:/Users/Will/Documents/nyc_cancer_data.xlsx&quot;, sheet = &quot;income_vs_incidence&quot;) 
+
+cancer_data_by_income %&gt;%
+  
+plot_ly(x = ~median_income,
+       y = ~incidence_per_100k, type = &quot;scatter&quot;, mode = &quot;markers&quot;, color = ~location) %&gt;%
+  
+  layout(title = &quot;Cancer Incidence Rate vs Median Household Income in NYC Neighborhoods&quot;, xaxis = list(title = &quot;Median Household Income&quot;), yaxis = list(title = &quot;Cancer Incidence Rate Per 100k&quot;))</code></pre>
+<div id="htmlwidget-d5f8f424dd740665ce95" style="width:90%;height:345.6px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d5f8f424dd740665ce95">{"x":{"visdat":{"350044f012d6":["function () ","plotlyVisDat"]},"cur_data":"350044f012d6","attrs":{"350044f012d6":{"x":{},"y":{},"mode":"markers","color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Cancer Incidence Rate vs Median Household Income in NYC Neighborhoods","xaxis":{"domain":[0,1],"automargin":true,"title":"Median Household Income"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Cancer Incidence Rate Per 100k"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[69232.19668],"y":[418.6],"mode":"markers","type":"scatter","name":"Astoria","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"line":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[151098.5236],"y":[456.8],"mode":"markers","type":"scatter","name":"Battery Park/Tribeca","marker":{"color":"rgba(132,189,157,1)","line":{"color":"rgba(132,189,157,1)"}},"textfont":{"color":"rgba(132,189,157,1)"},"error_y":{"color":"rgba(132,189,157,1)"},"error_x":{"color":"rgba(132,189,157,1)"},"line":{"color":"rgba(132,189,157,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[71627.82133],"y":[459.3],"mode":"markers","type":"scatter","name":"Bay Ridge","marker":{"color":"rgba(156,183,148,1)","line":{"color":"rgba(156,183,148,1)"}},"textfont":{"color":"rgba(156,183,148,1)"},"error_y":{"color":"rgba(156,183,148,1)"},"error_x":{"color":"rgba(156,183,148,1)"},"line":{"color":"rgba(156,183,148,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[73167.19529],"y":[422.9],"mode":"markers","type":"scatter","name":"Bayside","marker":{"color":"rgba(176,178,140,1)","line":{"color":"rgba(176,178,140,1)"}},"textfont":{"color":"rgba(176,178,140,1)"},"error_y":{"color":"rgba(176,178,140,1)"},"error_x":{"color":"rgba(176,178,140,1)"},"line":{"color":"rgba(176,178,140,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[36873.01247],"y":[465.2],"mode":"markers","type":"scatter","name":"Bedford Park","marker":{"color":"rgba(193,171,131,1)","line":{"color":"rgba(193,171,131,1)"}},"textfont":{"color":"rgba(193,171,131,1)"},"error_y":{"color":"rgba(193,171,131,1)"},"error_x":{"color":"rgba(193,171,131,1)"},"line":{"color":"rgba(193,171,131,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[54135.69391],"y":[410.2],"mode":"markers","type":"scatter","name":"Bedford Stuyvesant","marker":{"color":"rgba(210,165,123,1)","line":{"color":"rgba(210,165,123,1)"}},"textfont":{"color":"rgba(210,165,123,1)"},"error_y":{"color":"rgba(210,165,123,1)"},"error_x":{"color":"rgba(210,165,123,1)"},"line":{"color":"rgba(210,165,123,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[55789.79086],"y":[429.8],"mode":"markers","type":"scatter","name":"Bensonhurst","marker":{"color":"rgba(225,158,115,1)","line":{"color":"rgba(225,158,115,1)"}},"textfont":{"color":"rgba(225,158,115,1)"},"error_y":{"color":"rgba(225,158,115,1)"},"error_x":{"color":"rgba(225,158,115,1)"},"line":{"color":"rgba(225,158,115,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[47311.76177],"y":[430.5],"mode":"markers","type":"scatter","name":"Borough Park","marker":{"color":"rgba(239,150,106,1)","line":{"color":"rgba(239,150,106,1)"}},"textfont":{"color":"rgba(239,150,106,1)"},"error_y":{"color":"rgba(239,150,106,1)"},"error_x":{"color":"rgba(239,150,106,1)"},"line":{"color":"rgba(239,150,106,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[39002.68837],"y":[439.4],"mode":"markers","type":"scatter","name":"Bronx","marker":{"color":"rgba(252,141,98,1)","line":{"color":"rgba(252,141,98,1)"}},"textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"line":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[59386.87812],"y":[442.8],"mode":"markers","type":"scatter","name":"Brooklyn","marker":{"color":"rgba(242,144,112,1)","line":{"color":"rgba(242,144,112,1)"}},"textfont":{"color":"rgba(242,144,112,1)"},"error_y":{"color":"rgba(242,144,112,1)"},"error_x":{"color":"rgba(242,144,112,1)"},"line":{"color":"rgba(242,144,112,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[21123.63158],"y":[495.8],"mode":"markers","type":"scatter","name":"Brownsville","marker":{"color":"rgba(231,147,125,1)","line":{"color":"rgba(231,147,125,1)"}},"textfont":{"color":"rgba(231,147,125,1)"},"error_y":{"color":"rgba(231,147,125,1)"},"error_x":{"color":"rgba(231,147,125,1)"},"line":{"color":"rgba(231,147,125,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[52830.98061],"y":[378.9],"mode":"markers","type":"scatter","name":"Bushwick","marker":{"color":"rgba(220,149,138,1)","line":{"color":"rgba(220,149,138,1)"}},"textfont":{"color":"rgba(220,149,138,1)"},"error_y":{"color":"rgba(220,149,138,1)"},"error_x":{"color":"rgba(220,149,138,1)"},"line":{"color":"rgba(220,149,138,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[79937.93767],"y":[458.4],"mode":"markers","type":"scatter","name":"Canarsie","marker":{"color":"rgba(207,151,151,1)","line":{"color":"rgba(207,151,151,1)"}},"textfont":{"color":"rgba(207,151,151,1)"},"error_y":{"color":"rgba(207,151,151,1)"},"error_x":{"color":"rgba(207,151,151,1)"},"line":{"color":"rgba(207,151,151,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[51165.41136],"y":[494.1],"mode":"markers","type":"scatter","name":"Central Harlem","marker":{"color":"rgba(194,154,164,1)","line":{"color":"rgba(194,154,164,1)"}},"textfont":{"color":"rgba(194,154,164,1)"},"error_y":{"color":"rgba(194,154,164,1)"},"error_x":{"color":"rgba(194,154,164,1)"},"line":{"color":"rgba(194,154,164,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[106359.6856],"y":[494.1],"mode":"markers","type":"scatter","name":"Chelsea/Clinton","marker":{"color":"rgba(178,156,177,1)","line":{"color":"rgba(178,156,177,1)"}},"textfont":{"color":"rgba(178,156,177,1)"},"error_y":{"color":"rgba(178,156,177,1)"},"error_x":{"color":"rgba(178,156,177,1)"},"line":{"color":"rgba(178,156,177,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[32226.7313],"y":[461.3],"mode":"markers","type":"scatter","name":"Concourse/Highbridge","marker":{"color":"rgba(161,158,190,1)","line":{"color":"rgba(161,158,190,1)"}},"textfont":{"color":"rgba(161,158,190,1)"},"error_y":{"color":"rgba(161,158,190,1)"},"error_x":{"color":"rgba(161,158,190,1)"},"line":{"color":"rgba(161,158,190,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[37668.77285],"y":[483.8],"mode":"markers","type":"scatter","name":"Coney Island","marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"line":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[62687.77147],"y":[429.1],"mode":"markers","type":"scatter","name":"Crown Heights North","marker":{"color":"rgba(154,158,202,1)","line":{"color":"rgba(154,158,202,1)"}},"textfont":{"color":"rgba(154,158,202,1)"},"error_y":{"color":"rgba(154,158,202,1)"},"error_x":{"color":"rgba(154,158,202,1)"},"line":{"color":"rgba(154,158,202,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[53264.84211],"y":[419.2],"mode":"markers","type":"scatter","name":"Crown Heights South","marker":{"color":"rgba(167,156,201,1)","line":{"color":"rgba(167,156,201,1)"}},"textfont":{"color":"rgba(167,156,201,1)"},"error_y":{"color":"rgba(167,156,201,1)"},"error_x":{"color":"rgba(167,156,201,1)"},"line":{"color":"rgba(167,156,201,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[51467.86288],"y":[437.6],"mode":"markers","type":"scatter","name":"East Flatbush","marker":{"color":"rgba(179,153,200,1)","line":{"color":"rgba(179,153,200,1)"}},"textfont":{"color":"rgba(179,153,200,1)"},"error_y":{"color":"rgba(179,153,200,1)"},"error_x":{"color":"rgba(179,153,200,1)"},"line":{"color":"rgba(179,153,200,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[38348.76731],"y":[483.7],"mode":"markers","type":"scatter","name":"East Harlem","marker":{"color":"rgba(190,151,199,1)","line":{"color":"rgba(190,151,199,1)"}},"textfont":{"color":"rgba(190,151,199,1)"},"error_y":{"color":"rgba(190,151,199,1)"},"error_x":{"color":"rgba(190,151,199,1)"},"line":{"color":"rgba(190,151,199,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[38365.45429],"y":[450.7],"mode":"markers","type":"scatter","name":"East New York","marker":{"color":"rgba(201,148,198,1)","line":{"color":"rgba(201,148,198,1)"}},"textfont":{"color":"rgba(201,148,198,1)"},"error_y":{"color":"rgba(201,148,198,1)"},"error_x":{"color":"rgba(201,148,198,1)"},"line":{"color":"rgba(201,148,198,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[27087.14127],"y":[488.7],"mode":"markers","type":"scatter","name":"East Tremont","marker":{"color":"rgba(211,145,197,1)","line":{"color":"rgba(211,145,197,1)"}},"textfont":{"color":"rgba(211,145,197,1)"},"error_y":{"color":"rgba(211,145,197,1)"},"error_x":{"color":"rgba(211,145,197,1)"},"line":{"color":"rgba(211,145,197,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[54224.34349],"y":[403.3],"mode":"markers","type":"scatter","name":"Elmhurst/Corona","marker":{"color":"rgba(221,142,196,1)","line":{"color":"rgba(221,142,196,1)"}},"textfont":{"color":"rgba(221,142,196,1)"},"error_y":{"color":"rgba(221,142,196,1)"},"error_x":{"color":"rgba(221,142,196,1)"},"line":{"color":"rgba(221,142,196,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[59029.15097],"y":[422.7],"mode":"markers","type":"scatter","name":"Flatbush/Midwood","marker":{"color":"rgba(231,138,195,1)","line":{"color":"rgba(231,138,195,1)"}},"textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"line":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[53485.9446],"y":[447.7],"mode":"markers","type":"scatter","name":"Flushing","marker":{"color":"rgba(226,150,183,1)","line":{"color":"rgba(226,150,183,1)"}},"textfont":{"color":"rgba(226,150,183,1)"},"error_y":{"color":"rgba(226,150,183,1)"},"error_x":{"color":"rgba(226,150,183,1)"},"line":{"color":"rgba(226,150,183,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[96536.2687],"y":[494.7],"mode":"markers","type":"scatter","name":"Fort Greene/Brooklyn Hts","marker":{"color":"rgba(219,160,170,1)","line":{"color":"rgba(219,160,170,1)"}},"textfont":{"color":"rgba(219,160,170,1)"},"error_y":{"color":"rgba(219,160,170,1)"},"error_x":{"color":"rgba(219,160,170,1)"},"line":{"color":"rgba(219,160,170,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[66753.13712],"y":[409.8],"mode":"markers","type":"scatter","name":"Fresh Meadows/Briarwood","marker":{"color":"rgba(213,171,157,1)","line":{"color":"rgba(213,171,157,1)"}},"textfont":{"color":"rgba(213,171,157,1)"},"error_y":{"color":"rgba(213,171,157,1)"},"error_x":{"color":"rgba(213,171,157,1)"},"line":{"color":"rgba(213,171,157,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[151098.5236],"y":[456.8],"mode":"markers","type":"scatter","name":"Greenwich Village","marker":{"color":"rgba(205,180,144,1)","line":{"color":"rgba(205,180,144,1)"}},"textfont":{"color":"rgba(205,180,144,1)"},"error_y":{"color":"rgba(205,180,144,1)"},"error_x":{"color":"rgba(205,180,144,1)"},"line":{"color":"rgba(205,180,144,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[77063.60526],"y":[411.9],"mode":"markers","type":"scatter","name":"Howard Beach","marker":{"color":"rgba(197,190,130,1)","line":{"color":"rgba(197,190,130,1)"}},"textfont":{"color":"rgba(197,190,130,1)"},"error_y":{"color":"rgba(197,190,130,1)"},"error_x":{"color":"rgba(197,190,130,1)"},"line":{"color":"rgba(197,190,130,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[21866.20222],"y":[443.9],"mode":"markers","type":"scatter","name":"Hunts Point","marker":{"color":"rgba(188,199,116,1)","line":{"color":"rgba(188,199,116,1)"}},"textfont":{"color":"rgba(188,199,116,1)"},"error_y":{"color":"rgba(188,199,116,1)"},"error_x":{"color":"rgba(188,199,116,1)"},"line":{"color":"rgba(188,199,116,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[59031.23684],"y":[393.6],"mode":"markers","type":"scatter","name":"Jackson Heights","marker":{"color":"rgba(178,208,101,1)","line":{"color":"rgba(178,208,101,1)"}},"textfont":{"color":"rgba(178,208,101,1)"},"error_y":{"color":"rgba(178,208,101,1)"},"error_x":{"color":"rgba(178,208,101,1)"},"line":{"color":"rgba(178,208,101,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[64317.88089],"y":[444.1],"mode":"markers","type":"scatter","name":"Jamaica/St. Albans","marker":{"color":"rgba(166,216,84,1)","line":{"color":"rgba(166,216,84,1)"}},"textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"line":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[41283.59003],"y":[405.6],"mode":"markers","type":"scatter","name":"Lower East Side","marker":{"color":"rgba(178,216,80,1)","line":{"color":"rgba(178,216,80,1)"}},"textfont":{"color":"rgba(178,216,80,1)"},"error_y":{"color":"rgba(178,216,80,1)"},"error_x":{"color":"rgba(178,216,80,1)"},"line":{"color":"rgba(178,216,80,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[88723.63296],"y":[449],"mode":"markers","type":"scatter","name":"Manhattan","marker":{"color":"rgba(190,217,76,1)","line":{"color":"rgba(190,217,76,1)"}},"textfont":{"color":"rgba(190,217,76,1)"},"error_y":{"color":"rgba(190,217,76,1)"},"error_x":{"color":"rgba(190,217,76,1)"},"line":{"color":"rgba(190,217,76,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[52196.87535],"y":[398.6],"mode":"markers","type":"scatter","name":"Manhattanville","marker":{"color":"rgba(202,217,72,1)","line":{"color":"rgba(202,217,72,1)"}},"textfont":{"color":"rgba(202,217,72,1)"},"error_y":{"color":"rgba(202,217,72,1)"},"error_x":{"color":"rgba(202,217,72,1)"},"line":{"color":"rgba(202,217,72,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[106359.6856],"y":[494.1],"mode":"markers","type":"scatter","name":"Midtown Business District","marker":{"color":"rgba(213,217,68,1)","line":{"color":"rgba(213,217,68,1)"}},"textfont":{"color":"rgba(213,217,68,1)"},"error_y":{"color":"rgba(213,217,68,1)"},"error_x":{"color":"rgba(213,217,68,1)"},"line":{"color":"rgba(213,217,68,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[27087.14127],"y":[410],"mode":"markers","type":"scatter","name":"Morrisania","marker":{"color":"rgba(224,217,63,1)","line":{"color":"rgba(224,217,63,1)"}},"textfont":{"color":"rgba(224,217,63,1)"},"error_y":{"color":"rgba(224,217,63,1)"},"error_x":{"color":"rgba(224,217,63,1)"},"line":{"color":"rgba(224,217,63,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[21866.20222],"y":[443.9],"mode":"markers","type":"scatter","name":"Mott Haven","marker":{"color":"rgba(234,217,58,1)","line":{"color":"rgba(234,217,58,1)"}},"textfont":{"color":"rgba(234,217,58,1)"},"error_y":{"color":"rgba(234,217,58,1)"},"error_x":{"color":"rgba(234,217,58,1)"},"line":{"color":"rgba(234,217,58,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[117208.3089],"y":[481],"mode":"markers","type":"scatter","name":"Murray Hill/Stuyvesant","marker":{"color":"rgba(245,217,53,1)","line":{"color":"rgba(245,217,53,1)"}},"textfont":{"color":"rgba(245,217,53,1)"},"error_y":{"color":"rgba(245,217,53,1)"},"error_x":{"color":"rgba(245,217,53,1)"},"line":{"color":"rgba(245,217,53,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[140591.9834],"y":[472.8],"mode":"markers","type":"scatter","name":"Park Slope","marker":{"color":"rgba(255,217,47,1)","line":{"color":"rgba(255,217,47,1)"}},"textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"line":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[50079.71468],"y":[410],"mode":"markers","type":"scatter","name":"Pelham Parkway","marker":{"color":"rgba(252,214,65,1)","line":{"color":"rgba(252,214,65,1)"}},"textfont":{"color":"rgba(252,214,65,1)"},"error_y":{"color":"rgba(252,214,65,1)"},"error_x":{"color":"rgba(252,214,65,1)"},"line":{"color":"rgba(252,214,65,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[67278.77701],"y":[425],"mode":"markers","type":"scatter","name":"Queens","marker":{"color":"rgba(250,212,80,1)","line":{"color":"rgba(250,212,80,1)"}},"textfont":{"color":"rgba(250,212,80,1)"},"error_y":{"color":"rgba(250,212,80,1)"},"error_x":{"color":"rgba(250,212,80,1)"},"line":{"color":"rgba(250,212,80,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[89543.38089],"y":[437.5],"mode":"markers","type":"scatter","name":"Queens Village","marker":{"color":"rgba(247,209,93,1)","line":{"color":"rgba(247,209,93,1)"}},"textfont":{"color":"rgba(247,209,93,1)"},"error_y":{"color":"rgba(247,209,93,1)"},"error_x":{"color":"rgba(247,209,93,1)"},"line":{"color":"rgba(247,209,93,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[78686.41413],"y":[425.1],"mode":"markers","type":"scatter","name":"Rego Park/Forest Hills","marker":{"color":"rgba(244,206,105,1)","line":{"color":"rgba(244,206,105,1)"}},"textfont":{"color":"rgba(244,206,105,1)"},"error_y":{"color":"rgba(244,206,105,1)"},"error_x":{"color":"rgba(244,206,105,1)"},"line":{"color":"rgba(244,206,105,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[74292.52355],"y":[416.6],"mode":"markers","type":"scatter","name":"Ridgewood/Glendale","marker":{"color":"rgba(240,204,117,1)","line":{"color":"rgba(240,204,117,1)"}},"textfont":{"color":"rgba(240,204,117,1)"},"error_y":{"color":"rgba(240,204,117,1)"},"error_x":{"color":"rgba(240,204,117,1)"},"line":{"color":"rgba(240,204,117,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[56303.95845],"y":[414.6],"mode":"markers","type":"scatter","name":"Riverdale","marker":{"color":"rgba(237,201,127,1)","line":{"color":"rgba(237,201,127,1)"}},"textfont":{"color":"rgba(237,201,127,1)"},"error_y":{"color":"rgba(237,201,127,1)"},"error_x":{"color":"rgba(237,201,127,1)"},"line":{"color":"rgba(237,201,127,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[63904.87812],"y":[469.2],"mode":"markers","type":"scatter","name":"Sheepshead Bay","marker":{"color":"rgba(233,199,138,1)","line":{"color":"rgba(233,199,138,1)"}},"textfont":{"color":"rgba(233,199,138,1)"},"error_y":{"color":"rgba(233,199,138,1)"},"error_x":{"color":"rgba(233,199,138,1)"},"line":{"color":"rgba(233,199,138,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[70251.14543],"y":[404.9],"mode":"markers","type":"scatter","name":"Sunnyside/Woodside","marker":{"color":"rgba(229,196,148,1)","line":{"color":"rgba(229,196,148,1)"}},"textfont":{"color":"rgba(229,196,148,1)"},"error_y":{"color":"rgba(229,196,148,1)"},"error_x":{"color":"rgba(229,196,148,1)"},"line":{"color":"rgba(229,196,148,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[59225.22299],"y":[454.8],"mode":"markers","type":"scatter","name":"Sunset Park","marker":{"color":"rgba(223,194,152,1)","line":{"color":"rgba(223,194,152,1)"}},"textfont":{"color":"rgba(223,194,152,1)"},"error_y":{"color":"rgba(223,194,152,1)"},"error_x":{"color":"rgba(223,194,152,1)"},"line":{"color":"rgba(223,194,152,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[56331.07479],"y":[474.5],"mode":"markers","type":"scatter","name":"The Rockaways","marker":{"color":"rgba(217,192,156,1)","line":{"color":"rgba(217,192,156,1)"}},"textfont":{"color":"rgba(217,192,156,1)"},"error_y":{"color":"rgba(217,192,156,1)"},"error_x":{"color":"rgba(217,192,156,1)"},"line":{"color":"rgba(217,192,156,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[136987.5956],"y":[476.6],"mode":"markers","type":"scatter","name":"Upper East Side","marker":{"color":"rgba(211,190,160,1)","line":{"color":"rgba(211,190,160,1)"}},"textfont":{"color":"rgba(211,190,160,1)"},"error_y":{"color":"rgba(211,190,160,1)"},"error_x":{"color":"rgba(211,190,160,1)"},"line":{"color":"rgba(211,190,160,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[129213.5485],"y":[454.9],"mode":"markers","type":"scatter","name":"Upper West Side","marker":{"color":"rgba(205,187,164,1)","line":{"color":"rgba(205,187,164,1)"}},"textfont":{"color":"rgba(205,187,164,1)"},"error_y":{"color":"rgba(205,187,164,1)"},"error_x":{"color":"rgba(205,187,164,1)"},"line":{"color":"rgba(205,187,164,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[58802.8338],"y":[384.1],"mode":"markers","type":"scatter","name":"Washington Heights","marker":{"color":"rgba(199,185,168,1)","line":{"color":"rgba(199,185,168,1)"}},"textfont":{"color":"rgba(199,185,168,1)"},"error_y":{"color":"rgba(199,185,168,1)"},"error_x":{"color":"rgba(199,185,168,1)"},"line":{"color":"rgba(199,185,168,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[61296.49446],"y":[443.5],"mode":"markers","type":"scatter","name":"Williamsbridge","marker":{"color":"rgba(192,183,171,1)","line":{"color":"rgba(192,183,171,1)"}},"textfont":{"color":"rgba(192,183,171,1)"},"error_y":{"color":"rgba(192,183,171,1)"},"error_x":{"color":"rgba(192,183,171,1)"},"line":{"color":"rgba(192,183,171,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[79897.26316],"y":[383.4],"mode":"markers","type":"scatter","name":"Williamsburg/Greenpoint","marker":{"color":"rgba(186,181,175,1)","line":{"color":"rgba(186,181,175,1)"}},"textfont":{"color":"rgba(186,181,175,1)"},"error_y":{"color":"rgba(186,181,175,1)"},"error_x":{"color":"rgba(186,181,175,1)"},"line":{"color":"rgba(186,181,175,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[72917.93352],"y":[407.8],"mode":"markers","type":"scatter","name":"Woodhaven","marker":{"color":"rgba(179,179,179,1)","line":{"color":"rgba(179,179,179,1)"}},"textfont":{"color":"rgba(179,179,179,1)"},"error_y":{"color":"rgba(179,179,179,1)"},"error_x":{"color":"rgba(179,179,179,1)"},"line":{"color":"rgba(179,179,179,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<p>Looking at this plot we see there does not seem to be a distinct
+relationship between median household income and cancer incidence rates
+as neighborhoods with low median household income experience high cancer
+incidence as well as in neighborhoods with extremely high median income
+such as Park Slope, still experience high rates of cancer incidence. The
+same can be said for low median income areas such as Bushwick which
+still experiences low cancer incidence rates and high median income
+areas such as Williamsburg experiencing low cancer incidence rates.</p>
+<p>Now we will fit a linear model to quantitatively determine any
+relationship between median household income and cancer incidence
+rates.</p>
+<pre class="r"><code>lm(incidence_per_100k ~ median_income, data = cancer_data_by_income) %&gt;%
+  
+  broom::tidy() %&gt;%
+  
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term            estimate  p.value
+##   &lt;chr&gt;              &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   427.       4.57e-44
+## 2 median_income   0.000207 1.29e- 1</code></pre>
+<pre class="r"><code>ggplot(cancer_data_by_income, aes(x = median_income, y = incidence_per_100k)) + geom_point() + 
+  geom_smooth(se = FALSE, method = &quot;lm&quot;) + 
+  labs(title = &quot;Model of Cancer Incidence vs Median Income across NYC Neighborhoods from 2015 - 2019&quot;, y = &quot;Cancer Incidence per 100k&quot;, x = &quot;Median Income&quot;)   + theme(
+    plot.title = element_textbox(hjust = 0.5,
+                                 width = unit(0.5, &quot;npc&quot;),
+                                 margin = margin(b = 3)), 
+    plot.title.position = &quot;plot&quot;
+  )</code></pre>
+<p><img src="income_and_cancer_rates_files/figure-html/unnamed-chunk-16-1.png" width="90%" /></p>
+<p>We see that median_income is a not a significant predictor for cancer
+incidence rates being evidenced by the p-value for the median_income
+estimate being insignificant at 0.129. The linear regression graph for
+cancer incidence and median income also does not appear to be correlated
+as there is not a clear proportional relationship between the two
+variables.</p>
+</div>
+<div id="conclusion-and-limitations" class="section level2">
+<h2>Conclusion and Limitations</h2>
+<p>From this analysis, there is not enough evidence to determine that
+median household income in New York City has an effect on cancer
+incidence rates. This could be due to a multitude of reasons, the
+modeling is rudimentary as the only predictor for cancer incidence rates
+was median household income. It is reasonable to suggest that cancer
+incidence should have multiple predictors to be accurately modeled as
+the development of cancer is often a multi-faceted occurrence.
+Additionally, income may not have any effect on cancer incidence
+regardless of better modeling techniques or more robust datasets.
+However, to accurately determine factors that lead to cancer incidence
+or mortality, a multitude of predictors would need to be implemented and
+that would make it more likely to determine if income plays a factor in
+cancer incidence.</p>
+<p>There were also many avenues of exploration that were not considered
+in terms of analyzing the race, ethnicity, sex, and age, among other
+factors, within the cancer and income data sets. These categories were
+either unavailable for public use or were not able to be analyzed in the
+given data sets. These factors play a role in both income levels and
+cancer rates and should be taken into consideration when performing
+analysis like this. While this analysis finds that median household
+income is not a significant predictor for cancer rates, this topic
+should be explored in more depth before drawing further conclusions.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

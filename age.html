@@ -334,6 +334,9 @@ div.tocify {
 <li>
   <a href="Heart-Disease-Related-Deaths.html">Heart Disease Related Deaths</a>
 </li>
+<li>
+  <a href="income_and_cancer_rates.html">Income as a Predictor for Cancer Rates</a>
+</li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -366,14 +369,14 @@ death_by_age = read_csv(&quot;data/Vital_Statistics_Deaths_by_Resident_County__R
   janitor::clean_names() %&gt;%
   filter(region == &quot;NYC&quot;)
 
-opiod_death = read_csv(&quot;data/Vital_Statistics__Opioid-Related_Deaths_by_Age_Group__Beginning_2003.csv&quot;) %&gt;%
+opioid_death = read_csv(&quot;data/Vital_Statistics__Opioid-Related_Deaths_by_Age_Group__Beginning_2003.csv&quot;) %&gt;%
   janitor::clean_names()
 
 suicide_death = read_csv(&quot;data/Vital_Statistics_Suicide_Deaths_by_Age-Group__Race_Ethnicity__Resident_Region__and_Gender__Beginning_2003.csv&quot;) %&gt;%
   janitor::clean_names()
 
 #merging datasets for statistical analysis
-predictor_age = left_join(opiod_death, suicide_death, by = c(&quot;year&quot;, &quot;sex&quot;, &quot;region&quot;, &quot;race_or_ethnicity&quot;, &quot;age_group&quot;)) %&gt;%
+predictor_age = left_join(opioid_death, suicide_death, by = c(&quot;year&quot;, &quot;sex&quot;, &quot;region&quot;, &quot;race_or_ethnicity&quot;, &quot;age_group&quot;)) %&gt;%
   filter(region == &quot;NYC&quot;)</code></pre>
 <div id="motivation-to-view-age-group-as-a-predictor"
 class="section level2">
@@ -435,9 +438,154 @@ differences in leading causes of death among the age groups. Accidents
 seem to be a more frequent cause of death for the age groups of 25-34
 and 35-44, which for individuals who are 45+ the frequency of death by
 diseases of the heart and malignant neoplasms are larger. While among
-the youth accidents have a higher cases of death in New York City.</p>
+the youth accidents have a higher cases of death in New York.</p>
 <p><br></p>
 </div>
+</div>
+<div id="further-analysis" class="section level2">
+<h2>Further Analysis</h2>
+<div
+id="fitting-a-slr-model-for-age-group-as-a-predictor-for-suicide-deaths"
+class="section level3">
+<h3>Fitting a SLR model for Age Group as a predictor for Suicide
+Deaths</h3>
+<pre class="r"><code>suicide_df = suicide_death %&gt;%
+  filter(age_group != &quot;Unknown&quot;, age_group != &quot;Total&quot;) %&gt;%
+  select(year, age_group, suicide_deaths)%&gt;%
+  mutate(age_group = as.factor(age_group),
+    age_group = fct_recode(
+      age_group, &quot;&lt;1&quot; = &quot;1&quot;, &quot;1-9&quot; = &quot;2&quot;, &quot;10-19&quot; = &quot;3&quot;, &quot;20-24&quot; = &quot;4&quot;, &quot;25-34&quot; = &quot;5&quot;, &quot;35-44&quot;=&quot;6&quot;,       &quot;45-54&quot; = &quot;7&quot;, &quot;55-64&quot; = &quot;8&quot;, &quot;65-74&quot; = &quot;9&quot;, &quot;75-84&quot; = &quot;10&quot;, &quot;85+&quot; = &quot;11&quot;))
+
+# SLR model
+s_fit = lm(suicide_deaths ~ age_group, data = suicide_df)
+
+ s_fit %&gt;% 
+  broom::tidy() %&gt;% 
+  filter(p.value &lt; 0.05) %&gt;%
+   select(term, estimate, p.value) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age_group10-19</td>
+<td align="right">8.046241</td>
+<td align="right">0.0036926</td>
+</tr>
+<tr class="even">
+<td align="left">age_group20-24</td>
+<td align="right">12.295887</td>
+<td align="right">0.0000091</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group25-34</td>
+<td align="right">20.699315</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group35-44</td>
+<td align="right">21.551214</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group45-54</td>
+<td align="right">24.842316</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group55-64</td>
+<td align="right">18.581912</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group65-74</td>
+<td align="right">9.210045</td>
+<td align="right">0.0002191</td>
+</tr>
+<tr class="even">
+<td align="left">age_group75-84</td>
+<td align="right">5.917637</td>
+<td align="right">0.0169695</td>
+</tr>
+</tbody>
+</table>
+<p>At a <span class="math inline">\(\alpha = 0.5\)</span> level, all age
+groups except the age group of 1-9 and 85+ are significant predictors of
+suicide_death.</p>
+</div>
+<div
+id="fitting-a-slr-model-for-age-group-as-a-predictor-for-opioid-poisoning-deaths"
+class="section level3">
+<h3>Fitting a SLR model for Age Group as a predictor for Opioid
+Poisoning Deaths</h3>
+<pre class="r"><code>opi_df = opioid_death %&gt;%
+  filter(age_group != &quot;Unknown&quot;, age_group != &quot;Total&quot;) %&gt;%
+  select(year, age_group, opioid_poisoning_deaths)%&gt;%
+  mutate(age_group = as.factor(age_group),
+    age_group = fct_recode(
+      age_group, &quot;&lt;1&quot; = &quot;1&quot;, &quot;1-9&quot; = &quot;2&quot;, &quot;10-19&quot; = &quot;3&quot;, &quot;20-24&quot; = &quot;4&quot;, &quot;25-34&quot; = &quot;5&quot;, &quot;35-44&quot;=&quot;6&quot;,       &quot;45-54&quot; = &quot;7&quot;, &quot;55-64&quot; = &quot;8&quot;, &quot;65-74&quot; = &quot;9&quot;, &quot;75-84&quot; = &quot;10&quot;, &quot;85+&quot; = &quot;11&quot;))
+
+# SLR model
+o_fit = lm(opioid_poisoning_deaths ~ age_group, data = opi_df)
+
+ o_fit %&gt;% 
+  broom::tidy() %&gt;% 
+  filter(p.value &lt; 0.05) %&gt;%
+   select(term, estimate, p.value) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age_group20-24</td>
+<td align="right">6.547308</td>
+<td align="right">0.000412</td>
+</tr>
+<tr class="even">
+<td align="left">age_group25-34</td>
+<td align="right">19.749315</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group35-44</td>
+<td align="right">18.442530</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group45-54</td>
+<td align="right">21.114706</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group55-64</td>
+<td align="right">11.614706</td>
+<td align="right">0.000000</td>
+</tr>
+</tbody>
+</table>
+<p>At a <span class="math inline">\(\alpha = 0.5\)</span> level, those
+among the age groups of 20-64 are significant predictors of an opioid
+poisoning related death.</p>
+<p><br></p>
+</div>
+</div>
+<div id="limitations-to-analysis" class="section level2">
+<h2>Limitations to Analysis</h2>
+<p>The datasets used in this analysis contain NA values, and by default
+the <code>lm()</code> function disregards observations containing NA
+values, which may limit the predictive capacity of our analysis.</p>
 </div>
 
 
