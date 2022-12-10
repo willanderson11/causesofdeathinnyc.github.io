@@ -36,6 +36,13 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.10.1/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -383,7 +390,10 @@ specific questions based on our interests and research experience. We
 chose the period of 2007-2019 to focus on the modern causes of death in
 the city to avoid confounding factors of death due to the COVID-19
 outbreak (2019 onward).</p>
-<p><br> ## Questions and Planned Analyses</p>
+<p><br></p>
+</div>
+<div id="questions-and-planned-analyses" class="section level2">
+<h2>Questions and Planned Analyses</h2>
 <p>Each team member decided to focus on a specific cause of death and an
 individual-level factor (i.e., age, income, education level, etc.) that
 contributed to the changes in leading causes of death observed in the
@@ -423,7 +433,10 @@ and Opioid Poisoning Deaths?</p></li>
 <p><a
 href="https://www.worldlifeexpectancy.com/new-york-cause-of-death-by-age-and-gender">Figure
 Source</a></p>
-<p><br> ## Data Processing and Cleaning</p>
+<p><br></p>
+</div>
+<div id="data-processing-and-cleaning" class="section level2">
+<h2>Data Processing and Cleaning</h2>
 <ol style="list-style-type: decimal">
 <li>Heart Disease Related Deaths <a
 href="https://health.data.ny.gov/Health/Vital-Statistics-Deaths-by-Region-and-Age-Group-by/c3ns-hz2v">(Dataset)</a></li>
@@ -442,6 +455,39 @@ disease</p>
 <p><code>sex</code> : gender</p>
 <p><code>age_group</code> : age group</p>
 <p><code>race_or_ethnicity</code> : race group</p>
+<pre class="r"><code>death_df = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;%  
+
+  janitor::clean_names() %&gt;%  
+
+  filter(selected_cause_of_death == &quot;Diseases of the Heart&quot;, 
+
+         race_or_ethnicity != &quot;Not Stated&quot;) %&gt;% 
+
+  mutate( 
+
+    age_group = as.factor(age_group), 
+
+    age_group = fct_recode( 
+
+      age_group, &quot;&lt;1&quot; = &quot;1&quot;, &quot;1-9&quot; = &quot;2&quot;, &quot;10-19&quot; = &quot;3&quot;, &quot;20-24&quot; = &quot;4&quot;, &quot;25-34&quot; = &quot;5&quot;, &quot;35-44&quot;=&quot;6&quot;,                  &quot;45-54&quot; = &quot;7&quot;, &quot;55-64&quot; = &quot;8&quot;, &quot;65-74&quot; = &quot;9&quot;, &quot;75-84&quot; = &quot;10&quot;, &quot;85+&quot; = &quot;11&quot;), 
+
+    sex = as.factor(sex), 
+
+    sex = fct_recode(sex, &quot;M&quot; = &quot;1&quot;, &quot;F&quot; = &quot;2&quot;), 
+
+    race_or_ethnicity = as.factor(race_or_ethnicity), 
+
+    race_or_ethnicity = fct_recode(race_or_ethnicity, &quot;White Non Hispanic&quot; = &quot;1&quot;,  
+
+                                   &quot;Black Non Hispanic&quot; = &quot;2&quot;, &quot;Hispanic&quot; = &quot;3&quot;,  
+
+                                   &quot;Other Non Hispanic&quot; = &quot;4&quot;) 
+
+    ) %&gt;%  
+
+  sample_n(200) %&gt;%  
+
+  select(deaths, sex, age_group, race_or_ethnicity) </code></pre>
 <p><br> 2. (Jenifer’s Datasets)</p>
 <p><br> 3. Median Household Income Data in New York City <a
 href="https://data.cccnewyork.org/data/download#0,8/0,29">(Dataset)</a></p>
@@ -552,6 +598,673 @@ table with 1,859 rows and 4 columns.</p>
 poisoning is the cause of death</p>
 <p><code>suicide_deaths</code> : death in which suicide is the cause of
 death</p>
+<pre class="r"><code>#datasets for exploratory analysis
+death_in_nys = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names() %&gt;%
+  mutate(selected_cause_of_death = recode(selected_cause_of_death,
+       &quot;CLRD&quot; = &quot;Chronic Lower Respiratory Disease&quot;))
+
+death_by_age = read_csv(&quot;data/Vital_Statistics_Deaths_by_Resident_County__Region__and_Age-Group__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names() %&gt;%
+  filter(region == &quot;NYC&quot;)
+
+opioid_death = read_csv(&quot;data/Vital_Statistics__Opioid-Related_Deaths_by_Age_Group__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names()
+
+suicide_death = read_csv(&quot;data/Vital_Statistics_Suicide_Deaths_by_Age-Group__Race_Ethnicity__Resident_Region__and_Gender__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names()
+
+#merging datasets for statistical analysis
+predictor_age = left_join(opioid_death, suicide_death, by = c(&quot;year&quot;, &quot;sex&quot;, &quot;region&quot;, &quot;race_or_ethnicity&quot;, &quot;age_group&quot;)) %&gt;%
+  filter(region == &quot;NYC&quot;) %&gt;%
+  filter(age_group != &quot;Unknown&quot;, age_group != &quot;Total&quot;) %&gt;%
+  select(year, age_group, opioid_poisoning_deaths, suicide_deaths)%&gt;%
+  mutate(age_group = as.factor(age_group),
+    age_group = fct_recode(
+      age_group, &quot;&lt;1&quot; = &quot;1&quot;, &quot;1-9&quot; = &quot;2&quot;, &quot;10-19&quot; = &quot;3&quot;, &quot;20-24&quot; = &quot;4&quot;, &quot;25-34&quot; = &quot;5&quot;, &quot;35-44&quot;=&quot;6&quot;,       &quot;45-54&quot; = &quot;7&quot;, &quot;55-64&quot; = &quot;8&quot;, &quot;65-74&quot; = &quot;9&quot;, &quot;75-84&quot; = &quot;10&quot;, &quot;85+&quot; = &quot;11&quot;))</code></pre>
+<p><br></p>
+</div>
+<div id="eda" class="section level2">
+<h2>EDA</h2>
+<p>According to a new report by the Centers for Disease Control and
+Prevention’s (CDC) National Center, New York ranked the third-highest
+average life expectancy at 80.7 years. The average woman in New York
+lives until 83.1 years; the average man lives 78.2 years. To better
+understand New York City’s causes of death and mortality trends in the
+city, we conducted some exploration, mainly through visualization.<br />
+We found that heart disease, cancer, accidents, chronic lower, and
+stroke are the most prevalent causes in the city.</p>
+<p>As explained in the data processing and cleaning, we originally
+wanted each to focus on one of the causes. However, we had limitations
+in finding publicly available data for the five leading causes of death.
+Therefore, we decided to conduct further exploratory analysis, focus on
+data available through the city administration, and focus our research
+on individual factors of interest.</p>
+<ol style="list-style-type: decimal">
+<li>Heart Disease</li>
+</ol>
+<p>To investigate the association between age groups, sex, race with
+heart disease related death, We fitted a lasso model for model selection
+to determine the variables that should be included. We used
+cross-validation to find the best lambda for the lasso model and plotted
+the lasso model. From the plot, most of the predictors did not reach 0
+before the line, which means that we can include most of our predictors.
+Then we fitted a multiple linear regression model to analyze the
+relationship between age groups, sex, race with heart disease related
+death. Lastly, we graphed the boxplots of age groups, race and sex
+related to heart disease deaths by order.</p>
+<ul>
+<li>Fit a Lasso Model for Variable Selection:</li>
+</ul>
+<pre class="r"><code>#fit a lasso model 
+
+x = model.matrix(deaths ~ ., death_df)[,-1] #create a matrix of predictors  
+
+y = death_df$deaths #create outcome vector 
+
+#fit model and cross validation 
+
+lambda = 10^(seq(3, -2, -0.1)) 
+
+ 
+
+lasso_fit = 
+
+  glmnet(x, y, lambda = lambda) 
+
+ 
+
+lasso_cv = 
+
+  cv.glmnet(x, y, lambda = lambda) 
+
+ 
+
+lambda_opt = lasso_cv$lambda.min 
+
+#plot lasso  
+
+lasso_plot = broom::tidy(lasso_fit) %&gt;%  
+
+  select(term, lambda, estimate) %&gt;%  
+
+  complete(term, lambda, fill = list(estimate = 0) ) %&gt;%  
+
+  filter(term != &quot;(Intercept)&quot;) %&gt;%  
+
+  ggplot(aes(x = log(lambda, 10), y = estimate, group = term, color = term)) +  
+
+  geom_path() +  
+
+  geom_vline(xintercept = log(lambda_opt, 10), color = &quot;blue&quot;, size = 1.2) + 
+
+  theme(legend.position = &quot;none&quot;) 
+
+ 
+
+lasso_plot </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<pre class="r"><code>#Generate lasso result 
+
+lasso_fit =  
+
+  glmnet(x, y, lambda = lambda_opt) 
+
+ 
+
+lasso_result = lasso_fit %&gt;% broom::tidy() </code></pre>
+<ul>
+<li>Fit a MLR Model to Understand the Major Factors of NYC Heart Disease
+Related Death:</li>
+</ul>
+<pre class="r"><code>#run MLR model 
+
+MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df) 
+
+ 
+
+MLR_result = MLR %&gt;%  
+
+  broom::tidy() %&gt;%  
+
+  filter(p.value &lt; 0.05) %&gt;%  
+
+  knitr::kable() 
+
+ 
+
+MLR_result </code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">-1026.342</td>
+<td align="right">484.5020</td>
+<td align="right">-2.118344</td>
+<td align="right">0.0354882</td>
+</tr>
+<tr class="even">
+<td align="left">age_group55-64</td>
+<td align="right">1105.718</td>
+<td align="right">530.5763</td>
+<td align="right">2.083995</td>
+<td align="right">0.0385419</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group65-74</td>
+<td align="right">1566.198</td>
+<td align="right">559.7594</td>
+<td align="right">2.797985</td>
+<td align="right">0.0056898</td>
+</tr>
+<tr class="even">
+<td align="left">age_group75-84</td>
+<td align="right">1910.362</td>
+<td align="right">503.2503</td>
+<td align="right">3.796047</td>
+<td align="right">0.0001995</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group85+</td>
+<td align="right">3845.070</td>
+<td align="right">587.3019</td>
+<td align="right">6.547007</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">race_or_ethnicityHispanic</td>
+<td align="right">1572.046</td>
+<td align="right">322.1178</td>
+<td align="right">4.880344</td>
+<td align="right">0.0000023</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>#plot age_groups with heart disease related deaths 
+
+death_df %&gt;%  
+
+  ggplot(aes(y = deaths, x = reorder(age_group, deaths), color = age_group))+ 
+
+  geom_boxplot()+ 
+
+  theme_classic()+ 
+
+  labs(x = &quot;Age Groups&quot;, 
+
+       y = &quot;Number of Deaths&quot;, 
+
+       title = &quot;Number of Heart Disease Related Death with Age in NYC From 2003 to 2019&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<pre class="r"><code>#plot race with heart disease related deaths 
+
+death_df %&gt;%  
+
+  ggplot(aes(y = deaths, x = reorder(race_or_ethnicity, deaths), color = race_or_ethnicity))+ 
+
+  geom_boxplot()+ 
+
+  theme_classic()+ 
+
+  labs(x = &quot;Race or Ethnicity&quot;, 
+
+       y = &quot;Number of Deaths&quot;, 
+
+       title = &quot;Number of Heart Disease Related Death with Race in NYC From 2003 to 2019&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<pre class="r"><code>#plot sex with heart disease related deaths
+
+death_df %&gt;%  
+
+  ggplot(aes(y = deaths, x = reorder(sex, deaths), color = sex))+ 
+
+  geom_boxplot()+ 
+
+  theme_classic()+ 
+
+  labs(x = &quot;Sex&quot;, 
+y = &quot;Number of Deaths&quot;, 
+title = &quot;Number of Heart Disease Related Death with Sex in NYC From 2003 to 2019&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>(Jennifer’s EDA)</p></li>
+<li><p>Cancer</p></li>
+</ol>
+<p>To analyze any potential relationship between income levels and
+cancer incidence and mortality rates we first visualized, through
+scatterplots, the median household income per borough to get a better
+idea of any trends over time. From this, we determined that Manhattan
+had the highest median household income per year, while the Bronx had
+the lowest and the rates remained largely constant over time for each
+borough. Then we plotted the distribution of median incomes per borough
+to understand the most frequent values of median household income in
+each borough as well as showing the dispersion and most frequent values
+of median household income in each borough.</p>
+<pre class="r"><code>income_data =  read_csv(&quot;data/median_income_nyc.csv&quot;, skip = 5, na = &quot;&quot;) %&gt;% 
+janitor::clean_names() %&gt;% 
+select(-data_format, -fips) %&gt;% 
+rename(year = time_frame, median_income = data) %&gt;% 
+filter(household_type %in% &quot;All Households&quot;) %&gt;% 
+mutate(median_income = as.numeric(median_income)) 
+
+ 
+
+income_data %&gt;% 
+filter(location %in% c(&quot;Manhattan&quot;, &quot;Bronx&quot;, &quot;Queens&quot;, &quot;Brooklyn&quot;, year == &quot;2013&quot;)) %&gt;% 
+ggplot(aes(x = median_income, y = reorder(location, median_income), fill = location, group = location)) +  
+geom_density_ridges() + 
+labs(title = &quot;Median Household Income Distribution Per Borough in 2013&quot;,  
+
+x = &quot;Median Household Income&quot;,  
+
+y = &quot;Borough&quot;) + 
+
+theme(legend.position = &quot;right&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
+<pre class="r"><code>income_data %&gt;% 
+filter(location %in% c(&quot;Manhattan&quot;, &quot;Bronx&quot;, &quot;Queens&quot;, &quot;Brooklyn&quot;)) %&gt;% 
+ggplot(aes(x = year, y = median_income, fill = reorder(location, median_income))) +  
+geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +  
+labs(title = &quot;Median Household Income by Borough per Year&quot;, x = &quot;Year&quot;, y = &quot;Median Household Income&quot;) +
+theme(legend.position = &quot;right&quot;) +  
+scale_fill_discrete(name = &quot;Borough&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-12-2.png" width="90%" /></p>
+<pre class="r"><code>income_data %&gt;%
+filter(location %in% c(&quot;Manhattan&quot;, &quot;Bronx&quot;, &quot;Queens&quot;, &quot;Brooklyn&quot;)) %&gt;% 
+group_by(year, location) %&gt;% 
+summarize(median_income = mean(median_income, na.rm = TRUE)) %&gt;% 
+ggplot(aes(x = reorder(location, median_income), y = median_income, fill = location)) + 
+geom_violin() +  
+labs(title = &quot;Median Household Income Per NYC Borough from 2005 - 2019&quot;, x = &quot;Borough&quot;, y = &quot;Average Median Income&quot;) + 
+theme(legend.position = &quot;none&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-12-3.png" width="90%" /></p>
+<p>Then we used scatterplots and line plots to visualize cancer
+incidence, mortality rates, and median household incomes per borough to
+observe any trends over time. After completing this step, we decided to
+make the linear model more specific by examining the neighborhoods
+within each borough and its corresponding median household income and
+cancer incidence rates. We accomplished this by first plotting each
+neighborhood’s respective median household income vs cancer incidence
+rates from 2015 – 2019. Then after observing the trends from this graph,
+we fit a linear model using each borough’s respective median household
+income data and cancer incidence data.</p>
+<pre class="r"><code>cancer_data_by_income = read_excel(&quot;data/nyc_cancer_data.xlsx&quot;, sheet = &quot;income_vs_incidence&quot;)  
+
+cancer_data_by_income %&gt;% 
+plot_ly(x = ~median_income, 
+y = ~incidence_per_100k, type = &quot;scatter&quot;, mode = &quot;markers&quot;, color = ~location) %&gt;% 
+layout(title = &quot;Cancer Incidence Rate vs Median Household Income in NYC Neighborhoods&quot;, xaxis = list(title = &quot;Median Household Income&quot;), yaxis = list(title = &quot;Cancer Incidence Rate Per 100k&quot;)) </code></pre>
+<div id="htmlwidget-29562c72442a7bbedb2b" style="width:90%;height:345.6px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-29562c72442a7bbedb2b">{"x":{"visdat":{"485429d0d7f":["function () ","plotlyVisDat"]},"cur_data":"485429d0d7f","attrs":{"485429d0d7f":{"x":{},"y":{},"mode":"markers","color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Cancer Incidence Rate vs Median Household Income in NYC Neighborhoods","xaxis":{"domain":[0,1],"automargin":true,"title":"Median Household Income"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Cancer Incidence Rate Per 100k"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[69232.19668],"y":[418.6],"mode":"markers","type":"scatter","name":"Astoria","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"line":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[151098.5236],"y":[456.8],"mode":"markers","type":"scatter","name":"Battery Park/Tribeca","marker":{"color":"rgba(132,189,157,1)","line":{"color":"rgba(132,189,157,1)"}},"textfont":{"color":"rgba(132,189,157,1)"},"error_y":{"color":"rgba(132,189,157,1)"},"error_x":{"color":"rgba(132,189,157,1)"},"line":{"color":"rgba(132,189,157,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[71627.82133],"y":[459.3],"mode":"markers","type":"scatter","name":"Bay Ridge","marker":{"color":"rgba(156,183,148,1)","line":{"color":"rgba(156,183,148,1)"}},"textfont":{"color":"rgba(156,183,148,1)"},"error_y":{"color":"rgba(156,183,148,1)"},"error_x":{"color":"rgba(156,183,148,1)"},"line":{"color":"rgba(156,183,148,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[73167.19529],"y":[422.9],"mode":"markers","type":"scatter","name":"Bayside","marker":{"color":"rgba(176,178,140,1)","line":{"color":"rgba(176,178,140,1)"}},"textfont":{"color":"rgba(176,178,140,1)"},"error_y":{"color":"rgba(176,178,140,1)"},"error_x":{"color":"rgba(176,178,140,1)"},"line":{"color":"rgba(176,178,140,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[36873.01247],"y":[465.2],"mode":"markers","type":"scatter","name":"Bedford Park","marker":{"color":"rgba(193,171,131,1)","line":{"color":"rgba(193,171,131,1)"}},"textfont":{"color":"rgba(193,171,131,1)"},"error_y":{"color":"rgba(193,171,131,1)"},"error_x":{"color":"rgba(193,171,131,1)"},"line":{"color":"rgba(193,171,131,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[54135.69391],"y":[410.2],"mode":"markers","type":"scatter","name":"Bedford Stuyvesant","marker":{"color":"rgba(210,165,123,1)","line":{"color":"rgba(210,165,123,1)"}},"textfont":{"color":"rgba(210,165,123,1)"},"error_y":{"color":"rgba(210,165,123,1)"},"error_x":{"color":"rgba(210,165,123,1)"},"line":{"color":"rgba(210,165,123,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[55789.79086],"y":[429.8],"mode":"markers","type":"scatter","name":"Bensonhurst","marker":{"color":"rgba(225,158,115,1)","line":{"color":"rgba(225,158,115,1)"}},"textfont":{"color":"rgba(225,158,115,1)"},"error_y":{"color":"rgba(225,158,115,1)"},"error_x":{"color":"rgba(225,158,115,1)"},"line":{"color":"rgba(225,158,115,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[47311.76177],"y":[430.5],"mode":"markers","type":"scatter","name":"Borough Park","marker":{"color":"rgba(239,150,106,1)","line":{"color":"rgba(239,150,106,1)"}},"textfont":{"color":"rgba(239,150,106,1)"},"error_y":{"color":"rgba(239,150,106,1)"},"error_x":{"color":"rgba(239,150,106,1)"},"line":{"color":"rgba(239,150,106,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[39002.68837],"y":[439.4],"mode":"markers","type":"scatter","name":"Bronx","marker":{"color":"rgba(252,141,98,1)","line":{"color":"rgba(252,141,98,1)"}},"textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"line":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[59386.87812],"y":[442.8],"mode":"markers","type":"scatter","name":"Brooklyn","marker":{"color":"rgba(242,144,112,1)","line":{"color":"rgba(242,144,112,1)"}},"textfont":{"color":"rgba(242,144,112,1)"},"error_y":{"color":"rgba(242,144,112,1)"},"error_x":{"color":"rgba(242,144,112,1)"},"line":{"color":"rgba(242,144,112,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[21123.63158],"y":[495.8],"mode":"markers","type":"scatter","name":"Brownsville","marker":{"color":"rgba(231,147,125,1)","line":{"color":"rgba(231,147,125,1)"}},"textfont":{"color":"rgba(231,147,125,1)"},"error_y":{"color":"rgba(231,147,125,1)"},"error_x":{"color":"rgba(231,147,125,1)"},"line":{"color":"rgba(231,147,125,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[52830.98061],"y":[378.9],"mode":"markers","type":"scatter","name":"Bushwick","marker":{"color":"rgba(220,149,138,1)","line":{"color":"rgba(220,149,138,1)"}},"textfont":{"color":"rgba(220,149,138,1)"},"error_y":{"color":"rgba(220,149,138,1)"},"error_x":{"color":"rgba(220,149,138,1)"},"line":{"color":"rgba(220,149,138,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[79937.93767],"y":[458.4],"mode":"markers","type":"scatter","name":"Canarsie","marker":{"color":"rgba(207,151,151,1)","line":{"color":"rgba(207,151,151,1)"}},"textfont":{"color":"rgba(207,151,151,1)"},"error_y":{"color":"rgba(207,151,151,1)"},"error_x":{"color":"rgba(207,151,151,1)"},"line":{"color":"rgba(207,151,151,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[51165.41136],"y":[494.1],"mode":"markers","type":"scatter","name":"Central Harlem","marker":{"color":"rgba(194,154,164,1)","line":{"color":"rgba(194,154,164,1)"}},"textfont":{"color":"rgba(194,154,164,1)"},"error_y":{"color":"rgba(194,154,164,1)"},"error_x":{"color":"rgba(194,154,164,1)"},"line":{"color":"rgba(194,154,164,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[106359.6856],"y":[494.1],"mode":"markers","type":"scatter","name":"Chelsea/Clinton","marker":{"color":"rgba(178,156,177,1)","line":{"color":"rgba(178,156,177,1)"}},"textfont":{"color":"rgba(178,156,177,1)"},"error_y":{"color":"rgba(178,156,177,1)"},"error_x":{"color":"rgba(178,156,177,1)"},"line":{"color":"rgba(178,156,177,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[32226.7313],"y":[461.3],"mode":"markers","type":"scatter","name":"Concourse/Highbridge","marker":{"color":"rgba(161,158,190,1)","line":{"color":"rgba(161,158,190,1)"}},"textfont":{"color":"rgba(161,158,190,1)"},"error_y":{"color":"rgba(161,158,190,1)"},"error_x":{"color":"rgba(161,158,190,1)"},"line":{"color":"rgba(161,158,190,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[37668.77285],"y":[483.8],"mode":"markers","type":"scatter","name":"Coney Island","marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"line":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[62687.77147],"y":[429.1],"mode":"markers","type":"scatter","name":"Crown Heights North","marker":{"color":"rgba(154,158,202,1)","line":{"color":"rgba(154,158,202,1)"}},"textfont":{"color":"rgba(154,158,202,1)"},"error_y":{"color":"rgba(154,158,202,1)"},"error_x":{"color":"rgba(154,158,202,1)"},"line":{"color":"rgba(154,158,202,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[53264.84211],"y":[419.2],"mode":"markers","type":"scatter","name":"Crown Heights South","marker":{"color":"rgba(167,156,201,1)","line":{"color":"rgba(167,156,201,1)"}},"textfont":{"color":"rgba(167,156,201,1)"},"error_y":{"color":"rgba(167,156,201,1)"},"error_x":{"color":"rgba(167,156,201,1)"},"line":{"color":"rgba(167,156,201,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[51467.86288],"y":[437.6],"mode":"markers","type":"scatter","name":"East Flatbush","marker":{"color":"rgba(179,153,200,1)","line":{"color":"rgba(179,153,200,1)"}},"textfont":{"color":"rgba(179,153,200,1)"},"error_y":{"color":"rgba(179,153,200,1)"},"error_x":{"color":"rgba(179,153,200,1)"},"line":{"color":"rgba(179,153,200,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[38348.76731],"y":[483.7],"mode":"markers","type":"scatter","name":"East Harlem","marker":{"color":"rgba(190,151,199,1)","line":{"color":"rgba(190,151,199,1)"}},"textfont":{"color":"rgba(190,151,199,1)"},"error_y":{"color":"rgba(190,151,199,1)"},"error_x":{"color":"rgba(190,151,199,1)"},"line":{"color":"rgba(190,151,199,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[38365.45429],"y":[450.7],"mode":"markers","type":"scatter","name":"East New York","marker":{"color":"rgba(201,148,198,1)","line":{"color":"rgba(201,148,198,1)"}},"textfont":{"color":"rgba(201,148,198,1)"},"error_y":{"color":"rgba(201,148,198,1)"},"error_x":{"color":"rgba(201,148,198,1)"},"line":{"color":"rgba(201,148,198,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[27087.14127],"y":[488.7],"mode":"markers","type":"scatter","name":"East Tremont","marker":{"color":"rgba(211,145,197,1)","line":{"color":"rgba(211,145,197,1)"}},"textfont":{"color":"rgba(211,145,197,1)"},"error_y":{"color":"rgba(211,145,197,1)"},"error_x":{"color":"rgba(211,145,197,1)"},"line":{"color":"rgba(211,145,197,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[54224.34349],"y":[403.3],"mode":"markers","type":"scatter","name":"Elmhurst/Corona","marker":{"color":"rgba(221,142,196,1)","line":{"color":"rgba(221,142,196,1)"}},"textfont":{"color":"rgba(221,142,196,1)"},"error_y":{"color":"rgba(221,142,196,1)"},"error_x":{"color":"rgba(221,142,196,1)"},"line":{"color":"rgba(221,142,196,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[59029.15097],"y":[422.7],"mode":"markers","type":"scatter","name":"Flatbush/Midwood","marker":{"color":"rgba(231,138,195,1)","line":{"color":"rgba(231,138,195,1)"}},"textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"line":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[53485.9446],"y":[447.7],"mode":"markers","type":"scatter","name":"Flushing","marker":{"color":"rgba(226,150,183,1)","line":{"color":"rgba(226,150,183,1)"}},"textfont":{"color":"rgba(226,150,183,1)"},"error_y":{"color":"rgba(226,150,183,1)"},"error_x":{"color":"rgba(226,150,183,1)"},"line":{"color":"rgba(226,150,183,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[96536.2687],"y":[494.7],"mode":"markers","type":"scatter","name":"Fort Greene/Brooklyn Hts","marker":{"color":"rgba(219,160,170,1)","line":{"color":"rgba(219,160,170,1)"}},"textfont":{"color":"rgba(219,160,170,1)"},"error_y":{"color":"rgba(219,160,170,1)"},"error_x":{"color":"rgba(219,160,170,1)"},"line":{"color":"rgba(219,160,170,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[66753.13712],"y":[409.8],"mode":"markers","type":"scatter","name":"Fresh Meadows/Briarwood","marker":{"color":"rgba(213,171,157,1)","line":{"color":"rgba(213,171,157,1)"}},"textfont":{"color":"rgba(213,171,157,1)"},"error_y":{"color":"rgba(213,171,157,1)"},"error_x":{"color":"rgba(213,171,157,1)"},"line":{"color":"rgba(213,171,157,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[151098.5236],"y":[456.8],"mode":"markers","type":"scatter","name":"Greenwich Village","marker":{"color":"rgba(205,180,144,1)","line":{"color":"rgba(205,180,144,1)"}},"textfont":{"color":"rgba(205,180,144,1)"},"error_y":{"color":"rgba(205,180,144,1)"},"error_x":{"color":"rgba(205,180,144,1)"},"line":{"color":"rgba(205,180,144,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[77063.60526],"y":[411.9],"mode":"markers","type":"scatter","name":"Howard Beach","marker":{"color":"rgba(197,190,130,1)","line":{"color":"rgba(197,190,130,1)"}},"textfont":{"color":"rgba(197,190,130,1)"},"error_y":{"color":"rgba(197,190,130,1)"},"error_x":{"color":"rgba(197,190,130,1)"},"line":{"color":"rgba(197,190,130,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[21866.20222],"y":[443.9],"mode":"markers","type":"scatter","name":"Hunts Point","marker":{"color":"rgba(188,199,116,1)","line":{"color":"rgba(188,199,116,1)"}},"textfont":{"color":"rgba(188,199,116,1)"},"error_y":{"color":"rgba(188,199,116,1)"},"error_x":{"color":"rgba(188,199,116,1)"},"line":{"color":"rgba(188,199,116,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[59031.23684],"y":[393.6],"mode":"markers","type":"scatter","name":"Jackson Heights","marker":{"color":"rgba(178,208,101,1)","line":{"color":"rgba(178,208,101,1)"}},"textfont":{"color":"rgba(178,208,101,1)"},"error_y":{"color":"rgba(178,208,101,1)"},"error_x":{"color":"rgba(178,208,101,1)"},"line":{"color":"rgba(178,208,101,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[64317.88089],"y":[444.1],"mode":"markers","type":"scatter","name":"Jamaica/St. Albans","marker":{"color":"rgba(166,216,84,1)","line":{"color":"rgba(166,216,84,1)"}},"textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"line":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[41283.59003],"y":[405.6],"mode":"markers","type":"scatter","name":"Lower East Side","marker":{"color":"rgba(178,216,80,1)","line":{"color":"rgba(178,216,80,1)"}},"textfont":{"color":"rgba(178,216,80,1)"},"error_y":{"color":"rgba(178,216,80,1)"},"error_x":{"color":"rgba(178,216,80,1)"},"line":{"color":"rgba(178,216,80,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[88723.63296],"y":[449],"mode":"markers","type":"scatter","name":"Manhattan","marker":{"color":"rgba(190,217,76,1)","line":{"color":"rgba(190,217,76,1)"}},"textfont":{"color":"rgba(190,217,76,1)"},"error_y":{"color":"rgba(190,217,76,1)"},"error_x":{"color":"rgba(190,217,76,1)"},"line":{"color":"rgba(190,217,76,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[52196.87535],"y":[398.6],"mode":"markers","type":"scatter","name":"Manhattanville","marker":{"color":"rgba(202,217,72,1)","line":{"color":"rgba(202,217,72,1)"}},"textfont":{"color":"rgba(202,217,72,1)"},"error_y":{"color":"rgba(202,217,72,1)"},"error_x":{"color":"rgba(202,217,72,1)"},"line":{"color":"rgba(202,217,72,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[106359.6856],"y":[494.1],"mode":"markers","type":"scatter","name":"Midtown Business District","marker":{"color":"rgba(213,217,68,1)","line":{"color":"rgba(213,217,68,1)"}},"textfont":{"color":"rgba(213,217,68,1)"},"error_y":{"color":"rgba(213,217,68,1)"},"error_x":{"color":"rgba(213,217,68,1)"},"line":{"color":"rgba(213,217,68,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[27087.14127],"y":[410],"mode":"markers","type":"scatter","name":"Morrisania","marker":{"color":"rgba(224,217,63,1)","line":{"color":"rgba(224,217,63,1)"}},"textfont":{"color":"rgba(224,217,63,1)"},"error_y":{"color":"rgba(224,217,63,1)"},"error_x":{"color":"rgba(224,217,63,1)"},"line":{"color":"rgba(224,217,63,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[21866.20222],"y":[443.9],"mode":"markers","type":"scatter","name":"Mott Haven","marker":{"color":"rgba(234,217,58,1)","line":{"color":"rgba(234,217,58,1)"}},"textfont":{"color":"rgba(234,217,58,1)"},"error_y":{"color":"rgba(234,217,58,1)"},"error_x":{"color":"rgba(234,217,58,1)"},"line":{"color":"rgba(234,217,58,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[117208.3089],"y":[481],"mode":"markers","type":"scatter","name":"Murray Hill/Stuyvesant","marker":{"color":"rgba(245,217,53,1)","line":{"color":"rgba(245,217,53,1)"}},"textfont":{"color":"rgba(245,217,53,1)"},"error_y":{"color":"rgba(245,217,53,1)"},"error_x":{"color":"rgba(245,217,53,1)"},"line":{"color":"rgba(245,217,53,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[140591.9834],"y":[472.8],"mode":"markers","type":"scatter","name":"Park Slope","marker":{"color":"rgba(255,217,47,1)","line":{"color":"rgba(255,217,47,1)"}},"textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"line":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[50079.71468],"y":[410],"mode":"markers","type":"scatter","name":"Pelham Parkway","marker":{"color":"rgba(252,214,65,1)","line":{"color":"rgba(252,214,65,1)"}},"textfont":{"color":"rgba(252,214,65,1)"},"error_y":{"color":"rgba(252,214,65,1)"},"error_x":{"color":"rgba(252,214,65,1)"},"line":{"color":"rgba(252,214,65,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[67278.77701],"y":[425],"mode":"markers","type":"scatter","name":"Queens","marker":{"color":"rgba(250,212,80,1)","line":{"color":"rgba(250,212,80,1)"}},"textfont":{"color":"rgba(250,212,80,1)"},"error_y":{"color":"rgba(250,212,80,1)"},"error_x":{"color":"rgba(250,212,80,1)"},"line":{"color":"rgba(250,212,80,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[89543.38089],"y":[437.5],"mode":"markers","type":"scatter","name":"Queens Village","marker":{"color":"rgba(247,209,93,1)","line":{"color":"rgba(247,209,93,1)"}},"textfont":{"color":"rgba(247,209,93,1)"},"error_y":{"color":"rgba(247,209,93,1)"},"error_x":{"color":"rgba(247,209,93,1)"},"line":{"color":"rgba(247,209,93,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[78686.41413],"y":[425.1],"mode":"markers","type":"scatter","name":"Rego Park/Forest Hills","marker":{"color":"rgba(244,206,105,1)","line":{"color":"rgba(244,206,105,1)"}},"textfont":{"color":"rgba(244,206,105,1)"},"error_y":{"color":"rgba(244,206,105,1)"},"error_x":{"color":"rgba(244,206,105,1)"},"line":{"color":"rgba(244,206,105,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[74292.52355],"y":[416.6],"mode":"markers","type":"scatter","name":"Ridgewood/Glendale","marker":{"color":"rgba(240,204,117,1)","line":{"color":"rgba(240,204,117,1)"}},"textfont":{"color":"rgba(240,204,117,1)"},"error_y":{"color":"rgba(240,204,117,1)"},"error_x":{"color":"rgba(240,204,117,1)"},"line":{"color":"rgba(240,204,117,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[56303.95845],"y":[414.6],"mode":"markers","type":"scatter","name":"Riverdale","marker":{"color":"rgba(237,201,127,1)","line":{"color":"rgba(237,201,127,1)"}},"textfont":{"color":"rgba(237,201,127,1)"},"error_y":{"color":"rgba(237,201,127,1)"},"error_x":{"color":"rgba(237,201,127,1)"},"line":{"color":"rgba(237,201,127,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[63904.87812],"y":[469.2],"mode":"markers","type":"scatter","name":"Sheepshead Bay","marker":{"color":"rgba(233,199,138,1)","line":{"color":"rgba(233,199,138,1)"}},"textfont":{"color":"rgba(233,199,138,1)"},"error_y":{"color":"rgba(233,199,138,1)"},"error_x":{"color":"rgba(233,199,138,1)"},"line":{"color":"rgba(233,199,138,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[70251.14543],"y":[404.9],"mode":"markers","type":"scatter","name":"Sunnyside/Woodside","marker":{"color":"rgba(229,196,148,1)","line":{"color":"rgba(229,196,148,1)"}},"textfont":{"color":"rgba(229,196,148,1)"},"error_y":{"color":"rgba(229,196,148,1)"},"error_x":{"color":"rgba(229,196,148,1)"},"line":{"color":"rgba(229,196,148,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[59225.22299],"y":[454.8],"mode":"markers","type":"scatter","name":"Sunset Park","marker":{"color":"rgba(223,194,152,1)","line":{"color":"rgba(223,194,152,1)"}},"textfont":{"color":"rgba(223,194,152,1)"},"error_y":{"color":"rgba(223,194,152,1)"},"error_x":{"color":"rgba(223,194,152,1)"},"line":{"color":"rgba(223,194,152,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[56331.07479],"y":[474.5],"mode":"markers","type":"scatter","name":"The Rockaways","marker":{"color":"rgba(217,192,156,1)","line":{"color":"rgba(217,192,156,1)"}},"textfont":{"color":"rgba(217,192,156,1)"},"error_y":{"color":"rgba(217,192,156,1)"},"error_x":{"color":"rgba(217,192,156,1)"},"line":{"color":"rgba(217,192,156,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[136987.5956],"y":[476.6],"mode":"markers","type":"scatter","name":"Upper East Side","marker":{"color":"rgba(211,190,160,1)","line":{"color":"rgba(211,190,160,1)"}},"textfont":{"color":"rgba(211,190,160,1)"},"error_y":{"color":"rgba(211,190,160,1)"},"error_x":{"color":"rgba(211,190,160,1)"},"line":{"color":"rgba(211,190,160,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[129213.5485],"y":[454.9],"mode":"markers","type":"scatter","name":"Upper West Side","marker":{"color":"rgba(205,187,164,1)","line":{"color":"rgba(205,187,164,1)"}},"textfont":{"color":"rgba(205,187,164,1)"},"error_y":{"color":"rgba(205,187,164,1)"},"error_x":{"color":"rgba(205,187,164,1)"},"line":{"color":"rgba(205,187,164,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[58802.8338],"y":[384.1],"mode":"markers","type":"scatter","name":"Washington Heights","marker":{"color":"rgba(199,185,168,1)","line":{"color":"rgba(199,185,168,1)"}},"textfont":{"color":"rgba(199,185,168,1)"},"error_y":{"color":"rgba(199,185,168,1)"},"error_x":{"color":"rgba(199,185,168,1)"},"line":{"color":"rgba(199,185,168,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[61296.49446],"y":[443.5],"mode":"markers","type":"scatter","name":"Williamsbridge","marker":{"color":"rgba(192,183,171,1)","line":{"color":"rgba(192,183,171,1)"}},"textfont":{"color":"rgba(192,183,171,1)"},"error_y":{"color":"rgba(192,183,171,1)"},"error_x":{"color":"rgba(192,183,171,1)"},"line":{"color":"rgba(192,183,171,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[79897.26316],"y":[383.4],"mode":"markers","type":"scatter","name":"Williamsburg/Greenpoint","marker":{"color":"rgba(186,181,175,1)","line":{"color":"rgba(186,181,175,1)"}},"textfont":{"color":"rgba(186,181,175,1)"},"error_y":{"color":"rgba(186,181,175,1)"},"error_x":{"color":"rgba(186,181,175,1)"},"line":{"color":"rgba(186,181,175,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[72917.93352],"y":[407.8],"mode":"markers","type":"scatter","name":"Woodhaven","marker":{"color":"rgba(179,179,179,1)","line":{"color":"rgba(179,179,179,1)"}},"textfont":{"color":"rgba(179,179,179,1)"},"error_y":{"color":"rgba(179,179,179,1)"},"error_x":{"color":"rgba(179,179,179,1)"},"line":{"color":"rgba(179,179,179,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>lm(incidence_per_100k ~ median_income, data = cancer_data_by_income) %&gt;% 
+broom::tidy() %&gt;% 
+select(term, estimate, p.value) </code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term            estimate  p.value
+##   &lt;chr&gt;              &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   427.       4.57e-44
+## 2 median_income   0.000207 1.29e- 1</code></pre>
+<pre class="r"><code>ggplot(cancer_data_by_income, aes(x = median_income, y = incidence_per_100k)) + geom_point() +  
+
+geom_smooth(se = FALSE, method = &quot;lm&quot;) +  
+
+labs(title = &quot;Model of Cancer Incidence vs Median Income across NYC Neighborhoods from 2015 - 2019&quot;, y = &quot;Cancer Incidence per 100k&quot;, x = &quot;Median Income&quot;) + theme( 
+
+plot.title = element_textbox(hjust = 0.5, 
+
+width = unit(0.5, &quot;npc&quot;), 
+
+margin = margin(b = 3)),  
+
+plot.title.position = &quot;plot&quot; 
+
+) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" width="90%" /></p>
+<ol start="3" style="list-style-type: decimal">
+<li><p>(Angelica’s EDA)</p></li>
+<li><p>Suicide and Opioid Poisonings</p></li>
+</ol>
+<p>Historically, it is known that the elderly have the highest death
+rates, and this brings about the use of age-adjusted death rates. This
+exploratory analysis is conducted with the purpose of observing
+differences in causes of death across the age groups.</p>
+<pre class="r"><code>death_by_age %&gt;%
+  filter(age_group !=&quot;Total&quot; &amp; age_group !=&quot;Unknown&quot;) %&gt;%
+  group_by(county_name, age_group) %&gt;%
+  ggplot(aes(x=year, y = deaths, color = age_group)) +
+  geom_line()+
+  facet_grid(~county_name)+
+  labs(title=&quot;Death Rate by Age Group in New York City&quot;, color=&quot;Age Group&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" width="90%" /></p>
+<p>Though we find that Heart Disease, Cancer, Unintentional Injury,
+Accidents, and Chronic Lower Respiratory Diseases are the leading causes
+of death for the overall population of New York City, it is a known fact
+that the elderly are more likely to be victims of these diseases. The
+purpose of age group as a predictor of death is to analyze if there are
+differences in leading causes of death among different age groups.</p>
+<ul>
+<li>Observing the leading causes of death in New York by Age Group:</li>
+</ul>
+<pre class="r"><code>death_in_nys %&gt;% 
+
+  filter(age_group == &quot;&lt;1&quot; | age_group == &quot;1-9&quot; | age_group == &quot;10-19&quot; | age_group == &quot;20-24&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;% 
+
+group_by(year, age_group, selected_cause_of_death)%&gt;% 
+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+ 
+
+  geom_bar(stat=&quot;identity&quot;)+ 
+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
+
+  facet_grid(~age_group)+ 
+
+  theme(legend.position = &quot;none&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" width="90%" /></p>
+<pre class="r"><code>death_in_nys %&gt;% 
+
+  filter(age_group == &quot;25-34&quot; | age_group == &quot;35-44&quot; | age_group == &quot;45-54&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;% 
+
+group_by(year, age_group, selected_cause_of_death)%&gt;% 
+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+ 
+
+  geom_bar(stat=&quot;identity&quot;)+ 
+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
+
+  facet_grid(~age_group)+ 
+
+  theme(legend.position = &quot;none&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-16-2.png" width="90%" /></p>
+<pre class="r"><code>death_in_nys %&gt;% 
+
+  filter(age_group == &quot;55-64&quot; | age_group == &quot;65-74&quot; | age_group == &quot;75-84&quot; | age_group == &quot;85+&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;% 
+
+group_by(year, age_group, selected_cause_of_death)%&gt;% 
+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+ 
+
+  geom_bar(stat=&quot;identity&quot;)+ 
+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
+
+  facet_grid(~age_group)+ 
+
+  theme(legend.position = &quot;bottom&quot;,  legend.key.size=unit(5,&quot;point&quot;))+ 
+
+  guides(fill=guide_legend(nrow=5, byrow=TRUE))+ 
+
+  labs(fill=&quot;Selected Causes&quot;) </code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-16-3.png" width="90%" /></p>
+<p>Using the vital statistics of death data from the New York State
+Bureau of Vital and Health Statistics, our visual points to visible
+differences in leading causes of death among the age groups. Accidents
+seem to be a more frequent cause of death for the age groups of 25-34
+and 35-44, while for individuals who are 45+ the frequency of death by
+diseases of the heart and malignant neoplasms is larger. While among the
+youth accidents have higher cases of death in New York.</p>
+<p><br></p>
+</div>
+<div id="additional-analysis" class="section level2">
+<h2>Additional Analysis:</h2>
+<p>In relation to our initial analysis on age group as a predictor of
+death, we were interested in leading causes of death among younger age
+groups, one such cause of death is suicide which has become the second
+leading cause of death among individuals between the ages of 10-14 and
+25-34. Another cause of death of interest for the predictor of age group
+we chose was opioid poisoning deaths, as deaths from drug overdoses and
+chronic drug abuse in New York have increased by 71% between 2010 to
+2015. . Though suicide and opioid-related deaths are not the leading
+causes of death in New York City, the growing death rate in these
+categories has been a concern to the medical and public health
+community.</p>
+<p>To observe the relationship between <code>age_group</code> as a
+predictor and the outcomes of a suicide death and an opioid poisoning
+death we use a simple linear regression model:</p>
+<p>Fitting a SLR model for Age Group as a predictor for Suicide
+Deaths:</p>
+<pre class="r"><code># SLR model 
+
+s_fit = lm(suicide_deaths ~ age_group, data = predictor_age) 
+
+  
+
+ s_fit %&gt;%  
+
+  broom::tidy() %&gt;%  
+
+  filter(p.value &lt; 0.05) %&gt;% 
+
+   select(term, estimate, p.value) %&gt;% 
+
+  knitr::kable() </code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age_group10-19</td>
+<td align="right">4.467532</td>
+<td align="right">0.0408606</td>
+</tr>
+<tr class="even">
+<td align="left">age_group20-24</td>
+<td align="right">7.934210</td>
+<td align="right">0.0003048</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group25-34</td>
+<td align="right">17.797619</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group35-44</td>
+<td align="right">16.229885</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group45-54</td>
+<td align="right">18.197802</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group55-64</td>
+<td align="right">15.088889</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group65-74</td>
+<td align="right">7.316832</td>
+<td align="right">0.0003647</td>
+</tr>
+<tr class="even">
+<td align="left">age_group75-84</td>
+<td align="right">4.699029</td>
+<td align="right">0.0212500</td>
+</tr>
+</tbody>
+</table>
+<p>At a <span class="math inline">\(\alpha = 0.5\)</span> level, all age
+groups except the age group of 1-9 and 85+ are significant predictors of
+suicide_death.</p>
+<p>Fitting a SLR model for Age Group as a predictor of Opioid Poisoning
+Deaths:</p>
+<pre class="r"><code># SLR model 
+
+o_fit = lm(opioid_poisoning_deaths ~ age_group, data = predictor_age) 
+
+  
+
+ o_fit %&gt;%  
+
+  broom::tidy() %&gt;%  
+
+  filter(p.value &lt; 0.05) %&gt;% 
+
+   select(term, estimate, p.value) %&gt;% 
+
+  knitr::kable() </code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age_group20-24</td>
+<td align="right">3.106544</td>
+<td align="right">0.0122307</td>
+</tr>
+<tr class="even">
+<td align="left">age_group25-34</td>
+<td align="right">11.775183</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group35-44</td>
+<td align="right">14.235294</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group45-54</td>
+<td align="right">18.782353</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group55-64</td>
+<td align="right">11.123529</td>
+<td align="right">0.0000000</td>
+</tr>
+</tbody>
+</table>
+<p>At a <span class="math inline">\(\alpha = 0.5\)</span> level, those
+among the age groups of 20-64 are significant predictors of an opioid
+poisoning related death.</p>
+<p><br></p>
+</div>
+<div id="results-key-findings" class="section level2">
+<h2>Results &amp; Key findings:</h2>
+<ul>
+<li><p>From the multiple linear regression results, age group 75-84,
+85+, and race group Hispanic are the significant predictors. From the
+boxplots, we can see that the age group 75-84, 85+, and race group
+Hispanic are the most susceptible groups to heart disease related death.
+There was no significant difference between males and females in terms
+of heart disease related deaths. These results correspond with our
+multiple linear regression results. Our preliminary analysis indicated
+that the elderly over 75 years old are extremely vulnerable to heart
+diseases and there is racial disparity in health in NYC as Hispanic is
+the most vulnerable race group among all race groups.</p></li>
+<li><p>(Jennifer’s Findings)</p></li>
+<li><p>We determined that median household income is not a significant
+predictor for cancer incidence rates being evidenced by the linear
+regression results obtained in the analysis. The various plots and
+statistical tests in our analysis between median household income levels
+and cancer incidence/mortality rates did not show a correlation between
+the two variables or showed that median household income level as an
+insignificant predictor for cancer incidence rates.</p></li>
+<li><p>(Angelica’s Findings)</p></li>
+<li><p>Leading causes of death differ drastically by age group in New
+York, accidents leading to death are far more common in the youth than
+the elderly. Accidents and Malignant Neoplasms are the leading causes of
+death for those in the age groups of 1-44. While there is a shift to the
+leading causes of Diseases of the Heart and Malignant Neoplasms as the
+leading causes of death for those that are 44+ years of age. From the
+simple linear regression, the age group is a significant predictor of
+death by suicide and opioid poisoning. In the case of age group as a
+predictor for deaths by opioid poisoning, it was a significant factor
+for the age groups of 20-64. In the case of age group as a predictor for
+suicide deaths, age group was a significant factor for all age groups
+except young children between 1 to 9 years of age and those of old age
+of 85+ years.</p></li>
+</ul>
+<p><br></p>
+</div>
+<div id="discussion-next-steps" class="section level2">
+<h2>Discussion &amp; Next steps</h2>
+<p>Often death rates are calculated as an age-adjusted death rate,
+controlling for the effects of differences in population age
+distributions, hence it was interesting to see a stratified analysis of
+causes of death by age and to see if the age group of an individual
+impacts their likelihood of dying from suicide or drug poisoning. The
+results that we found were consistent with the literature, as our
+analysis concentrates on pre-COVID era data, it would be interesting to
+compare our results to data collected since the pandemic started as
+suicide and drug poisoning rates have further increased due to the
+pandemic.</p>
+<p>From this analysis, there is not enough evidence to determine that
+median household income in New York City influences cancer incidence
+rates. This could be due to a multitude of reasons, the modeling is
+rudimentary as the only predictor for cancer incidence rates was median
+household income. It is reasonable to suggest that cancer incidence
+should have multiple predictors to be accurately modeled as the
+development of cancer is often a multi-faceted occurrence. Additionally,
+income may not have any effect on cancer incidence regardless of better
+modeling techniques or more robust datasets but a more in-depth analysis
+is needed before drawing strict conclusions on the effect of income on
+cancer rates.</p>
+<p><br></p>
+</div>
+<div id="limitations-to-analysis" class="section level2">
+<h2>Limitations to Analysis</h2>
+<p>There are limitations with the scope of our project due to an
+inability to find data for our predictors of concern of age group,
+income, race, and ethnicity for all the leading causes, which led us to
+tackle different research concerns in the overall category of leading
+causes of death.</p>
+<p>As multiple datasets have been used in our analysis, which often
+varies per research question, we faced challenges in the data cleaning
+process, often dealing with missing values that occurred during the
+merging of datasets. Additionally in terms of modeling, constructing
+simple linear regressions based on single predictors is not appropriate
+for accurately depicting the multitude of factors that lead to causes of
+death such as cancer, heart disease, suicide deaths, opioid poisoning,
+HIV, and pregnancy-related deaths.</p>
+<p><br></p>
+</div>
+<div id="external-sources" class="section level2">
+<h2>External Sources</h2>
+<p>Suicide. (n.d.). National Institute of Mental Health (NIMH).
+Retrieved December 9, 2022, from <a
+href="https://www.nimh.nih.gov/health/statistics/suicide"
+class="uri">https://www.nimh.nih.gov/health/statistics/suicide</a></p>
+<p>The Growing Drug Epidemic in New York. (n.d.). Rockefeller Institute
+of Government. Retrieved December 9, 2022, from <a
+href="https://rockinst.org/issue-area/growing-drug-epidemic-new-york/"
+class="uri">https://rockinst.org/issue-area/growing-drug-epidemic-new-york/</a></p>
+<p>What are Health Disparities? - nyc.gov. (n.d.). Retrieved December 9,
+2022, from</p>
+<p><a
+href="https://www1.nyc.gov/assets/doh/downloads/pdf/episrv/disparitiestwosum_breast.pdf"
+class="uri">https://www1.nyc.gov/assets/doh/downloads/pdf/episrv/disparitiestwosum_breast.pdf</a></p>
+<p>Hashim, D., et al., (2016, July). Standardized cancer incidence
+disparities in upper Manhattan New York City neighborhoods: The role of
+race/ethnicity, socioeconomic status, and known risk factors. European
+journal of cancer prevention : the official journal of the European
+Cancer Prevention Organisation (ECP). Retrieved December 9, 2022, from
+<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4715792/"
+class="uri">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4715792/</a></p>
+<p><a
+href="https://www.cdc.gov/nchs/pressroom/states/newyork/newyork.htm"
+class="uri">https://www.cdc.gov/nchs/pressroom/states/newyork/newyork.htm</a></p>
 </div>
 
 

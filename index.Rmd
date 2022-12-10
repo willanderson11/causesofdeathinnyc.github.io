@@ -10,6 +10,18 @@ library(tidyverse)
 library(dplyr)
 library(ggplot2)
 library(plotly)
+library(glmnet)
+library(patchwork)
+library(leaflet)
+library(lubridate)
+library(rvest)
+library(httr)
+library(flexdashboard)
+library(viridis)
+library(stringr)
+library(ggridges)
+library(readxl)
+library(ggtext)
 knitr::opts_chunk$set(
   fig.width = 6,
   fig.asp = .6,
@@ -31,6 +43,7 @@ As a group, we are inspired by the historical changes in the health problems in 
 For this project, we started with a general question: What are the leading causes of death in NYC? We decided to focus on NYC as it’s the largest city in the US and one of the world’s most diverse cities. We found that heart disease, cancer, accidents, chronic lower respiratory disease, and stroke are the most prevalent causes in the city. We also considered other pertinent causes of death such as pregnancy-related mortality. This initial exploratory analysis led us to want to explore specific questions based on our interests and research experience. We chose the period of 2007-2019 to focus on the modern causes of death in the city to avoid confounding factors of death due to the COVID-19 outbreak (2019 onward).  
 
 <br>
+
 ## Questions and Planned Analyses
 
 Each team member decided to focus on a specific cause of death and an individual-level factor (i.e., age, income, education level, etc.) that contributed to the changes in leading causes of death observed in the past 12 years. Below are some of the specific questions we explore in our analysis: 
@@ -67,6 +80,7 @@ leading %>%
 [Figure Source](https://www.worldlifeexpectancy.com/new-york-cause-of-death-by-age-and-gender)
 
 <br>
+
 ## Data Processing and Cleaning
 
 1. Heart Disease Related Deaths [(Dataset)](https://health.data.ny.gov/Health/Vital-Statistics-Deaths-by-Region-and-Age-Group-by/c3ns-hz2v) 
@@ -82,6 +96,43 @@ The columns of interest for our analysis are:
 `age_group` : age group 
 
 `race_or_ethnicity` : race group 
+
+```{r, message=FALSE, warning=FALSE}
+death_df = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv") %>%  
+
+  janitor::clean_names() %>%  
+
+  filter(selected_cause_of_death == "Diseases of the Heart", 
+
+         race_or_ethnicity != "Not Stated") %>% 
+
+  mutate( 
+
+    age_group = as.factor(age_group), 
+
+    age_group = fct_recode( 
+
+      age_group, "<1" = "1", "1-9" = "2", "10-19" = "3", "20-24" = "4", "25-34" = "5", "35-44"="6",                  "45-54" = "7", "55-64" = "8", "65-74" = "9", "75-84" = "10", "85+" = "11"), 
+
+    sex = as.factor(sex), 
+
+    sex = fct_recode(sex, "M" = "1", "F" = "2"), 
+
+    race_or_ethnicity = as.factor(race_or_ethnicity), 
+
+    race_or_ethnicity = fct_recode(race_or_ethnicity, "White Non Hispanic" = "1",  
+
+                                   "Black Non Hispanic" = "2", "Hispanic" = "3",  
+
+                                   "Other Non Hispanic" = "4") 
+
+    ) %>%  
+
+  sample_n(200) %>%  
+
+  select(deaths, sex, age_group, race_or_ethnicity) 
+
+``` 
 
 <br>
 2. (Jenifer's Datasets)
@@ -168,3 +219,472 @@ The columns of interest for our analysis are:
 `opioid_poisoning_deaths` : death in which a drug poisoning is the cause of death 
 
 `suicide_deaths` : death in which suicide is the cause of death 
+
+```{r, message=FALSE, warning=FALSE}
+#datasets for exploratory analysis
+death_in_nys = read_csv("data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv") %>%
+  janitor::clean_names() %>%
+  mutate(selected_cause_of_death = recode(selected_cause_of_death,
+       "CLRD" = "Chronic Lower Respiratory Disease"))
+
+death_by_age = read_csv("data/Vital_Statistics_Deaths_by_Resident_County__Region__and_Age-Group__Beginning_2003.csv") %>%
+  janitor::clean_names() %>%
+  filter(region == "NYC")
+
+opioid_death = read_csv("data/Vital_Statistics__Opioid-Related_Deaths_by_Age_Group__Beginning_2003.csv") %>%
+  janitor::clean_names()
+
+suicide_death = read_csv("data/Vital_Statistics_Suicide_Deaths_by_Age-Group__Race_Ethnicity__Resident_Region__and_Gender__Beginning_2003.csv") %>%
+  janitor::clean_names()
+
+#merging datasets for statistical analysis
+predictor_age = left_join(opioid_death, suicide_death, by = c("year", "sex", "region", "race_or_ethnicity", "age_group")) %>%
+  filter(region == "NYC") %>%
+  filter(age_group != "Unknown", age_group != "Total") %>%
+  select(year, age_group, opioid_poisoning_deaths, suicide_deaths)%>%
+  mutate(age_group = as.factor(age_group),
+    age_group = fct_recode(
+      age_group, "<1" = "1", "1-9" = "2", "10-19" = "3", "20-24" = "4", "25-34" = "5", "35-44"="6",       "45-54" = "7", "55-64" = "8", "65-74" = "9", "75-84" = "10", "85+" = "11"))
+```
+
+<br>
+
+## EDA
+According to a new report by the Centers for Disease Control and Prevention's (CDC) National Center, New York ranked the third-highest average life expectancy at 80.7 years. The average woman in New York lives until 83.1 years; the average man lives 78.2 years. To better understand New York City's causes of death and mortality trends in the city, we conducted some exploration, mainly through visualization.  
+We found that heart disease, cancer, accidents, chronic lower, and stroke are the most prevalent causes in the city.  
+
+As explained in the data processing and cleaning, we originally wanted each to focus on one of the causes. However, we had limitations in finding publicly available data for the five leading causes of death. Therefore, we decided to conduct further exploratory analysis, focus on data available through the city administration, and focus our research on individual factors of interest.  
+
+1. Heart Disease
+
+To investigate the association between age groups, sex, race with heart disease related death, We fitted a lasso model for model selection to determine the variables that should be included. We used cross-validation to find the best lambda for the lasso model and plotted the lasso model. From the plot, most of the predictors did not reach 0 before the line, which means that we can include most of our predictors. Then we fitted a multiple linear regression model to analyze the relationship between age groups, sex, race with heart disease related death. Lastly, we graphed the boxplots of age groups, race and sex related to heart disease deaths by order.  
+
+* Fit a Lasso Model for Variable Selection:
+
+```{r, message=FALSE, warning=FALSE} 
+#fit a lasso model 
+
+x = model.matrix(deaths ~ ., death_df)[,-1] #create a matrix of predictors  
+
+y = death_df$deaths #create outcome vector 
+
+#fit model and cross validation 
+
+lambda = 10^(seq(3, -2, -0.1)) 
+
+ 
+
+lasso_fit = 
+
+  glmnet(x, y, lambda = lambda) 
+
+ 
+
+lasso_cv = 
+
+  cv.glmnet(x, y, lambda = lambda) 
+
+ 
+
+lambda_opt = lasso_cv$lambda.min 
+
+#plot lasso  
+
+lasso_plot = broom::tidy(lasso_fit) %>%  
+
+  select(term, lambda, estimate) %>%  
+
+  complete(term, lambda, fill = list(estimate = 0) ) %>%  
+
+  filter(term != "(Intercept)") %>%  
+
+  ggplot(aes(x = log(lambda, 10), y = estimate, group = term, color = term)) +  
+
+  geom_path() +  
+
+  geom_vline(xintercept = log(lambda_opt, 10), color = "blue", size = 1.2) + 
+
+  theme(legend.position = "none") 
+
+ 
+
+lasso_plot 
+
+``` 
+
+```{r, message=FALSE, warning=FALSE} 
+
+#Generate lasso result 
+
+lasso_fit =  
+
+  glmnet(x, y, lambda = lambda_opt) 
+
+ 
+
+lasso_result = lasso_fit %>% broom::tidy() 
+
+``` 
+
+
+* Fit a MLR Model to Understand the Major Factors of NYC Heart Disease Related Death: 
+
+```{r, message=FALSE, warning=FALSE} 
+
+#run MLR model 
+
+MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df) 
+
+ 
+
+MLR_result = MLR %>%  
+
+  broom::tidy() %>%  
+
+  filter(p.value < 0.05) %>%  
+
+  knitr::kable() 
+
+ 
+
+MLR_result 
+
+``` 
+
+ 
+
+```{r, message=FALSE, warning=FALSE} 
+
+#plot age_groups with heart disease related deaths 
+
+death_df %>%  
+
+  ggplot(aes(y = deaths, x = reorder(age_group, deaths), color = age_group))+ 
+
+  geom_boxplot()+ 
+
+  theme_classic()+ 
+
+  labs(x = "Age Groups", 
+
+       y = "Number of Deaths", 
+
+       title = "Number of Heart Disease Related Death with Age in NYC From 2003 to 2019") 
+
+``` 
+
+ 
+
+```{r, message=FALSE, warning=FALSE} 
+
+#plot race with heart disease related deaths 
+
+death_df %>%  
+
+  ggplot(aes(y = deaths, x = reorder(race_or_ethnicity, deaths), color = race_or_ethnicity))+ 
+
+  geom_boxplot()+ 
+
+  theme_classic()+ 
+
+  labs(x = "Race or Ethnicity", 
+
+       y = "Number of Deaths", 
+
+       title = "Number of Heart Disease Related Death with Race in NYC From 2003 to 2019") 
+
+``` 
+
+ 
+
+```{r, message=FALSE, warning=FALSE} 
+
+#plot sex with heart disease related deaths
+
+death_df %>%  
+
+  ggplot(aes(y = deaths, x = reorder(sex, deaths), color = sex))+ 
+
+  geom_boxplot()+ 
+
+  theme_classic()+ 
+
+  labs(x = "Sex", 
+y = "Number of Deaths", 
+title = "Number of Heart Disease Related Death with Sex in NYC From 2003 to 2019") 
+```
+
+2. (Jennifer's EDA)
+
+3. Cancer
+
+To analyze any potential relationship between income levels and cancer incidence and mortality rates we first visualized, through scatterplots, the median household income per borough to get a better idea of any trends over time. From this, we determined that Manhattan had the highest median household income per year, while the Bronx had the lowest and the rates remained largely constant over time for each borough.  Then we plotted the distribution of median incomes per borough to understand the most frequent values of median household income in each borough as well as showing the dispersion and most frequent values of median household income in each borough. 
+
+```{r, message = FALSE, warning = FALSE} 
+
+income_data =  read_csv("data/median_income_nyc.csv", skip = 5, na = "") %>% 
+janitor::clean_names() %>% 
+select(-data_format, -fips) %>% 
+rename(year = time_frame, median_income = data) %>% 
+filter(household_type %in% "All Households") %>% 
+mutate(median_income = as.numeric(median_income)) 
+
+ 
+
+income_data %>% 
+filter(location %in% c("Manhattan", "Bronx", "Queens", "Brooklyn", year == "2013")) %>% 
+ggplot(aes(x = median_income, y = reorder(location, median_income), fill = location, group = location)) +  
+geom_density_ridges() + 
+labs(title = "Median Household Income Distribution Per Borough in 2013",  
+
+x = "Median Household Income",  
+
+y = "Borough") + 
+
+theme(legend.position = "right") 
+ 
+
+income_data %>% 
+filter(location %in% c("Manhattan", "Bronx", "Queens", "Brooklyn")) %>% 
+ggplot(aes(x = year, y = median_income, fill = reorder(location, median_income))) +  
+geom_bar(stat = "identity", position = "dodge") +  
+labs(title = "Median Household Income by Borough per Year", x = "Year", y = "Median Household Income") +
+theme(legend.position = "right") +  
+scale_fill_discrete(name = "Borough") 
+
+ 
+
+income_data %>%
+filter(location %in% c("Manhattan", "Bronx", "Queens", "Brooklyn")) %>% 
+group_by(year, location) %>% 
+summarize(median_income = mean(median_income, na.rm = TRUE)) %>% 
+ggplot(aes(x = reorder(location, median_income), y = median_income, fill = location)) + 
+geom_violin() +  
+labs(title = "Median Household Income Per NYC Borough from 2005 - 2019", x = "Borough", y = "Average Median Income") + 
+theme(legend.position = "none") 
+``` 
+
+Then we used scatterplots and line plots to visualize cancer incidence, mortality rates, and median household incomes per borough to observe any trends over time. After completing this step, we decided to make the linear model more specific by examining the neighborhoods within each borough and its corresponding median household income and cancer incidence rates. We accomplished this by first plotting each neighborhood’s respective median household income vs cancer incidence rates from 2015 – 2019. Then after observing the trends from this graph, we fit a linear model using each borough’s respective median household income data and cancer incidence data.  
+
+```{r, message = FALSE, warning = FALSE}
+
+cancer_data_by_income = read_excel("data/nyc_cancer_data.xlsx", sheet = "income_vs_incidence")  
+
+cancer_data_by_income %>% 
+plot_ly(x = ~median_income, 
+y = ~incidence_per_100k, type = "scatter", mode = "markers", color = ~location) %>% 
+layout(title = "Cancer Incidence Rate vs Median Household Income in NYC Neighborhoods", xaxis = list(title = "Median Household Income"), yaxis = list(title = "Cancer Incidence Rate Per 100k")) 
+
+``` 
+
+```{r, message = FALSE, warning = FALSE} 
+
+lm(incidence_per_100k ~ median_income, data = cancer_data_by_income) %>% 
+broom::tidy() %>% 
+select(term, estimate, p.value) 
+
+ 
+
+ggplot(cancer_data_by_income, aes(x = median_income, y = incidence_per_100k)) + geom_point() +  
+
+geom_smooth(se = FALSE, method = "lm") +  
+
+labs(title = "Model of Cancer Incidence vs Median Income across NYC Neighborhoods from 2015 - 2019", y = "Cancer Incidence per 100k", x = "Median Income") + theme( 
+
+plot.title = element_textbox(hjust = 0.5, 
+
+width = unit(0.5, "npc"), 
+
+margin = margin(b = 3)),  
+
+plot.title.position = "plot" 
+
+) 
+``` 
+
+3. (Angelica's EDA)
+
+4. Suicide and Opioid Poisonings
+
+Historically, it is known that the elderly have the highest death rates, and this brings about the use of age-adjusted death rates. This exploratory analysis is conducted with the purpose of observing differences in causes of death across the age groups.
+
+```{r, message=FALSE, warning=FALSE}
+death_by_age %>%
+  filter(age_group !="Total" & age_group !="Unknown") %>%
+  group_by(county_name, age_group) %>%
+  ggplot(aes(x=year, y = deaths, color = age_group)) +
+  geom_line()+
+  facet_grid(~county_name)+
+  labs(title="Death Rate by Age Group in New York City", color="Age Group")
+```
+
+
+Though we find that Heart Disease, Cancer, Unintentional Injury, Accidents, and Chronic Lower Respiratory Diseases are the leading causes of death for the overall population of New York City, it is a known fact that the elderly are more likely to be victims of these diseases. The purpose of age group as a predictor of death is to analyze if there are differences in leading causes of death among different age groups.  
+
+* Observing the leading causes of death in New York by Age Group: 
+
+```{r} 
+
+death_in_nys %>% 
+
+  filter(age_group == "<1" | age_group == "1-9" | age_group == "10-19" | age_group == "20-24", selected_cause_of_death != "Total",selected_cause_of_death != "All Other Causes") %>% 
+
+group_by(year, age_group, selected_cause_of_death)%>% 
+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+ 
+
+  geom_bar(stat="identity")+ 
+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
+
+  facet_grid(~age_group)+ 
+
+  theme(legend.position = "none") 
+
+  
+
+death_in_nys %>% 
+
+  filter(age_group == "25-34" | age_group == "35-44" | age_group == "45-54", selected_cause_of_death != "Total",selected_cause_of_death != "All Other Causes") %>% 
+
+group_by(year, age_group, selected_cause_of_death)%>% 
+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+ 
+
+  geom_bar(stat="identity")+ 
+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
+
+  facet_grid(~age_group)+ 
+
+  theme(legend.position = "none") 
+
+  
+
+  
+
+death_in_nys %>% 
+
+  filter(age_group == "55-64" | age_group == "65-74" | age_group == "75-84" | age_group == "85+", selected_cause_of_death != "Total",selected_cause_of_death != "All Other Causes") %>% 
+
+group_by(year, age_group, selected_cause_of_death)%>% 
+
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+ 
+
+  geom_bar(stat="identity")+ 
+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ 
+
+  facet_grid(~age_group)+ 
+
+  theme(legend.position = "bottom",  legend.key.size=unit(5,"point"))+ 
+
+  guides(fill=guide_legend(nrow=5, byrow=TRUE))+ 
+
+  labs(fill="Selected Causes") 
+
+``` 
+
+Using the vital statistics of death data from the New York State Bureau of Vital and Health Statistics, our visual points to visible differences in leading causes of death among the age groups. Accidents seem to be a more frequent cause of death for the age groups of 25-34 and 35-44, while for individuals who are 45+ the frequency of death by diseases of the heart and malignant neoplasms is larger. While among the youth accidents have higher cases of death in New York. 
+
+<br>
+
+## Additional Analysis:  
+
+In relation to our initial analysis on age group as a predictor of death, we were interested in leading causes of death among younger age groups, one such cause of death is suicide which has become the second leading cause of death among individuals between the ages of 10-14 and 25-34. Another cause of death of interest for the predictor of age group we chose was opioid poisoning deaths, as deaths from drug overdoses and chronic drug abuse in New York have increased by 71% between 2010 to 2015.  . Though suicide and opioid-related deaths are not the leading causes of death in New York City, the growing death rate in these categories has been a concern to the medical and public health community. 
+
+To observe the relationship between `age_group` as a predictor and the outcomes of a suicide death and an opioid poisoning death we use a simple linear regression model: 
+
+Fitting a SLR model for Age Group as a predictor for Suicide Deaths: 
+
+```{r, warning=FALSE, message=FALSE} 
+
+# SLR model 
+
+s_fit = lm(suicide_deaths ~ age_group, data = predictor_age) 
+
+  
+
+ s_fit %>%  
+
+  broom::tidy() %>%  
+
+  filter(p.value < 0.05) %>% 
+
+   select(term, estimate, p.value) %>% 
+
+  knitr::kable() 
+
+``` 
+
+ At a $\alpha = 0.5$ level, all age groups except the age group of 1-9 and 85+ are significant predictors of suicide_death. 
+
+Fitting a SLR model for Age Group as a predictor of Opioid Poisoning Deaths: 
+
+```{r} 
+
+# SLR model 
+
+o_fit = lm(opioid_poisoning_deaths ~ age_group, data = predictor_age) 
+
+  
+
+ o_fit %>%  
+
+  broom::tidy() %>%  
+
+  filter(p.value < 0.05) %>% 
+
+   select(term, estimate, p.value) %>% 
+
+  knitr::kable() 
+
+``` 
+
+At a $\alpha = 0.5$ level, those among the age groups of 20-64 are significant predictors of an opioid poisoning related death. 
+
+<br>
+
+## Results & Key findings: 
+
+* From the multiple linear regression results, age group 75-84, 85+, and race group Hispanic are the significant predictors. From the boxplots, we can see that the age group 75-84, 85+, and race group Hispanic are the most susceptible groups to heart disease related death. There was no significant difference between males and females in terms of heart disease related deaths. These results correspond with our multiple linear regression results. Our preliminary analysis indicated that the elderly over 75 years old are extremely vulnerable to heart diseases and there is racial disparity in health in NYC as Hispanic is the most vulnerable race group among all race groups.  
+
+* (Jennifer's Findings)
+
+*  We determined that median household income is not a significant predictor for cancer incidence rates being evidenced by the linear regression results obtained in the analysis. The various plots and statistical tests in our analysis between median household income levels and cancer incidence/mortality rates did not show a correlation between the two variables or showed that median household income level as an insignificant predictor for cancer incidence rates.  
+
+* (Angelica's Findings)
+
+* Leading causes of death differ drastically by age group in New York, accidents leading to death are far more common in the youth than the elderly.  Accidents and Malignant Neoplasms are the leading causes of death for those in the age groups of 1-44. While there is a shift to the leading causes of Diseases of the Heart and Malignant Neoplasms as the leading causes of death for those that are 44+ years of age.  From the simple linear regression, the age group is a significant predictor of death by suicide and opioid poisoning. In the case of age group as a predictor for deaths by opioid poisoning, it was a significant factor for the age groups of 20-64. In the case of age group as a predictor for suicide deaths, age group was a significant factor for all age groups except young children between 1 to 9 years of age and those of old age of 85+ years. 
+
+<br>
+ 
+## Discussion & Next steps
+
+Often death rates are calculated as an age-adjusted death rate, controlling for the effects of differences in population age distributions, hence it was interesting to see a stratified analysis of causes of death by age and to see if the age group of an individual impacts their likelihood of dying from suicide or drug poisoning. The results that we found were consistent with the literature, as our analysis concentrates on pre-COVID era data, it would be interesting to compare our results to data collected since the pandemic started as suicide and drug poisoning rates have further increased due to the pandemic.  
+
+From this analysis, there is not enough evidence to determine that median household income in New York City influences cancer incidence rates. This could be due to a multitude of reasons, the modeling is rudimentary as the only predictor for cancer incidence rates was median household income. It is reasonable to suggest that cancer incidence should have multiple predictors to be accurately modeled as the development of cancer is often a multi-faceted occurrence. Additionally, income may not have any effect on cancer incidence regardless of better modeling techniques or more robust datasets but a more in-depth analysis is needed before drawing strict conclusions on the effect of income on cancer rates.  
+
+<br>
+
+## Limitations to Analysis
+
+There are limitations with the scope of our project due to an inability to find data for our predictors of concern of age group, income, race, and ethnicity for all the leading causes, which led us to tackle different research concerns in the overall category of leading causes of death.   
+
+As multiple datasets have been used in our analysis, which often varies per research question, we faced challenges in the data cleaning process, often dealing with missing values that occurred during the merging of datasets. Additionally in terms of modeling, constructing simple linear regressions based on single predictors is not appropriate for accurately depicting the multitude of factors that lead to causes of death such as cancer, heart disease, suicide deaths, opioid poisoning, HIV, and pregnancy-related deaths.   
+
+<br>
+
+## External Sources 
+
+Suicide. (n.d.). National Institute of Mental Health (NIMH). Retrieved December 9, 2022, from https://www.nimh.nih.gov/health/statistics/suicide 
+
+The Growing Drug Epidemic in New York. (n.d.). Rockefeller Institute of Government. Retrieved December 9, 2022, from https://rockinst.org/issue-area/growing-drug-epidemic-new-york/ 
+
+What are Health Disparities? - nyc.gov. (n.d.). Retrieved December 9, 2022, from 
+
+https://www1.nyc.gov/assets/doh/downloads/pdf/episrv/disparitiestwosum_breast.pdf 
+
+Hashim, D., et al., (2016, July). Standardized cancer incidence disparities in upper Manhattan New York City neighborhoods: The role of race/ethnicity, socioeconomic status, and known risk factors. European journal of cancer prevention : the official journal of the European Cancer Prevention Organisation (ECP). Retrieved December 9, 2022, from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4715792/ 
+
+https://www.cdc.gov/nchs/pressroom/states/newyork/newyork.htm 
