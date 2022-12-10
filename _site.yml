@@ -11,6 +11,8 @@ navbar:
       href: Heart-Disease-Related-Deaths.html
     - text: "Cancer"
       href: income_and_cancer_rates.html
+    - text: "HIV/AIDS"
+      href: income_and_cancer_rates.html
     
 output:
   html_document:
