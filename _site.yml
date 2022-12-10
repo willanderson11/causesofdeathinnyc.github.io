@@ -12,7 +12,7 @@ navbar:
     - text: "Cancer"
       href: income_and_cancer_rates.html
     - text: "HIV/AIDS"
-      href: income_and_cancer_rates.html
+      href: hiv_analysis.html
     
 output:
   html_document:
