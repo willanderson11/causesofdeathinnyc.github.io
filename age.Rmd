@@ -51,7 +51,13 @@ suicide_death = read_csv("data/Vital_Statistics_Suicide_Deaths_by_Age-Group__Rac
 
 #merging datasets for statistical analysis
 predictor_age = left_join(opioid_death, suicide_death, by = c("year", "sex", "region", "race_or_ethnicity", "age_group")) %>%
-  filter(region == "NYC")
+  filter(region == "NYC") %>%
+  filter(age_group != "Unknown", age_group != "Total") %>%
+  select(year, age_group, opioid_poisoning_deaths, suicide_deaths)%>%
+  mutate(age_group = as.factor(age_group),
+    age_group = fct_recode(
+      age_group, "<1" = "1", "1-9" = "2", "10-19" = "3", "20-24" = "4", "25-34" = "5", "35-44"="6",       "45-54" = "7", "55-64" = "8", "65-74" = "9", "75-84" = "10", "85+" = "11"))
+
 
 ```
 
@@ -110,15 +116,8 @@ Using the vital statistics of death data from the New York State Bureau of Vital
 ## Further Analysis
 ### Fitting a SLR model for Age Group as a predictor for Suicide Deaths
 ```{r, warning=FALSE, message=FALSE}
-suicide_df = suicide_death %>%
-  filter(age_group != "Unknown", age_group != "Total") %>%
-  select(year, age_group, suicide_deaths)%>%
-  mutate(age_group = as.factor(age_group),
-    age_group = fct_recode(
-      age_group, "<1" = "1", "1-9" = "2", "10-19" = "3", "20-24" = "4", "25-34" = "5", "35-44"="6",       "45-54" = "7", "55-64" = "8", "65-74" = "9", "75-84" = "10", "85+" = "11"))
-
 # SLR model
-s_fit = lm(suicide_deaths ~ age_group, data = suicide_df)
+s_fit = lm(suicide_deaths ~ age_group, data = predictor_age)
 
  s_fit %>% 
   broom::tidy() %>% 
@@ -131,15 +130,8 @@ s_fit = lm(suicide_deaths ~ age_group, data = suicide_df)
 ### Fitting a SLR model for Age Group as a predictor for Opioid Poisoning Deaths
 
 ```{r message=FALSE, warning=FALSE}
-opi_df = opioid_death %>%
-  filter(age_group != "Unknown", age_group != "Total") %>%
-  select(year, age_group, opioid_poisoning_deaths)%>%
-  mutate(age_group = as.factor(age_group),
-    age_group = fct_recode(
-      age_group, "<1" = "1", "1-9" = "2", "10-19" = "3", "20-24" = "4", "25-34" = "5", "35-44"="6",       "45-54" = "7", "55-64" = "8", "65-74" = "9", "75-84" = "10", "85+" = "11"))
-
 # SLR model
-o_fit = lm(opioid_poisoning_deaths ~ age_group, data = opi_df)
+o_fit = lm(opioid_poisoning_deaths ~ age_group, data = predictor_age)
 
  o_fit %>% 
   broom::tidy() %>% 

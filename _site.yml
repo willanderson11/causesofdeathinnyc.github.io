@@ -5,11 +5,11 @@ navbar:
   right:
     - text: "Report"
       href: index.html
-    - text: "Predictor: Age Group"
+    - text: "Suicide and Opioid Poisonings"
       href: age.html
-    - text: "Heart Disease Related Deaths"
+    - text: "Heart Disease"
       href: Heart-Disease-Related-Deaths.html
-    - text: "Income as a Predictor for Cancer Rates"
+    - text: "Cancer"
       href: income_and_cancer_rates.html
     
 output:
