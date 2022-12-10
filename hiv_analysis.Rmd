@@ -180,18 +180,42 @@ summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
 
 ## Further Analasysis
 
-### Fitting a MLR Model to understand the relationship between sex, gender, and hiv-related death rate in NYC
+### Fitting a SLR Model: Analysing the relationship between race and of hiv-related death rate in NYC
 
 ```{r}
-hiv_mlr = lm(hiv_related_death_rate ~ sex + age + race + borough , data = hiv_data)
+hiv_race_slr = lm(deaths ~ race, data = hiv_data)
 
-summary(hiv_mlr)
+hiv_race_result = hiv_race_slr %>% 
+  broom::tidy() %>% 
+  filter(p.value < 0.05) %>%
+   select(term, estimate, p.value) %>%
+  knitr::kable()
+
+hiv_race_result 
+```
+
+
+### Fitting a MLR Model: Finding the fiiting model of hiv-related death rate in NYC
+
+
+```{r}
+hiv_mlr = lm(deaths ~ race + age + sex + borough + concurrent_diagnoses + x_linked_to_care_within_3_months, data = hiv_data)
+
+hiv_mlr_result = hiv_mlr %>% 
+  broom::tidy() %>% 
+  filter(p.value < 0.05) %>%
+   select(term, estimate, p.value) %>%
+  knitr::kable()
+
+hiv_mlr_result 
 
 ```
 
 ```{r}
-back_step = step(hiv_mlr, direction='backward') 
-summary(back_step)
+
+#stepwise regression
+
+step(hiv_mlr, direction='backward')
 
 mallow_cp = ols_step_best_subset(hiv_mlr,cp)
 mallow_cp
@@ -199,14 +223,24 @@ mallow_cp
 ```
 
 ```{r}
-best_mlr = lm(hiv_related_death_rate ~ age + race + borough, data = hiv_data) 
 
-best_mlr_result = best_mlr %>% 
-  broom::tidy() %>% 
-  filter(p.value < 0.05) %>% 
-  knitr::kable()
+library(caret)
 
-best_mlr_result
+set.seed(1)
+# Use 10-fold validation and create the training sets
+train = trainControl(method = "cv", number = 10)
+
+# Fit the 4 -variables model that we selected: murder, hs_grad, frost
+model_caret = train(deaths ~ age + sex + borough + concurrent_diagnoses + x_linked_to_care_within_3_months,
+                   data = hiv_data,
+                   trControl = train,
+                   method = 'lm',
+                   na.action = na.omit)
+
+model_caret$hiv_mlr 
+
+summary(model_caret)
+
 ```
 
 ## Limitations to Analysis

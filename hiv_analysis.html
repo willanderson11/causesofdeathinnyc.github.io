@@ -488,128 +488,219 @@ summarise(sum_deaths = sum(deaths, na.rm = T)) %&gt;%
 <div id="further-analasysis" class="section level2">
 <h2>Further Analasysis</h2>
 <div
-id="fitting-a-mlr-model-to-understand-the-relationship-between-sex-gender-and-hiv-related-death-rate-in-nyc"
+id="fitting-a-slr-model-analysing-the-relationship-between-race-and-of-hiv-related-death-rate-in-nyc"
 class="section level3">
-<h3>Fitting a MLR Model to understand the relationship between sex,
-gender, and hiv-related death rate in NYC</h3>
-<pre class="r"><code>hiv_mlr = lm(hiv_related_death_rate ~ sex + age + race + borough , data = hiv_data)
+<h3>Fitting a SLR Model: Analysing the relationship between race and of
+hiv-related death rate in NYC</h3>
+<pre class="r"><code>hiv_race_slr = lm(deaths ~ race, data = hiv_data)
 
-summary(hiv_mlr)
+hiv_race_result = hiv_race_slr %&gt;% 
+  broom::tidy() %&gt;% 
+  filter(p.value &lt; 0.05) %&gt;%
+   select(term, estimate, p.value) %&gt;%
+  knitr::kable()
+
+hiv_race_result </code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">20.16699</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">raceAsian/Pacific Islander</td>
+<td align="right">-19.58958</td>
+<td align="right">0.0000005</td>
+</tr>
+<tr class="odd">
+<td align="left">raceOther/Unknown</td>
+<td align="right">-19.94824</td>
+<td align="right">0.0000003</td>
+</tr>
+<tr class="even">
+<td align="left">raceWhite</td>
+<td align="right">-13.14824</td>
+<td align="right">0.0007278</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div
+id="fitting-a-mlr-model-finding-the-fiiting-model-of-hiv-related-death-rate-in-nyc"
+class="section level3">
+<h3>Fitting a MLR Model: Finding the fiiting model of hiv-related death
+rate in NYC</h3>
+<pre class="r"><code>hiv_mlr = lm(deaths ~ race + age + sex + borough + concurrent_diagnoses + x_linked_to_care_within_3_months, data = hiv_data)
+
+hiv_mlr_result = hiv_mlr %&gt;% 
+  broom::tidy() %&gt;% 
+  filter(p.value &lt; 0.05) %&gt;%
+   select(term, estimate, p.value) %&gt;%
+  knitr::kable()
+
+hiv_mlr_result </code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">30.5918451</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age20 - 29</td>
+<td align="right">-7.5626953</td>
+<td align="right">0.0001848</td>
+</tr>
+<tr class="odd">
+<td align="left">age30 - 39</td>
+<td align="right">-8.1494610</td>
+<td align="right">0.0000533</td>
+</tr>
+<tr class="even">
+<td align="left">age50 - 59</td>
+<td align="right">12.7776853</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age60+</td>
+<td align="right">17.9888184</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">sexTransgender</td>
+<td align="right">-35.1005032</td>
+<td align="right">0.0037298</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughBronx</td>
+<td align="right">-21.1931564</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">boroughBrooklyn</td>
+<td align="right">-29.5445140</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughManhattan</td>
+<td align="right">-28.7044907</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">boroughQueens</td>
+<td align="right">-33.4780930</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughStaten Island</td>
+<td align="right">-25.7066896</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">concurrent_diagnoses</td>
+<td align="right">3.0521693</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">x_linked_to_care_within_3_months</td>
+<td align="right">-0.0328377</td>
+<td align="right">0.0336239</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>
+#stepwise regression
+
+step(hiv_mlr, direction=&#39;backward&#39;)
+## Start:  AIC=29219.52
+## deaths ~ race + age + sex + borough + concurrent_diagnoses + 
+##     x_linked_to_care_within_3_months
+## 
+##                                    Df Sum of Sq      RSS   AIC
+## - race                              5      4329  3010211 29216
+## &lt;none&gt;                                           3005882 29220
+## - x_linked_to_care_within_3_months  1      3043  3008925 29222
+## - sex                               3     20727  3026609 29244
+## - borough                           5    142497  3148379 29417
+## - age                               6    213449  3219331 29515
+## - concurrent_diagnoses              1  22461392 25467274 38797
+## 
+## Step:  AIC=29215.97
+## deaths ~ age + sex + borough + concurrent_diagnoses + x_linked_to_care_within_3_months
+## 
+##                                    Df Sum of Sq      RSS   AIC
+## &lt;none&gt;                                           3010211 29216
+## - x_linked_to_care_within_3_months  1      3407  3013618 29219
+## - sex                               3     23537  3033747 29245
+## - borough                           5    140848  3151059 29411
+## - age                               6    213074  3223285 29511
+## - concurrent_diagnoses              1  23388769 26398980 38948
 ## 
 ## Call:
-## lm(formula = hiv_related_death_rate ~ sex + age + race + borough, 
-##     data = hiv_data)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -12.938  -3.373  -1.616   0.425 170.191 
+## lm(formula = deaths ~ age + sex + borough + concurrent_diagnoses + 
+##     x_linked_to_care_within_3_months, data = hiv_data)
 ## 
 ## Coefficients:
-##                            Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)                 0.66771    1.35975   0.491 0.623413    
-## sexFemale                  -0.02893    0.85712  -0.034 0.973078    
-## sexMale                     0.05914    0.85712   0.069 0.944997    
-## sexTransgender              1.28698    4.92399   0.261 0.793819    
-## age20 - 29                  2.45833    0.69031   3.561 0.000373 ***
-## age30 - 39                  2.77630    0.69031   4.022 5.86e-05 ***
-## age40 - 49                  4.21068    0.69031   6.100 1.15e-09 ***
-## age50 - 59                  6.13828    0.69031   8.892  &lt; 2e-16 ***
-## age60+                      9.80755    0.69031  14.207  &lt; 2e-16 ***
-## ageAll                      3.84531    0.69031   5.570 2.68e-08 ***
-## raceAsian/Pacific Islander -1.49844    0.69031  -2.171 0.030005 *  
-## raceBlack                   0.39063    0.69031   0.566 0.571509    
-## raceLatino/Hispanic         0.68333    0.69031   0.990 0.322276    
-## raceOther/Unknown          -2.91224    0.69031  -4.219 2.50e-05 ***
-## raceWhite                  -0.21406    0.69031  -0.310 0.756501    
-## boroughBronx                0.41838    1.01454   0.412 0.680081    
-## boroughBrooklyn            -0.27808    0.99558  -0.279 0.780013    
-## boroughManhattan           -0.89718    0.99905  -0.898 0.369214    
-## boroughQueens              -1.06427    0.99905  -1.065 0.286803    
-## boroughStaten Island        2.40320    1.04782   2.294 0.021861 *  
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 9.565 on 4784 degrees of freedom
-##   (1201 observations deleted due to missingness)
-## Multiple R-squared:  0.0681, Adjusted R-squared:  0.0644 
-## F-statistic:  18.4 on 19 and 4784 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>back_step = step(hiv_mlr, direction=&#39;backward&#39;) 
-## Start:  AIC=21716.1
-## hiv_related_death_rate ~ sex + age + race + borough
-## 
-##           Df Sum of Sq    RSS   AIC
-## - sex      3      15.2 437719 21710
-## &lt;none&gt;                 437704 21716
-## - race     5    3567.5 441271 21745
-## - borough  5    5061.9 442766 21761
-## - age      6   22281.2 459985 21943
-## 
-## Step:  AIC=21710.27
-## hiv_related_death_rate ~ age + race + borough
-## 
-##           Df Sum of Sq    RSS   AIC
-## &lt;none&gt;                 437719 21710
-## - race     5    3632.9 441352 21740
-## - borough  5    5064.3 442783 21756
-## - age      6   22300.0 460019 21937
-summary(back_step)
-## 
-## Call:
-## lm(formula = hiv_related_death_rate ~ age + race + borough, data = hiv_data)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -12.893  -3.346  -1.633   0.383 170.236 
-## 
-## Coefficients:
-##                            Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)                  0.7306     1.0488   0.697 0.486064    
-## age20 - 29                   2.4583     0.6901   3.562 0.000371 ***
-## age30 - 39                   2.7763     0.6901   4.023 5.83e-05 ***
-## age40 - 49                   4.2107     0.6901   6.101 1.13e-09 ***
-## age50 - 59                   6.1383     0.6901   8.895  &lt; 2e-16 ***
-## age60+                       9.8076     0.6901  14.212  &lt; 2e-16 ***
-## ageAll                       3.8488     0.6291   6.117 1.03e-09 ***
-## raceAsian/Pacific Islander  -1.5019     0.6291  -2.387 0.017016 *  
-## raceBlack                    0.3872     0.6291   0.615 0.538309    
-## raceLatino/Hispanic          0.6799     0.6291   1.081 0.279899    
-## raceOther/Unknown           -2.9157     0.6291  -4.634 3.68e-06 ***
-## raceWhite                   -0.2175     0.6291  -0.346 0.729571    
-## boroughBronx                 0.3695     0.9969   0.371 0.710867    
-## boroughBrooklyn             -0.3269     0.9776  -0.334 0.738083    
-## boroughManhattan            -0.9460     0.9811  -0.964 0.334978    
-## boroughQueens               -1.1131     0.9811  -1.135 0.256624    
-## boroughStaten Island         2.3544     1.0307   2.284 0.022398 *  
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 9.562 on 4787 degrees of freedom
-##   (1201 observations deleted due to missingness)
-## Multiple R-squared:  0.06806,    Adjusted R-squared:  0.06495 
-## F-statistic: 21.85 on 16 and 4787 DF,  p-value: &lt; 2.2e-16
+##                      (Intercept)                        age20 - 29  
+##                          30.7969                           -7.6097  
+##                       age30 - 39                        age40 - 49  
+##                          -8.1993                           -2.2420  
+##                       age50 - 59                            age60+  
+##                          12.7407                           17.9615  
+##                           ageAll                         sexFemale  
+##                           2.2322                           -0.6547  
+##                          sexMale                    sexTransgender  
+##                          -4.6877                          -34.1332  
+##                     boroughBronx                   boroughBrooklyn  
+##                         -20.3149                          -28.7193  
+##                 boroughManhattan                     boroughQueens  
+##                         -27.8994                          -32.7003  
+##             boroughStaten Island              concurrent_diagnoses  
+##                         -24.7167                            3.0587  
+## x_linked_to_care_within_3_months  
+##                          -0.0347
 
 mallow_cp = ols_step_best_subset(hiv_mlr,cp)
 mallow_cp
-##       Best Subsets Regression      
-## -----------------------------------
+##                                  Best Subsets Regression                                 
+## -----------------------------------------------------------------------------------------
 ## Model Index    Predictors
-## -----------------------------------
-##      1         age                  
-##      2         age borough          
-##      3         age race borough     
-##      4         sex age race borough 
-## -----------------------------------
+## -----------------------------------------------------------------------------------------
+##      1         concurrent_diagnoses                                                       
+##      2         age concurrent_diagnoses                                                   
+##      3         age borough concurrent_diagnoses                                           
+##      4         age borough concurrent_diagnoses x_linked_to_care_within_3_months          
+##      5         age sex borough concurrent_diagnoses x_linked_to_care_within_3_months      
+##      6         race age sex borough concurrent_diagnoses x_linked_to_care_within_3_months 
+## -----------------------------------------------------------------------------------------
 ## 
-##                                                          Subsets Regression Summary                                                          
-## ---------------------------------------------------------------------------------------------------------------------------------------------
-##                        Adj.        Pred                                                                                                       
-## Model    R-Square    R-Square    R-Square      C(p)         AIC           SBIC          SBC           MSEP          FPE       HSP       APC  
-## ---------------------------------------------------------------------------------------------------------------------------------------------
-##   1        0.0495      0.0484      0.0473     79.2372    35419.9555    21776.7320    35471.7732    446603.3832    93.1005    0.0194    0.9512 
-##   2        0.0603      0.0582      0.0563     25.8733    35375.1337    21723.9475    35459.3374    441627.8342    92.1594    0.0192    0.9408 
-##   3        0.0681      0.0649      0.0614    -11.8339    35345.4265    21686.2982    35462.0162    438083.8920    91.5153    0.0191    0.9335 
-##   4        0.0681      0.0644       0.061    -10.0000    35351.2597    21688.1400    35487.2810    438159.9838    91.5885    0.0191    0.9338 
-## ---------------------------------------------------------------------------------------------------------------------------------------------
+##                                                            Subsets Regression Summary                                                            
+## -------------------------------------------------------------------------------------------------------------------------------------------------
+##                        Adj.        Pred                                                                                                           
+## Model    R-Square    R-Square    R-Square       C(p)          AIC           SBIC          SBC            MSEP          FPE        HSP       APC  
+## -------------------------------------------------------------------------------------------------------------------------------------------------
+##   1        0.9124      0.9124      0.9115     -953.4915    55095.9484    38060.8594    55116.0485    3400864.8119    566.7163    0.0944    0.0877 
+##   2        0.9169      0.9169      0.9159    -1213.9164    54787.3101    37742.9343    54847.6102    3224517.8218    537.8677    0.0896    0.0831 
+##   3        0.9202      0.9201      0.9185    -1401.9624    54553.9254    37502.4167    54647.7256    3096914.4634    517.0138    0.0861    0.0799 
+##   4        0.9208      0.9206      0.9189       29.3546    41969.0858    29228.8399    42065.2065    3037135.1692    679.5997    0.1516    0.0794 
+##   5        0.9214      0.9211      0.9194       -3.5760    41940.1697    29196.0086    42055.5146    3014245.4311    674.9305    0.1506    0.0788 
+##   6        0.9215      0.9212      0.9195       -8.0000    41943.7187    29191.5848    42091.1038    3010583.6674    674.8656    0.1506    0.0787 
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 ## AIC: Akaike Information Criteria 
 ##  SBIC: Sawa&#39;s Bayesian Information Criteria 
 ##  SBC: Schwarz Bayesian Criteria 
@@ -617,97 +708,57 @@ mallow_cp
 ##  FPE: Final Prediction Error 
 ##  HSP: Hocking&#39;s Sp 
 ##  APC: Amemiya Prediction Criteria</code></pre>
-<pre class="r"><code>best_mlr = lm(hiv_related_death_rate ~ age + race + borough, data = hiv_data) 
+<pre class="r"><code>
+library(caret)
 
-best_mlr_result = best_mlr %&gt;% 
-  broom::tidy() %&gt;% 
-  filter(p.value &lt; 0.05) %&gt;% 
-  knitr::kable()
+set.seed(1)
+# Use 10-fold validation and create the training sets
+train = trainControl(method = &quot;cv&quot;, number = 10)
 
-best_mlr_result</code></pre>
-<table>
-<colgroup>
-<col width="40%" />
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">term</th>
-<th align="right">estimate</th>
-<th align="right">std.error</th>
-<th align="right">statistic</th>
-<th align="right">p.value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">age20 - 29</td>
-<td align="right">2.458333</td>
-<td align="right">0.6901054</td>
-<td align="right">3.562258</td>
-<td align="right">0.0003713</td>
-</tr>
-<tr class="even">
-<td align="left">age30 - 39</td>
-<td align="right">2.776302</td>
-<td align="right">0.6901054</td>
-<td align="right">4.023012</td>
-<td align="right">0.0000583</td>
-</tr>
-<tr class="odd">
-<td align="left">age40 - 49</td>
-<td align="right">4.210677</td>
-<td align="right">0.6901054</td>
-<td align="right">6.101499</td>
-<td align="right">0.0000000</td>
-</tr>
-<tr class="even">
-<td align="left">age50 - 59</td>
-<td align="right">6.138281</td>
-<td align="right">0.6901054</td>
-<td align="right">8.894701</td>
-<td align="right">0.0000000</td>
-</tr>
-<tr class="odd">
-<td align="left">age60+</td>
-<td align="right">9.807552</td>
-<td align="right">0.6901054</td>
-<td align="right">14.211673</td>
-<td align="right">0.0000000</td>
-</tr>
-<tr class="even">
-<td align="left">ageAll</td>
-<td align="right">3.848754</td>
-<td align="right">0.6291402</td>
-<td align="right">6.117483</td>
-<td align="right">0.0000000</td>
-</tr>
-<tr class="odd">
-<td align="left">raceAsian/Pacific Islander</td>
-<td align="right">-1.501879</td>
-<td align="right">0.6291402</td>
-<td align="right">-2.387193</td>
-<td align="right">0.0170161</td>
-</tr>
-<tr class="even">
-<td align="left">raceOther/Unknown</td>
-<td align="right">-2.915681</td>
-<td align="right">0.6291402</td>
-<td align="right">-4.634391</td>
-<td align="right">0.0000037</td>
-</tr>
-<tr class="odd">
-<td align="left">boroughStaten Island</td>
-<td align="right">2.354375</td>
-<td align="right">1.0306823</td>
-<td align="right">2.284288</td>
-<td align="right">0.0223982</td>
-</tr>
-</tbody>
-</table>
+# Fit the 4 -variables model that we selected: murder, hs_grad, frost
+model_caret = train(deaths ~ age + sex + borough + concurrent_diagnoses + x_linked_to_care_within_3_months,
+                   data = hiv_data,
+                   trControl = train,
+                   method = &#39;lm&#39;,
+                   na.action = na.omit)
+
+model_caret$hiv_mlr 
+## NULL
+
+summary(model_caret)
+## 
+## Call:
+## lm(formula = .outcome ~ ., data = dat)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -318.76   -5.58    0.69    6.08  374.69 
+## 
+## Coefficients:
+##                                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                       30.79694    3.86151   7.975 1.92e-15 ***
+## `age20 - 29`                      -7.60972    2.02119  -3.765 0.000169 ***
+## `age30 - 39`                      -8.19925    2.01508  -4.069 4.80e-05 ***
+## `age40 - 49`                      -2.24204    2.01958  -1.110 0.266994    
+## `age50 - 59`                      12.74074    2.04866   6.219 5.46e-10 ***
+## `age60+`                          17.96155    2.14661   8.367  &lt; 2e-16 ***
+## ageAll                             2.23220    1.67043   1.336 0.181519    
+## sexFemale                         -0.65472    1.89458  -0.346 0.729676    
+## sexMale                           -4.68766    1.84748  -2.537 0.011204 *  
+## sexTransgender                   -34.13322   12.09001  -2.823 0.004775 ** 
+## boroughBronx                     -20.31493    2.83194  -7.174 8.52e-13 ***
+## boroughBrooklyn                  -28.71927    2.79251 -10.284  &lt; 2e-16 ***
+## boroughManhattan                 -27.89941    2.81461  -9.912  &lt; 2e-16 ***
+## boroughQueens                    -32.70025    2.82767 -11.564  &lt; 2e-16 ***
+## `boroughStaten Island`           -24.71673    3.05037  -8.103 6.87e-16 ***
+## concurrent_diagnoses               3.05870    0.01642 186.279  &lt; 2e-16 ***
+## x_linked_to_care_within_3_months  -0.03470    0.01543  -2.248 0.024604 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 25.96 on 4466 degrees of freedom
+## Multiple R-squared:  0.9214, Adjusted R-squared:  0.9211 
+## F-statistic:  3273 on 16 and 4466 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <div id="limitations-to-analysis" class="section level2">
