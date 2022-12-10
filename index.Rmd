@@ -1,5 +1,5 @@
 ---
-title: "Data Science Final Project"
+title: "Final Report"
 output: 
   html_document:
     toc: true
@@ -24,6 +24,24 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
+## Motivation
+
+As a group, we are inspired by the historical changes in the health problems in a community, mortality patterns, and leading causes of death that we learned in our Principles of Epidemiology class. In 1839 cholera was reported as the primary cause of death in England. Nowadays, the leading cause of death in England, like in the US and most industrialized countries, is heart disease, with social and racial disparities in mortality from chronic diseases becoming the major challenge.
+
+For this project, we started with a general question: What are the leading causes of death in NYC? We decided to focus on NYC as it’s the largest city in the US and one of the world’s most diverse cities. We found that heart disease, cancer, accidents, chronic lower respiratory disease, and stroke are the most prevalent causes in the city. We also considered other pertinent causes of death such as pregnancy-related mortality. This initial exploratory analysis led us to want to explore specific questions based on our interests and research experience. We chose the period of 2007-2019 to focus on the modern causes of death in the city to avoid confounding factors of death due to the COVID-19 outbreak (2019 onward).  
+
+## Questions and Planned Analyses
+
+Each team member decided to focus on a specific cause of death and an individual-level factor (i.e., age, income, education level, etc.) that contributed to the changes in leading causes of death observed in the past 12 years. Below are some of the specific questions we explore in our analysis: 
+
+1. Heart Disease Related Death is one of the top leading causes of death in New York City. What is the relationship between age groups, sex, race, and Heart Disease Related Death?
+
+2. There has been a notable stark discrepancy in maternal mortality (pregnancy-related deaths) in minority women. Is there a relationship between pregnancy-related deaths and the predictors of race and other factors?
+
+3. We were also interested in examining cancer incidence and mortality rates as cancer of all forms is the second leading cause of death in New York City. What are the different social factors that can play a role in cancer rates we examined income levels across New York City? Are these predictors of cancer incidence and mortality rates across the city?
+
+4. There are stark differences between the leading causes of death among age groups. What were the leading causes of death by age group? Is there a relationship between age group as a predictor of Suicide Deaths and Opioid Poisoning Deaths? 
+
 ```{r include = FALSE}
 Disease = c("Heart Disease", "Cancer", "HIV", "Poisonings", "Suicide", "Maternal Mortality")
 Deaths = c(33294, 24627, 412, 4646, 1642, 513)
@@ -44,3 +62,4 @@ leading %>%
 ```
 
 Source: https://www.worldlifeexpectancy.com/new-york-cause-of-death-by-age-and-gender
+
