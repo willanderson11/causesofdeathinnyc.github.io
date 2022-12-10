@@ -383,9 +383,7 @@ specific questions based on our interests and research experience. We
 chose the period of 2007-2019 to focus on the modern causes of death in
 the city to avoid confounding factors of death due to the COVID-19
 outbreak (2019 onward).</p>
-</div>
-<div id="questions-and-planned-analyses" class="section level2">
-<h2>Questions and Planned Analyses</h2>
+<p><br> ## Questions and Planned Analyses</p>
 <p>Each team member decided to focus on a specific cause of death and an
 individual-level factor (i.e., age, income, education level, etc.) that
 contributed to the changes in leading causes of death observed in the
@@ -405,6 +403,7 @@ death in New York City. What are the different social factors that can
 play a role in cancer rates we examined income levels across New York
 City? Are these predictors of cancer incidence and mortality rates
 across the city?</p></li>
+<li><p>(Angelica’s Questions)</p></li>
 <li><p>There are stark differences between the leading causes of death
 among age groups. What were the leading causes of death by age group? Is
 there a relationship between age group as a predictor of Suicide Deaths
@@ -421,9 +420,138 @@ and Opioid Poisoning Deaths?</p></li>
   )+
   theme(legend.position = &quot;none&quot;)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
-<p>Source: <a
-href="https://www.worldlifeexpectancy.com/new-york-cause-of-death-by-age-and-gender"
-class="uri">https://www.worldlifeexpectancy.com/new-york-cause-of-death-by-age-and-gender</a></p>
+<p><a
+href="https://www.worldlifeexpectancy.com/new-york-cause-of-death-by-age-and-gender">Figure
+Source</a></p>
+<p><br> ## Data Processing and Cleaning</p>
+<ol style="list-style-type: decimal">
+<li>Heart Disease Related Deaths <a
+href="https://health.data.ny.gov/Health/Vital-Statistics-Deaths-by-Region-and-Age-Group-by/c3ns-hz2v">(Dataset)</a></li>
+</ol>
+<p>Data was obtained from the Health Department of New York State. The
+dataset ‘Vital Statistics Deaths by Region and Age-Group by Selected
+Cause of Death Beginning 2003’ was tidied to only include heart disease
+related deaths. We factored the <code>age_group</code> as &lt;1, 1-9,
+10-19, 20-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75-84, 85+ and
+<code>race_or_ethnicity</code> as White Non-Hispanic, Black
+Non-Hispanic, Hispanic, Other Non-Hispanic. We factored <code>sex</code>
+as Male and Female. The tidied dataset has 200 rows and 4 columns.</p>
+<p>The columns of interest for our analysis are:</p>
+<p><code>deaths</code> : number of deaths related to one certain type of
+disease</p>
+<p><code>sex</code> : gender</p>
+<p><code>age_group</code> : age group</p>
+<p><code>race_or_ethnicity</code> : race group</p>
+<p><br> 2. (Jenifer’s Datasets)</p>
+<p><br> 3. Median Household Income Data in New York City <a
+href="https://data.cccnewyork.org/data/download#0,8/0,29">(Dataset)</a></p>
+<p>Median Household Income Data for New York City and its boroughs was
+obtained from an organization called Citizens’ Committee for Children of
+New York which organized tabular data on median household income between
+2005 - 2019, for all neighborhoods and boroughs in New York City and for
+households with and without children. To clean the data, we had to
+remove columns that were not relevant to the analysis or contained
+explanations for the data formats. We also had to rename columns to
+their appropriate titles as well as converting column types to numeric
+forms as needed. Lastly, we filtered by household types to include
+households with and without children.</p>
+<p>The columns of interest for our analysis are:</p>
+<p><code>location</code>: The borough or neighborhood within New York
+City</p>
+<p><code>median_income</code>: The annual median household income for
+the specific location</p>
+<p><code>household_type</code>: Whether the household has children or
+not, filtered for all households</p>
+<p><code>year</code>: The year the data was reported</p>
+<ul>
+<li>Cancer Incidence and Mortality Rates <a
+href="https://www.health.ny.gov/statistics/cancer/registry/">(Dataset
+1)</a>, <a
+href="https://www.health.ny.gov/statistics/cancer/registry/vol1n.htm">(Dataset
+2)</a></li>
+</ul>
+<p>Each link on this page to the cancer incidence rate in each
+neighborhood for each borough was used in the analysis except for Staten
+Island (<a
+href="https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalbronx.htm">Dataset
+1</a>, <a
+href="https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalkings.htm">Dataset
+2</a>, <a
+href="https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalnewyork.htm">Dataset
+3</a>, <a
+href="https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalqueens.htm">Dataset
+4</a>)</p>
+<p>Data for cancer incidence and mortality rates was obtained from the
+New York State Department of Health’s Cancer Registry for cancer rates
+in each borough and neighborhood of New York City. To clean this
+dataset, we renamed columns to their appropriate titles, filtered the
+year range from 2005 – 2019 and by the borough or neighborhood of
+interest. We selected columns related to the rates of cancer incidence
+and mortality which were given in rates per 100,000 people.</p>
+<p>The columns of interest for our analysis are:</p>
+<p><code>year</code>: The year the data was reported</p>
+<p><code>incidence_per_100k</code>: The cancer incidence rate per
+100,000 people</p>
+<p><code>mortality_per_100k</code>: The cancer mortality rate per
+100,000 people</p>
+<ol start="4" style="list-style-type: decimal">
+<li>(Angelica’s Datasets)</li>
+</ol>
+<p><br> 5. Age as a Predictor of Death (in relation to Suicide and
+Opioid Related Deaths):</p>
+<ul>
+<li>Death by Age <a
+href="https://health.data.ny.gov/Health/Vital-Statistics-Deaths-by-Resident-County-Region-/xit9-mprv">(Dataset)</a></li>
+</ul>
+<p>Data was obtained from the Health Department of New York State. The
+‘Vital Statistics Deaths by Resident County, Region, and Age-Group:
+Beginning 2003’ dataset was filtered for the <code>region</code> of
+“NYC”, in order to depict the trend in number of deaths by county in the
+NYC region. The resulting dataset has 1,023 rows and 5 columns.</p>
+<p>The following columns are of focus for our analysis:</p>
+<p><code>year</code> : calendar year in which the deaths took place</p>
+<p><code>county_name</code> : county of resident</p>
+<p><code>age_group</code> : age group</p>
+<p><code>deaths</code> : number of deaths</p>
+<ul>
+<li>Death in New York State <a
+href="https://health.data.ny.gov/Health/Vital-Statistics-Deaths-by-Region-and-Age-Group-by/c3ns-hz2v">(Dataset)</a></li>
+</ul>
+<p>Data was obtained from the Health Department of New York State. The
+first dataset used to observe the differences in the leading causes of
+death among different age groups was the ‘Vital Statistics Deaths by
+Region and Age-Group by Selected Cause of Death: Beginning 2003’ which
+contains 8,472 rows and 6 columns, for our analysis we retained all
+columns of the dataset, cleaned up the column titles and recoded the use
+of “CLRD: in the <code>selected_cause_of_death</code> column to “Chronic
+Lower Respiratory Disease”, for ease of interpretation.</p>
+<p>The following column are of focus for our analysis:</p>
+<p><code>year</code> : calendar year in which the deaths took place</p>
+<p><code>age_group</code> : age group</p>
+<p><code>selected_cause_of_death</code> : high level aggregation of the
+cause of death of the resident</p>
+<p><code>deaths</code> : number of deaths among New York State residents
+for a calendar</p>
+<ul>
+<li>Opioid Death and Suicide Death Datasets (<a
+href="https://health.data.ny.gov/Health/Vital-Statistics-Opioid-Related-Deaths-by-Age-Grou/qabx-2sqw">Dataset
+1</a>, <a
+href="https://health.data.ny.gov/Health/Vital-Statistics-Suicide-Deaths-by-Age-Group-Race-/j6fz-a4ta">Datset
+2</a>)</li>
+</ul>
+<p>Data was obtained from the Health Department of New York State, by
+merging two datasets by the shared fields of year, sex, region, race,
+and age group. We then filtered the merged datasets for the data groups
+that were known and for the <code>region</code> of “NYC” and mutated the
+<code>age_group</code> variable to a factor variable, resulting in a
+table with 1,859 rows and 4 columns.</p>
+<p>The columns of interest for our analysis are:</p>
+<p><code>year</code> : calendar year in which the death took place</p>
+<p><code>age_group</code> : age group</p>
+<p><code>opioid_poisoning_deaths</code> : death in which a drug
+poisoning is the cause of death</p>
+<p><code>suicide_deaths</code> : death in which suicide is the cause of
+death</p>
 </div>
 
 
