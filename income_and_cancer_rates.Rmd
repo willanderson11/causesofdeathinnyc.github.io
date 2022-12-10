@@ -150,9 +150,11 @@ Now we will be loading and examining cancer incidence and mortality rates in New
 
 These datasets include the location within NYC for each cancer data recording from 2005 - 2019, the cancer incidence rate per 100,000 people for all types of cancer for both males and females and the cancer mortality rate per 100,000 people for all types of cancer for both males and females. Ethnicity, race, and age are not included in this dataset, the only identifying information is the person's sex. 
 
-I used datasets containing cancer incidence data per New York City boroughs and neighborhoods from 2015 - 2019, as well as cancer incidence and mortality rates in Queens, Brooklyn, Manhattan, and the Bronx over time from 2005 - 2019 from the following links: 
+We used datasets containing cancer incidence data per New York City boroughs and neighborhoods from 2015 - 2019, as well as cancer incidence and mortality rates in Queens, Brooklyn, Manhattan, and the Bronx over time from 2005 - 2019 from the following links: 
 
 * https://www.health.ny.gov/statistics/cancer/registry/vol1n.htm
+
+  * Each link on this page to the cancer incidence rate in each neighborhood for each borough was used in the analysis except for Staten Island 
 
 * https://www.health.ny.gov/statistics/cancer/registry/table2/tb2totalbronx.htm
  
@@ -390,7 +392,7 @@ income_data %>%
   filter(location %in% "New York City")
 
 
-nyc_cancer_rates = read_excel("C:/Users/Will/Documents/nyc_cancer_data.xlsx", sheet = "all NYC", skip = 2) %>%
+nyc_cancer_rates = read_excel("data/nyc_cancer_data.xlsx", sheet = "all NYC", skip = 2) %>%
   
   janitor::clean_names() %>%
   
@@ -438,7 +440,7 @@ income_data %>%
 Now we will examine all the neighborhoods within the four boroughs and plot their respective median household income vs cancer incidence rates from 2015 - 2019 to examine any trends. 
 
 ```{r, message = FALSE, warning = FALSE}
-cancer_data_by_income = read_excel("C:/Users/Will/Documents/nyc_cancer_data.xlsx", sheet = "income_vs_incidence") 
+cancer_data_by_income = read_excel("data/nyc_cancer_data.xlsx", sheet = "income_vs_incidence") 
 
 cancer_data_by_income %>%
   
