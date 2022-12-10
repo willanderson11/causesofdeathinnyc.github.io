@@ -1,5 +1,5 @@
 ---
-title: "HIV-Related Deaths"
+title: "HIV/Aids Related Deaths in New York City"
 output: 
   html_document:
     toc: true
@@ -36,8 +36,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ```
 
-
-## Motivation to Investiagate HIV-Related Deaths
+## Motivation to Investiagate HIV/Aids Related Deaths
 
 ```{r}
 #Import data set and clean data
@@ -49,61 +48,60 @@ hiv_data = read.csv("data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
 
 ```
 
-
-## Visualizing HIV Incidence and Mortality Rates by Borough, Race, and Gender
-
+## Visualizing HIV/Aids Number of Deaths and Death Rate by Borough, Race, and Gender
 
 ```{r}
-#Average Number of HIV-related Deaths in NYC (2011-2015)
+#Number of HIV-related Deaths in NYC (2011-2015)
 
-hiv_data %>% 
+hiv_deaths = hiv_data %>% 
   filter(borough == "All") %>% # Filter hiv data by borough
-  select(.data = ., year, deaths)   %>%
-      group_by(year) %>%
-         summarise(mean_deaths = mean(deaths)) %>% #mean number of deaths 
- ggplot(aes(x = year, y = mean_deaths)) +
+  select(.data = ., year, deaths) %>%
+  group_by(year) %>%
+  summarise(sum_deaths = sum(deaths))
+  
+ggplot(data=hiv_deaths, aes(x=year, y= sum_deaths, group=1)) +
     geom_line() +
     geom_point()+
-  labs (title = "Decline in Number of HIV-related deaths in NYC (2011-2015)",
+  labs (title = "Number of HIV/Aids Related deaths in NYC (2011-2015)",
     x = "Year",
-    y = "Average Number of deaths") +
+    y = "Number of deaths") +
   theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
-
 ```{r}
-#Average HIV-related deaths in NYC by race 
+#HIV-related deaths in NYC by race 
 
 hiv_data %>% # Filter hiv data by borough
   filter(borough != "All") %>% # Filter hiv data by borough
+  filter(race != "All" & race != 'Other/Unknown') %>% # Filter hiv data by race
   select(.data = ., year, deaths, race, borough)   %>% 
       group_by(year, race, borough) %>%
-         summarise(mean_deaths = mean(deaths)) %>% #mean number of deaths  
- ggplot(aes(x = year, y = mean_deaths, color = race)) +
+         summarise(sum_deaths = sum(deaths)) %>% #total number of deaths  
+ ggplot(aes(x = year, y = sum_deaths, color = race)) +
     geom_line() +
   facet_grid(~borough) +
-  labs (title = "Average HIV-related deaths in NYC by Race (2011-2015)",  
+  labs (title = "HIV-related deaths in NYC Boroughs by Race (2011-2015)",  
     x = "Year",
-    y = "Average Number of deaths") + 
+    y = "Number of deaths") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   theme(plot.title = element_text(hjust = 0.5))  
 ```
 
-
 ```{r}
-#Average Number of HIV-related deaths in NYC by Sex 
+#Number of HIV-related deaths in NYC by Sex 
 
 hiv_data %>% 
   filter(sex != "All") %>% # Filter hiv data by gender
+  filter(sex != "Transgender") %>% # Filter hiv data by gender
   filter(borough != "All") %>% # Filter hiv data by borough
   select(.data = ., year, deaths, sex, borough)   %>% 
       group_by(year, sex, borough) %>%
-         summarise(mean_deaths = mean(deaths)) %>% #mean number of deaths  
- ggplot(aes(x = year, y = mean_deaths, fill = sex)) +
+         summarise(sum_deaths = sum(deaths)) %>% #mean number of deaths  
+ ggplot(aes(x = year, y = sum_deaths, fill = sex)) +
   geom_bar(stat= "identity") +
   facet_grid(~borough) +
-  labs(title = "Average HIV-related deaths in NYC by Sex (2011-2015)",  
+  labs(title = "HIV/Aids related deaths in NYC by Sex (2011-2015)",  
     x = "Year",
     y = "Average Number of deaths") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -111,24 +109,26 @@ hiv_data %>%
 ```
 
 ```{r}
-# Total Number of Deaths in NYC by Age 
+#Number of Hiv-related Deaths in NYC  by Age 
 hiv_data %>% 
   filter(age != "All") %>% 
+  filter(borough == "All") %>% 
   select(.data = ., deaths, age) %>% 
   ggplot(aes(y = deaths, x = reorder(age, deaths), color = age)) +
   geom_boxplot() +
   theme_classic() +
   labs(x = "Age Groups",
        y = "Number of Deaths",
-       title = "HIV-related deaths in NYC by Age (2011-2015)") +
+       title = "HIV/Aids Related deaths in NYC by Age (2011-2015)") +
   theme(plot.title = element_text(hjust = 0.7))  
 
 ```
 
 ```{r}
-# Total Number of Hiv-Related Deaths in NYC by Race 
+# Number of Hiv-Related Deaths in NYC by Race 
 hiv_data %>% 
-  filter(race != "All") %>% 
+  filter(race != "All" & race != "Other/Unknown") %>% 
+  filter(borough == "All") %>% 
   select(.data = ., deaths, race) %>% 
   ggplot(aes(y = deaths, x = reorder(race, deaths), color = race)) +
   geom_boxplot() +
@@ -140,11 +140,9 @@ hiv_data %>%
 
 ```
 
-
 ## Further Analasysis
 
 ### Fitting a MLR Model to understand the relationship between sex, gender, and hiv-related death rate in NYC
-
 
 ```{r}
 hiv_mlr = lm(hiv_related_death_rate ~ sex + age + race + borough , data = hiv_data)
