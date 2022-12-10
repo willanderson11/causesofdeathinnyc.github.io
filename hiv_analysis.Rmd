@@ -239,7 +239,7 @@ model_caret = train(deaths ~ age + sex + borough + concurrent_diagnoses + x_link
 
 model_caret$hiv_mlr 
 
-summary(model_caret)
+model_caret
 
 ```
 

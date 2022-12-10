@@ -728,40 +728,21 @@ model_caret = train(deaths ~ age + sex + borough + concurrent_diagnoses + x_link
 model_caret$hiv_mlr 
 ## NULL
 
-summary(model_caret)
+model_caret
+## Linear Regression 
 ## 
-## Call:
-## lm(formula = .outcome ~ ., data = dat)
+## 6005 samples
+##    5 predictor
 ## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -318.76   -5.58    0.69    6.08  374.69 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 4034, 4035, 4035, 4035, 4035, 4034, ... 
+## Resampling results:
 ## 
-## Coefficients:
-##                                   Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)                       30.79694    3.86151   7.975 1.92e-15 ***
-## `age20 - 29`                      -7.60972    2.02119  -3.765 0.000169 ***
-## `age30 - 39`                      -8.19925    2.01508  -4.069 4.80e-05 ***
-## `age40 - 49`                      -2.24204    2.01958  -1.110 0.266994    
-## `age50 - 59`                      12.74074    2.04866   6.219 5.46e-10 ***
-## `age60+`                          17.96155    2.14661   8.367  &lt; 2e-16 ***
-## ageAll                             2.23220    1.67043   1.336 0.181519    
-## sexFemale                         -0.65472    1.89458  -0.346 0.729676    
-## sexMale                           -4.68766    1.84748  -2.537 0.011204 *  
-## sexTransgender                   -34.13322   12.09001  -2.823 0.004775 ** 
-## boroughBronx                     -20.31493    2.83194  -7.174 8.52e-13 ***
-## boroughBrooklyn                  -28.71927    2.79251 -10.284  &lt; 2e-16 ***
-## boroughManhattan                 -27.89941    2.81461  -9.912  &lt; 2e-16 ***
-## boroughQueens                    -32.70025    2.82767 -11.564  &lt; 2e-16 ***
-## `boroughStaten Island`           -24.71673    3.05037  -8.103 6.87e-16 ***
-## concurrent_diagnoses               3.05870    0.01642 186.279  &lt; 2e-16 ***
-## x_linked_to_care_within_3_months  -0.03470    0.01543  -2.248 0.024604 *  
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+##   RMSE     Rsquared   MAE     
+##   26.0741  0.8634017  11.18847
 ## 
-## Residual standard error: 25.96 on 4466 degrees of freedom
-## Multiple R-squared:  0.9214, Adjusted R-squared:  0.9211 
-## F-statistic:  3273 on 16 and 4466 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Tuning parameter &#39;intercept&#39; was held constant at a value of TRUE</code></pre>
 </div>
 </div>
 <div id="limitations-to-analysis" class="section level2">
