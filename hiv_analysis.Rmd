@@ -1,0 +1,176 @@
+---
+title: "HIV-Related Deaths"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include= FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, message = FALSE , warning = FALSE)
+
+#load packages
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(ggridges)
+library(ggcorrplot)
+library(glmnet)
+library(olsrr)
+
+
+#plot's default
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+```
+
+
+## Motivation to Investiagate HIV-Related Deaths
+
+```{r}
+#Import data set and clean data
+
+hiv_data = read.csv("data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
+   janitor::clean_names() %>%
+    na_if(., 99999) %>%
+  rename(., sex = gender)
+
+```
+
+
+## Visualizing HIV Incidence and Mortality Rates by Borough, Race, and Gender
+
+
+```{r}
+#Average Number of HIV-related Deaths in NYC (2011-2015)
+
+hiv_data %>% 
+  filter(borough == "All") %>% # Filter hiv data by borough
+  select(.data = ., year, deaths)   %>%
+      group_by(year) %>%
+         summarise(mean_deaths = mean(deaths)) %>% #mean number of deaths 
+ ggplot(aes(x = year, y = mean_deaths)) +
+    geom_line() +
+    geom_point()+
+  labs (title = "Decline in Number of HIV-related deaths in NYC (2011-2015)",
+    x = "Year",
+    y = "Average Number of deaths") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+```{r}
+#Average HIV-related deaths in NYC by race 
+
+hiv_data %>% # Filter hiv data by borough
+  filter(borough != "All") %>% # Filter hiv data by borough
+  select(.data = ., year, deaths, race, borough)   %>% 
+      group_by(year, race, borough) %>%
+         summarise(mean_deaths = mean(deaths)) %>% #mean number of deaths  
+ ggplot(aes(x = year, y = mean_deaths, color = race)) +
+    geom_line() +
+  facet_grid(~borough) +
+  labs (title = "Average HIV-related deaths in NYC by Race (2011-2015)",  
+    x = "Year",
+    y = "Average Number of deaths") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  
+```
+
+
+```{r}
+#Average Number of HIV-related deaths in NYC by Sex 
+
+hiv_data %>% 
+  filter(sex != "All") %>% # Filter hiv data by gender
+  filter(borough != "All") %>% # Filter hiv data by borough
+  select(.data = ., year, deaths, sex, borough)   %>% 
+      group_by(year, sex, borough) %>%
+         summarise(mean_deaths = mean(deaths)) %>% #mean number of deaths  
+ ggplot(aes(x = year, y = mean_deaths, fill = sex)) +
+  geom_bar(stat= "identity") +
+  facet_grid(~borough) +
+  labs(title = "Average HIV-related deaths in NYC by Sex (2011-2015)",  
+    x = "Year",
+    y = "Average Number of deaths") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  
+```
+
+```{r}
+# Total Number of Deaths in NYC by Age 
+hiv_data %>% 
+  filter(age != "All") %>% 
+  select(.data = ., deaths, age) %>% 
+  ggplot(aes(y = deaths, x = reorder(age, deaths), color = age)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = "Age Groups",
+       y = "Number of Deaths",
+       title = "HIV-related deaths in NYC by Age (2011-2015)") +
+  theme(plot.title = element_text(hjust = 0.7))  
+
+```
+
+```{r}
+# Total Number of Hiv-Related Deaths in NYC by Race 
+hiv_data %>% 
+  filter(race != "All") %>% 
+  select(.data = ., deaths, race) %>% 
+  ggplot(aes(y = deaths, x = reorder(race, deaths), color = race)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = "Age Groups",
+       y = "Number of Deaths",
+       title = "HIV-related deaths in NYC by Race (2011-2015)") +
+  theme(plot.title = element_text(hjust = 0.7))  
+
+```
+
+
+## Further Analasysis
+
+### Fitting a MLR Model to understand the relationship between sex, gender, and hiv-related death rate in NYC
+
+
+```{r}
+hiv_mlr = lm(hiv_related_death_rate ~ sex + age + race + borough , data = hiv_data)
+
+summary(hiv_mlr)
+
+```
+
+```{r}
+back_step = step(hiv_mlr, direction='backward') 
+summary(back_step)
+
+mallow_cp = ols_step_best_subset(hiv_mlr,cp)
+mallow_cp
+
+```
+
+```{r}
+best_mlr = lm(hiv_related_death_rate ~ age + race + borough, data = hiv_data) 
+
+best_mlr_result = best_mlr %>% 
+  broom::tidy() %>% 
+  filter(p.value < 0.05) %>% 
+  knitr::kable()
+
+best_mlr_result
+```
+
+## Limitations to Analysis

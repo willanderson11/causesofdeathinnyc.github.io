@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>HIV-Related Deaths</title>
+
+<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="index.html">Report</a>
+</li>
+<li>
+  <a href="age.html">Predictor: Age Group</a>
+</li>
+<li>
+  <a href="Heart-Disease-Related-Deaths.html">Heart Disease Related Deaths</a>
+</li>
+<li>
+  <a href="income_and_cancer_rates.html">Income as a Predictor for Cancer Rates</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">HIV-Related Deaths</h1>
+
+</div>
+
+
+<div id="motivation-to-investiagate-hiv-related-deaths"
+class="section level2">
+<h2>Motivation to Investiagate HIV-Related Deaths</h2>
+<pre class="r"><code>#Import data set and clean data
+
+hiv_data = read.csv(&quot;data/DOHMH_HIV_AIDS_Annual_Report.csv&quot;) %&gt;%
+   janitor::clean_names() %&gt;%
+    na_if(., 99999) %&gt;%
+  rename(., sex = gender)</code></pre>
+</div>
+<div
+id="visualizing-hiv-incidence-and-mortality-rates-by-borough-race-and-gender"
+class="section level2">
+<h2>Visualizing HIV Incidence and Mortality Rates by Borough, Race, and
+Gender</h2>
+<pre class="r"><code>#Average Number of HIV-related Deaths in NYC (2011-2015)
+
+hiv_data %&gt;% 
+  filter(borough == &quot;All&quot;) %&gt;% # Filter hiv data by borough
+  select(.data = ., year, deaths)   %&gt;%
+      group_by(year) %&gt;%
+         summarise(mean_deaths = mean(deaths)) %&gt;% #mean number of deaths 
+ ggplot(aes(x = year, y = mean_deaths)) +
+    geom_line() +
+    geom_point()+
+  labs (title = &quot;Decline in Number of HIV-related deaths in NYC (2011-2015)&quot;,
+    x = &quot;Year&quot;,
+    y = &quot;Average Number of deaths&quot;) +
+  theme(plot.title = element_text(hjust = 0.5))</code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<pre class="r"><code>#Average HIV-related deaths in NYC by race 
+
+hiv_data %&gt;% # Filter hiv data by borough
+  filter(borough != &quot;All&quot;) %&gt;% # Filter hiv data by borough
+  select(.data = ., year, deaths, race, borough)   %&gt;% 
+      group_by(year, race, borough) %&gt;%
+         summarise(mean_deaths = mean(deaths)) %&gt;% #mean number of deaths  
+ ggplot(aes(x = year, y = mean_deaths, color = race)) +
+    geom_line() +
+  facet_grid(~borough) +
+  labs (title = &quot;Average HIV-related deaths in NYC by Race (2011-2015)&quot;,  
+    x = &quot;Year&quot;,
+    y = &quot;Average Number of deaths&quot;) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  </code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<pre class="r"><code>#Average Number of HIV-related deaths in NYC by Sex 
+
+hiv_data %&gt;% 
+  filter(sex != &quot;All&quot;) %&gt;% # Filter hiv data by gender
+  filter(borough != &quot;All&quot;) %&gt;% # Filter hiv data by borough
+  select(.data = ., year, deaths, sex, borough)   %&gt;% 
+      group_by(year, sex, borough) %&gt;%
+         summarise(mean_deaths = mean(deaths)) %&gt;% #mean number of deaths  
+ ggplot(aes(x = year, y = mean_deaths, fill = sex)) +
+  geom_bar(stat= &quot;identity&quot;) +
+  facet_grid(~borough) +
+  labs(title = &quot;Average HIV-related deaths in NYC by Sex (2011-2015)&quot;,  
+    x = &quot;Year&quot;,
+    y = &quot;Average Number of deaths&quot;) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  </code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
+<pre class="r"><code># Total Number of Deaths in NYC by Age 
+hiv_data %&gt;% 
+  filter(age != &quot;All&quot;) %&gt;% 
+  select(.data = ., deaths, age) %&gt;% 
+  ggplot(aes(y = deaths, x = reorder(age, deaths), color = age)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = &quot;Age Groups&quot;,
+       y = &quot;Number of Deaths&quot;,
+       title = &quot;HIV-related deaths in NYC by Age (2011-2015)&quot;) +
+  theme(plot.title = element_text(hjust = 0.7))  </code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<pre class="r"><code># Total Number of Hiv-Related Deaths in NYC by Race 
+hiv_data %&gt;% 
+  filter(race != &quot;All&quot;) %&gt;% 
+  select(.data = ., deaths, race) %&gt;% 
+  ggplot(aes(y = deaths, x = reorder(race, deaths), color = race)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = &quot;Age Groups&quot;,
+       y = &quot;Number of Deaths&quot;,
+       title = &quot;HIV-related deaths in NYC by Race (2011-2015)&quot;) +
+  theme(plot.title = element_text(hjust = 0.7))  </code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+</div>
+<div id="further-analasysis" class="section level2">
+<h2>Further Analasysis</h2>
+<div
+id="fitting-a-mlr-model-to-understand-the-relationship-between-sex-gender-and-hiv-related-death-rate-in-nyc"
+class="section level3">
+<h3>Fitting a MLR Model to understand the relationship between sex,
+gender, and hiv-related death rate in NYC</h3>
+<pre class="r"><code>hiv_mlr = lm(hiv_related_death_rate ~ sex + age + race + borough , data = hiv_data)
+
+summary(hiv_mlr)
+## 
+## Call:
+## lm(formula = hiv_related_death_rate ~ sex + age + race + borough, 
+##     data = hiv_data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -12.938  -3.373  -1.616   0.425 170.191 
+## 
+## Coefficients:
+##                            Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                 0.66771    1.35975   0.491 0.623413    
+## sexFemale                  -0.02893    0.85712  -0.034 0.973078    
+## sexMale                     0.05914    0.85712   0.069 0.944997    
+## sexTransgender              1.28698    4.92399   0.261 0.793819    
+## age20 - 29                  2.45833    0.69031   3.561 0.000373 ***
+## age30 - 39                  2.77630    0.69031   4.022 5.86e-05 ***
+## age40 - 49                  4.21068    0.69031   6.100 1.15e-09 ***
+## age50 - 59                  6.13828    0.69031   8.892  &lt; 2e-16 ***
+## age60+                      9.80755    0.69031  14.207  &lt; 2e-16 ***
+## ageAll                      3.84531    0.69031   5.570 2.68e-08 ***
+## raceAsian/Pacific Islander -1.49844    0.69031  -2.171 0.030005 *  
+## raceBlack                   0.39063    0.69031   0.566 0.571509    
+## raceLatino/Hispanic         0.68333    0.69031   0.990 0.322276    
+## raceOther/Unknown          -2.91224    0.69031  -4.219 2.50e-05 ***
+## raceWhite                  -0.21406    0.69031  -0.310 0.756501    
+## boroughBronx                0.41838    1.01454   0.412 0.680081    
+## boroughBrooklyn            -0.27808    0.99558  -0.279 0.780013    
+## boroughManhattan           -0.89718    0.99905  -0.898 0.369214    
+## boroughQueens              -1.06427    0.99905  -1.065 0.286803    
+## boroughStaten Island        2.40320    1.04782   2.294 0.021861 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 9.565 on 4784 degrees of freedom
+##   (1201 observations deleted due to missingness)
+## Multiple R-squared:  0.0681, Adjusted R-squared:  0.0644 
+## F-statistic:  18.4 on 19 and 4784 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>back_step = step(hiv_mlr, direction=&#39;backward&#39;) 
+## Start:  AIC=21716.1
+## hiv_related_death_rate ~ sex + age + race + borough
+## 
+##           Df Sum of Sq    RSS   AIC
+## - sex      3      15.2 437719 21710
+## &lt;none&gt;                 437704 21716
+## - race     5    3567.5 441271 21745
+## - borough  5    5061.9 442766 21761
+## - age      6   22281.2 459985 21943
+## 
+## Step:  AIC=21710.27
+## hiv_related_death_rate ~ age + race + borough
+## 
+##           Df Sum of Sq    RSS   AIC
+## &lt;none&gt;                 437719 21710
+## - race     5    3632.9 441352 21740
+## - borough  5    5064.3 442783 21756
+## - age      6   22300.0 460019 21937
+summary(back_step)
+## 
+## Call:
+## lm(formula = hiv_related_death_rate ~ age + race + borough, data = hiv_data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -12.893  -3.346  -1.633   0.383 170.236 
+## 
+## Coefficients:
+##                            Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                  0.7306     1.0488   0.697 0.486064    
+## age20 - 29                   2.4583     0.6901   3.562 0.000371 ***
+## age30 - 39                   2.7763     0.6901   4.023 5.83e-05 ***
+## age40 - 49                   4.2107     0.6901   6.101 1.13e-09 ***
+## age50 - 59                   6.1383     0.6901   8.895  &lt; 2e-16 ***
+## age60+                       9.8076     0.6901  14.212  &lt; 2e-16 ***
+## ageAll                       3.8488     0.6291   6.117 1.03e-09 ***
+## raceAsian/Pacific Islander  -1.5019     0.6291  -2.387 0.017016 *  
+## raceBlack                    0.3872     0.6291   0.615 0.538309    
+## raceLatino/Hispanic          0.6799     0.6291   1.081 0.279899    
+## raceOther/Unknown           -2.9157     0.6291  -4.634 3.68e-06 ***
+## raceWhite                   -0.2175     0.6291  -0.346 0.729571    
+## boroughBronx                 0.3695     0.9969   0.371 0.710867    
+## boroughBrooklyn             -0.3269     0.9776  -0.334 0.738083    
+## boroughManhattan            -0.9460     0.9811  -0.964 0.334978    
+## boroughQueens               -1.1131     0.9811  -1.135 0.256624    
+## boroughStaten Island         2.3544     1.0307   2.284 0.022398 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 9.562 on 4787 degrees of freedom
+##   (1201 observations deleted due to missingness)
+## Multiple R-squared:  0.06806,    Adjusted R-squared:  0.06495 
+## F-statistic: 21.85 on 16 and 4787 DF,  p-value: &lt; 2.2e-16
+
+mallow_cp = ols_step_best_subset(hiv_mlr,cp)
+mallow_cp
+##       Best Subsets Regression      
+## -----------------------------------
+## Model Index    Predictors
+## -----------------------------------
+##      1         age                  
+##      2         age borough          
+##      3         age race borough     
+##      4         sex age race borough 
+## -----------------------------------
+## 
+##                                                          Subsets Regression Summary                                                          
+## ---------------------------------------------------------------------------------------------------------------------------------------------
+##                        Adj.        Pred                                                                                                       
+## Model    R-Square    R-Square    R-Square      C(p)         AIC           SBIC          SBC           MSEP          FPE       HSP       APC  
+## ---------------------------------------------------------------------------------------------------------------------------------------------
+##   1        0.0495      0.0484      0.0473     79.2372    35419.9555    21776.7320    35471.7732    446603.3832    93.1005    0.0194    0.9512 
+##   2        0.0603      0.0582      0.0563     25.8733    35375.1337    21723.9475    35459.3374    441627.8342    92.1594    0.0192    0.9408 
+##   3        0.0681      0.0649      0.0614    -11.8339    35345.4265    21686.2982    35462.0162    438083.8920    91.5153    0.0191    0.9335 
+##   4        0.0681      0.0644       0.061    -10.0000    35351.2597    21688.1400    35487.2810    438159.9838    91.5885    0.0191    0.9338 
+## ---------------------------------------------------------------------------------------------------------------------------------------------
+## AIC: Akaike Information Criteria 
+##  SBIC: Sawa&#39;s Bayesian Information Criteria 
+##  SBC: Schwarz Bayesian Criteria 
+##  MSEP: Estimated error of prediction, assuming multivariate normality 
+##  FPE: Final Prediction Error 
+##  HSP: Hocking&#39;s Sp 
+##  APC: Amemiya Prediction Criteria</code></pre>
+<pre class="r"><code>best_mlr = lm(hiv_related_death_rate ~ age + race + borough, data = hiv_data) 
+
+best_mlr_result = best_mlr %&gt;% 
+  broom::tidy() %&gt;% 
+  filter(p.value &lt; 0.05) %&gt;% 
+  knitr::kable()
+
+best_mlr_result</code></pre>
+<table>
+<colgroup>
+<col width="40%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age20 - 29</td>
+<td align="right">2.458333</td>
+<td align="right">0.6901054</td>
+<td align="right">3.562258</td>
+<td align="right">0.0003713</td>
+</tr>
+<tr class="even">
+<td align="left">age30 - 39</td>
+<td align="right">2.776302</td>
+<td align="right">0.6901054</td>
+<td align="right">4.023012</td>
+<td align="right">0.0000583</td>
+</tr>
+<tr class="odd">
+<td align="left">age40 - 49</td>
+<td align="right">4.210677</td>
+<td align="right">0.6901054</td>
+<td align="right">6.101499</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age50 - 59</td>
+<td align="right">6.138281</td>
+<td align="right">0.6901054</td>
+<td align="right">8.894701</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age60+</td>
+<td align="right">9.807552</td>
+<td align="right">0.6901054</td>
+<td align="right">14.211673</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">ageAll</td>
+<td align="right">3.848754</td>
+<td align="right">0.6291402</td>
+<td align="right">6.117483</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">raceAsian/Pacific Islander</td>
+<td align="right">-1.501879</td>
+<td align="right">0.6291402</td>
+<td align="right">-2.387193</td>
+<td align="right">0.0170161</td>
+</tr>
+<tr class="even">
+<td align="left">raceOther/Unknown</td>
+<td align="right">-2.915681</td>
+<td align="right">0.6291402</td>
+<td align="right">-4.634391</td>
+<td align="right">0.0000037</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughStaten Island</td>
+<td align="right">2.354375</td>
+<td align="right">1.0306823</td>
+<td align="right">2.284288</td>
+<td align="right">0.0223982</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="limitations-to-analysis" class="section level2">
+<h2>Limitations to Analysis</h2>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
