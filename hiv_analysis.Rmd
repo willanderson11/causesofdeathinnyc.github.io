@@ -48,7 +48,7 @@ hiv_data = read.csv("data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
 
 ```
 
-## Visualizing HIV/Aids Number of Deaths and Death Rate by Borough, Race, and Gender
+## Exploring HIV/Aids Related Deaths in NYC by Race, Age, and Sex
 
 ```{r}
 #Number of HIV-related Deaths in NYC (2011-2015)
@@ -70,6 +70,57 @@ ggplot(data=hiv_deaths, aes(x=year, y= sum_deaths, group=1)) +
 ```
 
 ```{r}
+#Boxplot Hiv-Related Deaths by Race 
+hiv_data %>% 
+  filter(race != "All" & race != "Other/Unknown") %>% 
+  filter(year != "All") %>% 
+  filter(borough == "All") %>% 
+  select(.data = ., deaths, race, year) %>% 
+  ggplot(aes(y = deaths, x = reorder(race, -deaths), color = race)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = "Race",
+       y = "Number of Deaths",
+       title = "HIV-related Deaths by Race") +
+  theme(plot.title = element_text(hjust = 0.7))  
+
+```
+
+
+```{r}
+#Boxplot Hiv-related Deaths in NYCby Age 
+hiv_data %>% 
+  filter(age != "All") %>% 
+  filter(year != "All") %>%
+  filter(borough == "All") %>% 
+  select(.data = ., deaths, age, year) %>% 
+  ggplot(aes(y = deaths, x = reorder(age, -deaths), color = age)) +
+  geom_boxplot() +
+  labs(x = "Age Group",
+       y = "Number of Deaths",
+       title = "HIV/Aids Related Deaths by Age") +
+  theme(plot.title = element_text(hjust = 0.7))  
+
+```
+
+```{r}
+#Boxplot Hiv-related Deaths in NYC by Sex 
+hiv_data %>% 
+  filter(sex != "All" & sex != "Transgender") %>% 
+  filter(borough == "All") %>% 
+  select(.data = ., deaths, sex, year) %>% 
+  ggplot(aes(y = deaths, x = reorder(sex, -deaths), color = sex)) +
+  geom_boxplot() +
+  labs(x = "Sex",
+       y = "Number of Deaths",
+       title = "HIV/Aids Related Deaths by Sex") +
+  theme(plot.title = element_text(hjust = 0.7))  
+```
+
+## Visualiazing HIV/Aids Related Deaths by NYC Borough
+
+
+```{r}
 #HIV-related deaths in NYC by race 
 
 hiv_data %>% # Filter hiv data by borough
@@ -89,16 +140,15 @@ hiv_data %>% # Filter hiv data by borough
 ```
 
 ```{r}
-#Number of HIV-related deaths in NYC by Sex 
-
+#Number of HIV-related deaths in NYC by Age
 hiv_data %>% 
-  filter(sex != "All") %>% # Filter hiv data by gender
-  filter(sex != "Transgender") %>% # Filter hiv data by gender
+  filter(age != "All") %>% # Filter hiv data by gender
   filter(borough != "All") %>% # Filter hiv data by borough
-  select(.data = ., year, deaths, sex, borough)   %>% 
-      group_by(year, sex, borough) %>%
-         summarise(sum_deaths = sum(deaths)) %>% #mean number of deaths  
- ggplot(aes(x = year, y = sum_deaths, fill = sex)) +
+  select(.data = ., year, deaths, age, borough)  %>%
+  na_if(., 0) %>%
+  group_by(year, borough, age)  %>%
+summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
+ ggplot(aes(x = year, y = sum_deaths, fill = age)) +
   geom_bar(stat= "identity") +
   facet_grid(~borough) +
   labs(title = "HIV/Aids related deaths in NYC by Sex (2011-2015)",  
@@ -109,35 +159,23 @@ hiv_data %>%
 ```
 
 ```{r}
-#Number of Hiv-related Deaths in NYC  by Age 
+#Number of HIV-related deaths in NYC by Sex 
 hiv_data %>% 
-  filter(age != "All") %>% 
-  filter(borough == "All") %>% 
-  select(.data = ., deaths, age) %>% 
-  ggplot(aes(y = deaths, x = reorder(age, deaths), color = age)) +
-  geom_boxplot() +
-  theme_classic() +
-  labs(x = "Age Groups",
-       y = "Number of Deaths",
-       title = "HIV/Aids Related deaths in NYC by Age (2011-2015)") +
-  theme(plot.title = element_text(hjust = 0.7))  
-
-```
-
-```{r}
-# Number of Hiv-Related Deaths in NYC by Race 
-hiv_data %>% 
-  filter(race != "All" & race != "Other/Unknown") %>% 
-  filter(borough == "All") %>% 
-  select(.data = ., deaths, race) %>% 
-  ggplot(aes(y = deaths, x = reorder(race, deaths), color = race)) +
-  geom_boxplot() +
-  theme_classic() +
-  labs(x = "Age Groups",
-       y = "Number of Deaths",
-       title = "HIV-related deaths in NYC by Race (2011-2015)") +
-  theme(plot.title = element_text(hjust = 0.7))  
-
+  filter(sex != "All") %>% # Filter hiv data by gender
+  filter(sex != "Transgender") %>% # Filter hiv data by gender
+  filter(borough != "All") %>% # Filter hiv data by borough
+  select(.data = ., year, deaths, sex, borough)  %>%
+  na_if(., 0) %>%
+  group_by(year, borough, sex)  %>%
+summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
+ ggplot(aes(x = year, y = sum_deaths, fill = sex)) +
+  geom_bar(stat= "identity") +
+  facet_grid(~borough) +
+  labs(title = "HIV/Aids related deaths in NYC by Sex (2011-2015)",  
+    x = "Year",
+    y = "Average Number of deaths") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  
 ```
 
 ## Further Analasysis

@@ -370,11 +370,9 @@ hiv_data = read.csv(&quot;data/DOHMH_HIV_AIDS_Annual_Report.csv&quot;) %&gt;%
     na_if(., 99999) %&gt;%
   rename(., sex = gender)</code></pre>
 </div>
-<div
-id="visualizing-hivaids-number-of-deaths-and-death-rate-by-borough-race-and-gender"
+<div id="exploring-hivaids-related-deaths-in-nyc-by-race-age-and-sex"
 class="section level2">
-<h2>Visualizing HIV/Aids Number of Deaths and Death Rate by Borough,
-Race, and Gender</h2>
+<h2>Exploring HIV/Aids Related Deaths in NYC by Race, Age, and Sex</h2>
 <pre class="r"><code>#Number of HIV-related Deaths in NYC (2011-2015)
 
 hiv_deaths = hiv_data %&gt;% 
@@ -391,6 +389,49 @@ ggplot(data=hiv_deaths, aes(x=year, y= sum_deaths, group=1)) +
     y = &quot;Number of deaths&quot;) +
   theme(plot.title = element_text(hjust = 0.5))</code></pre>
 <p><img src="hiv_analysis_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<pre class="r"><code>#Boxplot Hiv-Related Deaths by Race 
+hiv_data %&gt;% 
+  filter(race != &quot;All&quot; &amp; race != &quot;Other/Unknown&quot;) %&gt;% 
+  filter(year != &quot;All&quot;) %&gt;% 
+  filter(borough == &quot;All&quot;) %&gt;% 
+  select(.data = ., deaths, race, year) %&gt;% 
+  ggplot(aes(y = deaths, x = reorder(race, -deaths), color = race)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = &quot;Race&quot;,
+       y = &quot;Number of Deaths&quot;,
+       title = &quot;HIV-related Deaths by Race&quot;) +
+  theme(plot.title = element_text(hjust = 0.7))  </code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<pre class="r"><code>#Boxplot Hiv-related Deaths in NYCby Age 
+hiv_data %&gt;% 
+  filter(age != &quot;All&quot;) %&gt;% 
+  filter(year != &quot;All&quot;) %&gt;%
+  filter(borough == &quot;All&quot;) %&gt;% 
+  select(.data = ., deaths, age, year) %&gt;% 
+  ggplot(aes(y = deaths, x = reorder(age, -deaths), color = age)) +
+  geom_boxplot() +
+  labs(x = &quot;Age Group&quot;,
+       y = &quot;Number of Deaths&quot;,
+       title = &quot;HIV/Aids Related Deaths by Age&quot;) +
+  theme(plot.title = element_text(hjust = 0.7))  </code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
+<pre class="r"><code>#Boxplot Hiv-related Deaths in NYC by Sex 
+hiv_data %&gt;% 
+  filter(sex != &quot;All&quot; &amp; sex != &quot;Transgender&quot;) %&gt;% 
+  filter(borough == &quot;All&quot;) %&gt;% 
+  select(.data = ., deaths, sex, year) %&gt;% 
+  ggplot(aes(y = deaths, x = reorder(sex, -deaths), color = sex)) +
+  geom_boxplot() +
+  labs(x = &quot;Sex&quot;,
+       y = &quot;Number of Deaths&quot;,
+       title = &quot;HIV/Aids Related Deaths by Sex&quot;) +
+  theme(plot.title = element_text(hjust = 0.7))  </code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+</div>
+<div id="visualiazing-hivaids-related-deaths-by-nyc-borough"
+class="section level2">
+<h2>Visualiazing HIV/Aids Related Deaths by NYC Borough</h2>
 <pre class="r"><code>#HIV-related deaths in NYC by race 
 
 hiv_data %&gt;% # Filter hiv data by borough
@@ -407,16 +448,33 @@ hiv_data %&gt;% # Filter hiv data by borough
     y = &quot;Number of deaths&quot;) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   theme(plot.title = element_text(hjust = 0.5))  </code></pre>
-<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<pre class="r"><code>#Number of HIV-related deaths in NYC by Age
+hiv_data %&gt;% 
+  filter(age != &quot;All&quot;) %&gt;% # Filter hiv data by gender
+  filter(borough != &quot;All&quot;) %&gt;% # Filter hiv data by borough
+  select(.data = ., year, deaths, age, borough)  %&gt;%
+  na_if(., 0) %&gt;%
+  group_by(year, borough, age)  %&gt;%
+summarise(sum_deaths = sum(deaths, na.rm = T)) %&gt;%
+ ggplot(aes(x = year, y = sum_deaths, fill = age)) +
+  geom_bar(stat= &quot;identity&quot;) +
+  facet_grid(~borough) +
+  labs(title = &quot;HIV/Aids related deaths in NYC by Sex (2011-2015)&quot;,  
+    x = &quot;Year&quot;,
+    y = &quot;Average Number of deaths&quot;) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  </code></pre>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <pre class="r"><code>#Number of HIV-related deaths in NYC by Sex 
-
 hiv_data %&gt;% 
   filter(sex != &quot;All&quot;) %&gt;% # Filter hiv data by gender
   filter(sex != &quot;Transgender&quot;) %&gt;% # Filter hiv data by gender
   filter(borough != &quot;All&quot;) %&gt;% # Filter hiv data by borough
-  select(.data = ., year, deaths, sex, borough)   %&gt;% 
-      group_by(year, sex, borough) %&gt;%
-         summarise(sum_deaths = sum(deaths)) %&gt;% #mean number of deaths  
+  select(.data = ., year, deaths, sex, borough)  %&gt;%
+  na_if(., 0) %&gt;%
+  group_by(year, borough, sex)  %&gt;%
+summarise(sum_deaths = sum(deaths, na.rm = T)) %&gt;%
  ggplot(aes(x = year, y = sum_deaths, fill = sex)) +
   geom_bar(stat= &quot;identity&quot;) +
   facet_grid(~borough) +
@@ -425,33 +483,7 @@ hiv_data %&gt;%
     y = &quot;Average Number of deaths&quot;) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   theme(plot.title = element_text(hjust = 0.5))  </code></pre>
-<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
-<pre class="r"><code>#Number of Hiv-related Deaths in NYC  by Age 
-hiv_data %&gt;% 
-  filter(age != &quot;All&quot;) %&gt;% 
-  filter(borough == &quot;All&quot;) %&gt;% 
-  select(.data = ., deaths, age) %&gt;% 
-  ggplot(aes(y = deaths, x = reorder(age, deaths), color = age)) +
-  geom_boxplot() +
-  theme_classic() +
-  labs(x = &quot;Age Groups&quot;,
-       y = &quot;Number of Deaths&quot;,
-       title = &quot;HIV/Aids Related deaths in NYC by Age (2011-2015)&quot;) +
-  theme(plot.title = element_text(hjust = 0.7))  </code></pre>
-<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
-<pre class="r"><code># Number of Hiv-Related Deaths in NYC by Race 
-hiv_data %&gt;% 
-  filter(race != &quot;All&quot; &amp; race != &quot;Other/Unknown&quot;) %&gt;% 
-  filter(borough == &quot;All&quot;) %&gt;% 
-  select(.data = ., deaths, race) %&gt;% 
-  ggplot(aes(y = deaths, x = reorder(race, deaths), color = race)) +
-  geom_boxplot() +
-  theme_classic() +
-  labs(x = &quot;Age Groups&quot;,
-       y = &quot;Number of Deaths&quot;,
-       title = &quot;HIV-related deaths in NYC by Race (2011-2015)&quot;) +
-  theme(plot.title = element_text(hjust = 0.7))  </code></pre>
-<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p><img src="hiv_analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 </div>
 <div id="further-analasysis" class="section level2">
 <h2>Further Analasysis</h2>
