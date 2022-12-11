@@ -159,7 +159,7 @@ The columns of interest for our analysis are:
 
 `year`: The year the data was reported 
 
-```{r, warning = FALSE, messages = FALSE}
+```{r, warning = FALSE, message = FALSE}
 maternalmorb<- read_csv("data/Pregnancy-Associated_Mortality.csv")
 ```
 
@@ -570,7 +570,7 @@ mdeathsbyrace = maternalmorb %>%
 mdeathsbyrace
 ```
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 maternalmorb<- read_csv("data/Pregnancy-Associated_Mortality.csv")
 
 mdeathsbyborough = maternalmorb %>%
@@ -582,7 +582,7 @@ mdeathsbyborough = maternalmorb %>%
 mdeathsbyborough
 ```
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 maternalmorb<- read_csv("data/Pregnancy-Associated_Mortality.csv")
 
 mdeathsunderlyingcause = maternalmorb %>%
