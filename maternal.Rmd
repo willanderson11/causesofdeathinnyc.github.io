@@ -36,7 +36,6 @@ scale_fill_discrete = scale_fill_viridis_d
 
 
 ## Maternal Mortality factors as a predictor of Death
-Motivation to view Maternal Mortality factors in relation to Death 
 
 Maternal Mortality has been a cause of death for mothers due to a variety of factors that seem preventable or modifiable. To determine the underlying or root of these causes.
 
