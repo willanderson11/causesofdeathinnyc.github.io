@@ -4,8 +4,9 @@ navbar:
   title: "Home"
   right:
     - text: "Introduction"
-    - text: "Report"
       href: index.html
+    - text: "Report"
+      href: report.html
     - text: "Suicide and Opioid Poisonings"
       href: age.html
     - text: "Heart Disease"
