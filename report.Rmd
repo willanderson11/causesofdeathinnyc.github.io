@@ -962,6 +962,8 @@ At a $\alpha = 0.5$ level, those among the age groups of 20-64 are significant p
 
 * From the multiple linear regression results, age group 75-84, 85+, and race group Hispanic are the significant predictors. From the boxplots, we can see that the age group 75-84, 85+, and race group Hispanic are the most susceptible groups to heart disease related death. There was no significant difference between males and females in terms of heart disease related deaths. These results correspond with our multiple linear regression results. Our preliminary analysis indicated that the elderly over 75 years old are extremely vulnerable to heart diseases and there is racial disparity in health in NYC as Hispanic is the most vulnerable race group among all race groups.  
 
+* There is a clear discrepancy in maternal mortality based on race. Black women are more likely to die due a pregnancy related cause than any other race or ethnic group. 
+Other or Biracial women have the lowest pregnancy related mortality within the 2016 - 2019 time period. 
 
 *  We determined that median household income is not a significant predictor for cancer incidence rates being evidenced by the linear regression results obtained in the analysis. The various plots and statistical tests in our analysis between median household income levels and cancer incidence/mortality rates did not show a correlation between the two variables or showed that median household income level as an insignificant predictor for cancer incidence rates.  
 
