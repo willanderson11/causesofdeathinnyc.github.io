@@ -186,7 +186,7 @@ summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
   theme(plot.title = element_text(hjust = 0.5))  
 ```
 
-## Further Analasysis
+## Further Analysis
 
 ### Fitting a SLR Model: Analysing the relationship between race and of hiv-related death rate in NYC
 
