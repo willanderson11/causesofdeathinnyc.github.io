@@ -11,7 +11,7 @@
 
 
 
-<title>Heart Disease Related Deaths</title>
+<title>NYC Bills of Mortality: Investigating the leading causes of death in New York City</title>
 
 <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -325,11 +325,9 @@ div.tocify {
         
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
-  <a href="index.html">Introduction</a>
-</li>
+        <li class="dropdown-header">Introduction</li>
 <li>
-  <a href="report.html">Report</a>
+  <a href="index.html">Report</a>
 </li>
 <li>
   <a href="age.html">Suicide and Opioid Poisonings</a>
@@ -360,167 +358,63 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Heart Disease Related Deaths</h1>
+<h1 class="title toc-ignore">NYC Bills of Mortality: Investigating the
+leading causes of death in New York City</h1>
 
 </div>
 
 
-<pre class="r"><code>set.seed(7)</code></pre>
-<pre class="r"><code>#load data and clean data
-death_df = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;% 
-  janitor::clean_names() %&gt;% 
-  filter(selected_cause_of_death == &quot;Diseases of the Heart&quot;,
-         race_or_ethnicity != &quot;Not Stated&quot;) %&gt;%
-  mutate(
-    age_group = as.factor(age_group),
-    age_group = fct_recode(
-      age_group, &quot;&lt;1&quot; = &quot;1&quot;, &quot;1-9&quot; = &quot;2&quot;, &quot;10-19&quot; = &quot;3&quot;, &quot;20-24&quot; = &quot;4&quot;, &quot;25-34&quot; = &quot;5&quot;, &quot;35-44&quot;=&quot;6&quot;,                  &quot;45-54&quot; = &quot;7&quot;, &quot;55-64&quot; = &quot;8&quot;, &quot;65-74&quot; = &quot;9&quot;, &quot;75-84&quot; = &quot;10&quot;, &quot;85+&quot; = &quot;11&quot;),
-    sex = as.factor(sex),
-    sex = fct_recode(sex, &quot;M&quot; = &quot;1&quot;, &quot;F&quot; = &quot;2&quot;),
-    race_or_ethnicity = as.factor(race_or_ethnicity),
-    race_or_ethnicity = fct_recode(race_or_ethnicity, &quot;White Non Hispanic&quot; = &quot;1&quot;, 
-                                   &quot;Black Non Hispanic&quot; = &quot;2&quot;, &quot;Hispanic&quot; = &quot;3&quot;, 
-                                   &quot;Other Non Hispanic&quot; = &quot;4&quot;)
-    ) %&gt;% 
-  sample_n(200) %&gt;% 
-  select(deaths, sex, age_group, race_or_ethnicity)</code></pre>
-<div id="motivation-to-investigate-heart-disease-related-death"
-class="section level2">
-<h2>Motivation to Investigate Heart Disease Related Death</h2>
-<p>Heart Disease Related Death is the top leading causes of death in
-NYC. Therefore, understanding the relationship between age groups, sex,
-race and Heart Disease Related Death is critical.</p>
-<pre class="r"><code>#fit a lasso model
-x = model.matrix(deaths ~ ., death_df)[,-1] #create a matrix of predictors 
-y = death_df$deaths #create outcome vector</code></pre>
-<pre class="r"><code>#fit model and cross validation
-lambda = 10^(seq(3, -2, -0.1))
-
-lasso_fit =
-  glmnet(x, y, lambda = lambda)
-
-lasso_cv =
-  cv.glmnet(x, y, lambda = lambda)
-
-lambda_opt = lasso_cv$lambda.min</code></pre>
+<div id="motivation" class="section level3">
+<h3>Motivation</h3>
+<p>As a group, we are inspired by the historical changes in the health
+problems in a community, mortality patterns, and leading causes of death
+that we learned in our Principles of Epidemiology class. In 1839 cholera
+was reported as the primary cause of death in England. Nowadays, the
+leading cause of death in England, like in the US and most
+industrialized countries, is heart disease, with social and racial
+disparities in mortality from chronic diseases becoming the major
+challenge.</p>
+<p>For this project, we started with a general question: What are the
+leading causes of death in NYC? We decided to focus on NYC as it’s the
+largest city in the US and one of the world’s most diverse cities. We
+found that heart disease, cancer, accidents, chronic lower respiratory
+disease, and stroke are the most prevalent causes in the city. We also
+considered other pertinent causes of death such as pregnancy-related
+mortality. This initial exploratory analysis led us to want to explore
+specific questions based on our interests and research experience. We
+chose the period of 2007-2019 to focus on the modern causes of death in
+the city to avoid confounding factors of death due to the COVID-19
+outbreak (2019 onward).</p>
+<p><img src="images/cholera.png" width="351" /> <a
+href="http://eta.health.usf.edu/publichealth/PHC6000/presentations/Stockwell/Unit01/EPI6000_week1_stockwell_part1_slides.pdf">Image
+Source</a></p>
+<p><br></p>
 </div>
-<div id="fit-a-lasso-model-for-variable-selection"
-class="section level2">
-<h2>Fit a Lasso Model for Variable Selection</h2>
-<pre class="r"><code>#plot lasso 
-lasso_plot = broom::tidy(lasso_fit) %&gt;% 
-  select(term, lambda, estimate) %&gt;% 
-  complete(term, lambda, fill = list(estimate = 0) ) %&gt;% 
-  filter(term != &quot;(Intercept)&quot;) %&gt;% 
-  ggplot(aes(x = log(lambda, 10), y = estimate, group = term, color = term)) + 
-  geom_path() + 
-  geom_vline(xintercept = log(lambda_opt, 10), color = &quot;blue&quot;, size = 1.2) +
-  theme(legend.position = &quot;none&quot;)
-
-lasso_plot</code></pre>
-<p><img src="Heart-Disease-Related-Deaths_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
-<p>From the Lasso plot, we can see that most of our variables did not
-reach zero before optimal lambda value. Therefore, we could include all
-the variables.</p>
-<pre class="r"><code>#Generate lasso result
-lasso_fit = 
-  glmnet(x, y, lambda = lambda_opt)
-
-lasso_result = lasso_fit %&gt;% broom::tidy()</code></pre>
+<div id="group-members" class="section level3">
+<h3>Group Members</h3>
+<ul>
+<li>William Anderson - waa2119</li>
+<li>Riya Bhilegaonkar - rsb2204</li>
+<li>Jennifer Osei - jao2195</li>
+<li>Haoyang Wang - hw2850</li>
+<li>Angelica Vina Albarrancin - av2718</li>
+</ul>
+<p><br></p>
 </div>
-<div
-id="fit-a-mlr-model-to-understand-the-major-factors-of-nyc-heart-disease-related-death"
-class="section level2">
-<h2>Fit a MLR Model to Understand the Major Factors of NYC Heart Disease
-Related Death</h2>
-<pre class="r"><code>#run MLR model
-MLR = lm(deaths ~ sex + age_group + race_or_ethnicity, data = death_df)
-
-MLR_result = MLR %&gt;% 
-  broom::tidy() %&gt;% 
-  filter(p.value &lt; 0.05) %&gt;% 
-  knitr::kable()
-
-MLR_result</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="left">term</th>
-<th align="right">estimate</th>
-<th align="right">std.error</th>
-<th align="right">statistic</th>
-<th align="right">p.value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">age_group75-84</td>
-<td align="right">3112.937</td>
-<td align="right">757.9744</td>
-<td align="right">4.106916</td>
-<td align="right">0.0000601</td>
-</tr>
-<tr class="even">
-<td align="left">age_group85+</td>
-<td align="right">4206.077</td>
-<td align="right">758.3465</td>
-<td align="right">5.546378</td>
-<td align="right">0.0000001</td>
-</tr>
-<tr class="odd">
-<td align="left">race_or_ethnicityHispanic</td>
-<td align="right">1856.683</td>
-<td align="right">503.7457</td>
-<td align="right">3.685755</td>
-<td align="right">0.0002994</td>
-</tr>
-</tbody>
-</table>
-<p>From the MLR result, we can see that age groups 75-84, 85+ and race
-group Hispanic are significant.</p>
-<pre class="r"><code>#plot age_groups with heart disease related deaths
-death_df %&gt;% 
-  ggplot(aes(y = deaths, x = reorder(age_group, deaths), color = age_group))+
-  geom_boxplot()+
-  theme_classic()+
-  labs(x = &quot;Age Groups&quot;,
-       y = &quot;Number of Deaths&quot;,
-       title = &quot;Number of Heart Disease Related Death with Age in NYC From 2003 to 2019&quot;)</code></pre>
-<p><img src="Heart-Disease-Related-Deaths_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
-<p>From the plot, we can see that age groups 75-84 and 85+ are the
-groups with the most heart disease related deaths, which correspond to
-our MLR results.</p>
-<pre class="r"><code>#plot race with heart disease related deaths
-death_df %&gt;% 
-  ggplot(aes(y = deaths, x = reorder(race_or_ethnicity, deaths), color = race_or_ethnicity))+
-  geom_boxplot()+
-  theme_classic()+
-  labs(x = &quot;Race or Ethnicity&quot;,
-       y = &quot;Number of Deaths&quot;,
-       title = &quot;Number of Heart Disease Related Death with Race in NYC From 2003 to 2019&quot;)</code></pre>
-<p><img src="Heart-Disease-Related-Deaths_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
-<p>From the plot, we can see that race group Hispanic is the group with
-the most heart disease related deaths, which correspond to our MLR
-results.</p>
-<pre class="r"><code>#plot sex with heart disease related deaths
-death_df %&gt;% 
-  ggplot(aes(y = deaths, x = reorder(sex, deaths), color = sex))+
-  geom_boxplot()+
-  theme_classic()+
-  labs(x = &quot;Sex&quot;,
-       y = &quot;Number of Deaths&quot;,
-       title = &quot;Number of Heart Disease Related Death with Sex in NYC From 2003 to 2019&quot;)</code></pre>
-<p><img src="Heart-Disease-Related-Deaths_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
-<p>From the plot, we can see that there is no significant difference of
-heart disease related death between male and female, which correspond to
-our MLR results.</p>
+<div id="causes-of-death-we-focus-on" class="section level3">
+<h3>Causes of Death we focus on:</h3>
+<ul>
+<li>Heart Disease</li>
+<li>Pregnancy Related Deaths</li>
+<li>Cancer</li>
+<li>HIV/AIDS</li>
+<li>Suicide and Opioid Poisonings</li>
+</ul>
 </div>
-<div id="results-and-interpretation" class="section level2">
-<h2>Results and Interpretation</h2>
-<p>From our preliminary analysis, we can conclude that age groups 75-84,
-85+ and race group Hispanic are most susceptible to heart disease
-related death in New York City between 2003 to 2019. This results
-indicated racial disparity in health in NYC.</p>
+<div id="screencast" class="section level3">
+<h3>Screencast</h3>
+<iframe width="840" height="472.5" src title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
 </div>
 
 

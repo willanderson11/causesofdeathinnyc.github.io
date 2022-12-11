@@ -3,6 +3,7 @@ output_dir: "."
 navbar:
   title: "Home"
   right:
+    - text: "Introduction"
     - text: "Report"
       href: index.html
     - text: "Suicide and Opioid Poisonings"
