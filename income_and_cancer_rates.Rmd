@@ -58,7 +58,7 @@ income_data =
 ```
 
 
-This dataset includes variables listed as `r colnames(income_data)` with a size of `r dim(income_data)`.  This dataset contains median household income for different types of households, including families with and without children, spanning the years of 2005 - 2019 for approximately all neighborhoods in each of New York City's five boroughs. The dataset also includes median household income for each borough as an entity and New York City as a whole. For the remaining analysis, I will be using data from the boroughs of Manhattan, Queens, Brooklyn, and the Bronx as well as the respective neighborhoods within each borough. To help streamline analysis, I only looked at households of type "All Households" which includes both families with and without children. 
+This dataset includes variables listed as `r colnames(income_data)` with a size of `r dim(income_data)`.  This dataset contains median household income for different types of households, including families with and without children, spanning the years of 2005 - 2019 for approximately all neighborhoods in each of New York City's five boroughs. The dataset also includes median household income for each borough as an entity and New York City as a whole. For the remaining analysis, we will be using data from the boroughs of Manhattan, Queens, Brooklyn, and the Bronx as well as the respective neighborhoods within each borough. To help streamline analysis, we only looked at households of type "All Households" which includes both families with and without children. 
 
 Now we will visualize the income data per borough to get a better idea of any trends. 
 
