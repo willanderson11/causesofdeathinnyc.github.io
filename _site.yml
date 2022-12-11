@@ -15,6 +15,8 @@ navbar:
       href: income_and_cancer_rates.html
     - text: "HIV/AIDS"
       href: hiv_analysis.html
+    - text: "Maternal Mortality"
+      href: maternal.html
     
 output:
   html_document:

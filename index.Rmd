@@ -13,6 +13,7 @@ As a group, we are inspired by the historical changes in the health problems in 
 For this project, we started with a general question: What are the leading causes of death in NYC? We decided to focus on NYC as it’s the largest city in the US and one of the world’s most diverse cities. We found that heart disease, cancer, accidents, chronic lower respiratory disease, and stroke are the most prevalent causes in the city. We also considered other pertinent causes of death such as pregnancy-related mortality. This initial exploratory analysis led us to want to explore specific questions based on our interests and research experience. We chose the period of 2007-2019 to focus on the modern causes of death in the city to avoid confounding factors of death due to the COVID-19 outbreak (2019 onward).  
 
 ![](images/cholera.png){width="351"}
+
 [Image Source](http://eta.health.usf.edu/publichealth/PHC6000/presentations/Stockwell/Unit01/EPI6000_week1_stockwell_part1_slides.pdf)
 
 <br>
@@ -28,10 +29,12 @@ For this project, we started with a general question: What are the leading cause
 
 ### Causes of Death we focus on:
 * Heart Disease
-* Pregnancy Related Deaths
+* Maternal Mortality
 * Cancer
 * HIV/AIDS
 * Suicide and Opioid Poisonings
+
+<br>
 
 ### Screencast
 
