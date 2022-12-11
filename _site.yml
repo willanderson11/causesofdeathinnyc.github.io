@@ -17,6 +17,8 @@ navbar:
       href: hiv_analysis.html
     - text: "Maternal Mortality"
       href: maternal.html
+   - icon: fa-github fa-lg
+      href: https://github.com/riya-bhilegaonkar/causesofdeathinnyc.github.io
     
 output:
   html_document:
