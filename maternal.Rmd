@@ -37,9 +37,16 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ## Maternal Mortality factors as a predictor of Death
 
-Maternal Mortality has been a cause of death for mothers due to a variety of factors that seem preventable or modifiable. To determine the underlying or root of these causes.
+Maternal Mortality has been a cause of death for mothers due to a variety of factors that seem preventable or modifiable. To determine the underlying or root of these causes.  It is because of this we chose to look deeper into maternal mortality. 
 
-```{r}
+Maternal Deaths in New York City:
+
+New York City is a diverse and large population with a 100,000 + babies born per year in NYC alone.However there is an alarming statistic of  pregnancy-related mortality is on average 9.4 times
+higher for Black compared to White mothers. We know that disparities in health outcomes rarely occur in isolation, and communities of color in our city face differential access to power and resources such as generational wealth, access tohealthy food, and access to parks and public spaces, as well as overexposure to harmful conditions such as environmental damage, over policing and disproportionate incarceration (NYC Health). Together these factors lead to chronic stress and disease among
+communities of color, which drive the health disparity in pregnancy-associated mortality across the city and is the focus of this exploritory data analysis:
+
+
+```{r, message = FALSE, warning=FALSE}
 
 maternalmorb<- read_csv("data/Pregnancy-Associated_Mortality.csv")
 
@@ -52,7 +59,7 @@ mdeathsbyrace
 
 ```
 
-```{r}
+```{r, message = FALSE, warning=FALSE}
 maternalmorb<- read_csv("data/Pregnancy-Associated_Mortality.csv")
 
 mdeathsbyborough = maternalmorb %>%
@@ -62,11 +69,10 @@ mdeathsbyborough = maternalmorb %>%
   labs(title = "Maternal Deaths by Borough")
 
 mdeathsbyborough
-
-
 ```
 
-```{r}
+```{r, message = FALSE, warning=FALSE}
+
 maternalmorb<- read_csv("data/Pregnancy-Associated_Mortality.csv")
 
 mdeathsunderlyingcause = maternalmorb %>%
@@ -81,11 +87,13 @@ mdeathsunderlyingcause
 
 ```
 
-## Discussion 
+## Discussion Analysis 
 
-There is a clear discrepancy in maternal mortality based on race. Black women are more likely to die due a pregnancy related cause than any other race or ethnic group. 
-Other or Biracial women have the lowest pregnancy related mortality within the 2016 - 2019 time period. 
+These NYC data support the consistent racial discrepancy observed in previous news articles Black mothers are at a higher risk of maternal mortality than any other racial group.  Black women are more likely to die due a pregnancy related cause than any other race or ethnic group as they has the highest median death rate. Other or Biracial women have the lowest pregnancy related mortality within the 2016 - 2019 time period whereas all other races fall in between that spectrum.
+Brooklyn is the NYC borough with the highest mortality, with Staten island with the lowest. Cardiovascular conditions had the highest median pregnancy related cause of death relative to the other leading causes of pregnancy related mortality. 
+
 
 ## Limitations
 
-These data were restricted to to availability and completeness of the data resulting in less in depth analysis for other boroughs by race and further examination of the underlying causes. 
+These data were part of a truncated subset of pregnancy related mortality  restricted to to availability and completness of the data fields and collection,  resulting in less in depth analysis for other boroughs by race and further exxamination of the underlying causes. In addition, multiple fields were not available to provide a more detailed breakdown of race nester boroughs in NYC. 
+

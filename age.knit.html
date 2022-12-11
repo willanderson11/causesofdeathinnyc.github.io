@@ -11,7 +11,7 @@
 
 
 
-<title>Maternal Mortality</title>
+<title>Age as a predictor of Death</title>
 
 <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -36,8 +36,6 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -371,109 +369,229 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Maternal Mortality</h1>
+<h1 class="title toc-ignore">Age as a predictor of Death</h1>
 
 </div>
 
 
-<pre class="r"><code>#install.packages(&quot;tidyverse&quot;)
-library(tidyverse)
-library(ggridges)
-library(readxl)
-library(patchwork)
-#install.packages(&quot;plotly&quot;)
-library(plotly)
-#install.packages(&quot;ggtext&quot;)
-library(ggtext)
-library(tidyr)
-library(readr)
+<pre class="r"><code>#datasets for exploratory analysis
+death_in_nys = read_csv(&quot;data/Vital_Statistics_Deaths_by_Region_and_Age-Group_by_Selected_Cause_of_Death___Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names() %&gt;%
+  mutate(selected_cause_of_death = recode(selected_cause_of_death,
+       &quot;CLRD&quot; = &quot;Chronic Lower Respiratory Disease&quot;))
 
-knitr::opts_chunk$set(
-  fig.width = 6,
-  fig.asp = .6,
-  out.width = &quot;90%&quot;
-)
-theme_set(theme_minimal() + theme(legend.position = &quot;bottom&quot;))
-options(
-  ggplot2.continuous.colour = &quot;viridis&quot;,
-  ggplot2.continuous.fill = &quot;viridis&quot;
-)
-scale_colour_discrete = scale_colour_viridis_d
-scale_fill_discrete = scale_fill_viridis_d</code></pre>
-<div id="maternal-mortality-factors-as-a-predictor-of-death"
+death_by_age = read_csv(&quot;data/Vital_Statistics_Deaths_by_Resident_County__Region__and_Age-Group__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names() %&gt;%
+  filter(region == &quot;NYC&quot;)
+
+opioid_death = read_csv(&quot;data/Vital_Statistics__Opioid-Related_Deaths_by_Age_Group__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names()
+
+suicide_death = read_csv(&quot;data/Vital_Statistics_Suicide_Deaths_by_Age-Group__Race_Ethnicity__Resident_Region__and_Gender__Beginning_2003.csv&quot;) %&gt;%
+  janitor::clean_names()
+
+#merging datasets for statistical analysis
+predictor_age = left_join(opioid_death, suicide_death, by = c(&quot;year&quot;, &quot;sex&quot;, &quot;region&quot;, &quot;race_or_ethnicity&quot;, &quot;age_group&quot;)) %&gt;%
+  filter(region == &quot;NYC&quot;) %&gt;%
+  filter(age_group != &quot;Unknown&quot;, age_group != &quot;Total&quot;) %&gt;%
+  select(year, age_group, opioid_poisoning_deaths, suicide_deaths)%&gt;%
+  mutate(age_group = as.factor(age_group),
+    age_group = fct_recode(
+      age_group, &quot;&lt;1&quot; = &quot;1&quot;, &quot;1-9&quot; = &quot;2&quot;, &quot;10-19&quot; = &quot;3&quot;, &quot;20-24&quot; = &quot;4&quot;, &quot;25-34&quot; = &quot;5&quot;, &quot;35-44&quot;=&quot;6&quot;,       &quot;45-54&quot; = &quot;7&quot;, &quot;55-64&quot; = &quot;8&quot;, &quot;65-74&quot; = &quot;9&quot;, &quot;75-84&quot; = &quot;10&quot;, &quot;85+&quot; = &quot;11&quot;))</code></pre>
+<div id="motivation-to-view-age-group-as-a-predictor"
 class="section level2">
-<h2>Maternal Mortality factors as a predictor of Death</h2>
-<p>Maternal Mortality has been a cause of death for mothers due to a
-variety of factors that seem preventable or modifiable. To determine the
-underlying or root of these causes. It is because of this we chose to
-look deeper into maternal mortality.</p>
-<p>Maternal Deaths in New York City:</p>
-<p>New York City is a diverse and large population with a 100,000 +
-babies born per year in NYC alone.However there is an alarming statistic
-of pregnancy-related mortality is on average 9.4 times higher for Black
-compared to White mothers. We know that disparities in health outcomes
-rarely occur in isolation, and communities of color in our city face
-differential access to power and resources such as generational wealth,
-access tohealthy food, and access to parks and public spaces, as well as
-overexposure to harmful conditions such as environmental damage, over
-policing and disproportionate incarceration (NYC Health). Together these
-factors lead to chronic stress and disease among communities of color,
-which drive the health disparity in pregnancy-associated mortality
-across the city and is the focus of this exploritory data analysis:</p>
-<pre class="r"><code>maternalmorb&lt;- read_csv(&quot;data/Pregnancy-Associated_Mortality.csv&quot;)
-
-mdeathsbyrace = maternalmorb %&gt;%
-  ggplot(aes(x = `Race/ethnicity`, y = Deaths, fill = `Race/ethnicity`)) + 
-  geom_boxplot() + 
-  labs(title = &quot;Maternal Deaths by Race&quot;)
-
-mdeathsbyrace</code></pre>
-<p><img src="maternal_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
-<pre class="r"><code>maternalmorb&lt;- read_csv(&quot;data/Pregnancy-Associated_Mortality.csv&quot;)
-
-mdeathsbyborough = maternalmorb %&gt;%
-  filter(Borough != &quot;All&quot;) %&gt;%
-  ggplot(aes(x = Borough, y = Deaths, fill = Borough)) + 
-  geom_boxplot() + 
-  labs(title = &quot;Maternal Deaths by Borough&quot;)
-
-mdeathsbyborough</code></pre>
-<p><img src="maternal_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
-<pre class="r"><code>maternalmorb&lt;- read_csv(&quot;data/Pregnancy-Associated_Mortality.csv&quot;)
-
-mdeathsunderlyingcause = maternalmorb %&gt;%
-  filter(Related == &quot;Pregnancy-related&quot;) %&gt;%
-  ggplot(aes(x = Underlying_cause, y = Deaths, fill= Underlying_cause)) + 
-  geom_boxplot() + 
-  labs(title = &quot;Maternal Deaths by Underlying Cause&quot;) + 
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust=1))
-
-mdeathsunderlyingcause</code></pre>
-<p><img src="maternal_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
+<h2>Motivation to view Age Group as a Predictor</h2>
+<p>Though we find that Heart Disease, Cancer, Unintentional Injury,
+Accidents and Chronic Lower Respiratory Diseases to be the leading
+causes of death for the overall population of New York City, it is a
+known fact that the elderly are more likely to be victims to this
+disease. The purpose of age group as a predictor of death, is to analyze
+if there are differences in leading causes of death among different age
+groups. Additionally a further analysis is performed to view the
+relationship between age group on deaths caused by suicides and opioids.
+Though suicide and opioid related deaths are not leading causes of death
+in New York City, the growing death rate in these categories has been a
+concern to the medical and public health community.</p>
+<pre class="r"><code>death_by_age %&gt;%
+  filter(age_group !=&quot;Total&quot; &amp; age_group !=&quot;Unknown&quot;) %&gt;%
+  group_by(county_name, age_group) %&gt;%
+  ggplot(aes(x=year, y = deaths, color = age_group)) +
+  geom_line()+
+  facet_grid(~county_name)+
+  labs(title=&quot;Death Rate by Age Group in New York City&quot;, color=&quot;Age Group&quot;)</code></pre>
+<p><img src="age_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<div id="selected-causes-of-death-in-new-york-state-by-age-group"
+class="section level3">
+<h3>Selected causes of death in New York State by Age Group</h3>
+<pre class="r"><code>death_in_nys %&gt;%
+  filter(age_group == &quot;&lt;1&quot; | age_group == &quot;1-9&quot; | age_group == &quot;10-19&quot; | age_group == &quot;20-24&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;%
+group_by(year, age_group, selected_cause_of_death)%&gt;%
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+
+  geom_bar(stat=&quot;identity&quot;)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  facet_grid(~age_group)+
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="age_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
+<pre class="r"><code>death_in_nys %&gt;%
+  filter(age_group == &quot;25-34&quot; | age_group == &quot;35-44&quot; | age_group == &quot;45-54&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;%
+group_by(year, age_group, selected_cause_of_death)%&gt;%
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+
+  geom_bar(stat=&quot;identity&quot;)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  facet_grid(~age_group)+
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="age_files/figure-html/unnamed-chunk-4-2.png" width="90%" /></p>
+<pre class="r"><code>death_in_nys %&gt;%
+  filter(age_group == &quot;55-64&quot; | age_group == &quot;65-74&quot; | age_group == &quot;75-84&quot; | age_group == &quot;85+&quot;, selected_cause_of_death != &quot;Total&quot;,selected_cause_of_death != &quot;All Other Causes&quot;) %&gt;%
+group_by(year, age_group, selected_cause_of_death)%&gt;%
+  ggplot(aes(x=year, y=deaths, fill=selected_cause_of_death))+
+  geom_bar(stat=&quot;identity&quot;)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  facet_grid(~age_group)+
+  theme(legend.position = &quot;bottom&quot;,  legend.key.size=unit(5,&quot;point&quot;))+
+  guides(fill=guide_legend(nrow=5, byrow=TRUE))+
+  labs(fill=&quot;Selected Causes&quot;)</code></pre>
+<p><img src="age_files/figure-html/unnamed-chunk-4-3.png" width="90%" /></p>
+<p>Using the vital statistics of death data from the New York State
+Bureau of Vital and Health Statistics, our visual points to visible
+differences in leading causes of death among the age groups. Accidents
+seem to be a more frequent cause of death for the age groups of 25-34
+and 35-44, which for individuals who are 45+ the frequency of death by
+diseases of the heart and malignant neoplasms are larger. While among
+the youth accidents have a higher cases of death in New York.</p>
+<p><br></p>
 </div>
-<div id="discussion-analysis" class="section level2">
-<h2>Discussion Analysis</h2>
-<p>These NYC data support the consistent racial discrepancy observed in
-previous news articles Black mothers are at a higher risk of maternal
-mortality than any other racial group. Black women are more likely to
-die due a pregnancy related cause than any other race or ethnic group as
-they has the highest median death rate. Other or Biracial women have the
-lowest pregnancy related mortality within the 2016 - 2019 time period
-whereas all other races fall in between that spectrum. Brooklyn is the
-NYC borough with the highest mortality, with Staten island with the
-lowest. Cardiovascular conditions had the highest median pregnancy
-related cause of death relative to the other leading causes of pregnancy
-related mortality.</p>
 </div>
-<div id="limitations" class="section level2">
-<h2>Limitations</h2>
-<p>These data were part of a truncated subset of pregnancy related
-mortality restricted to to availability and completness of the data
-fields and collection, resulting in less in depth analysis for other
-boroughs by race and further exxamination of the underlying causes. In
-addition, multiple fields were not available to provide a more detailed
-breakdown of race nester boroughs in NYC.</p>
+<div id="further-analysis" class="section level2">
+<h2>Further Analysis</h2>
+<div
+id="fitting-a-slr-model-for-age-group-as-a-predictor-for-suicide-deaths"
+class="section level3">
+<h3>Fitting a SLR model for Age Group as a predictor for Suicide
+Deaths</h3>
+<pre class="r"><code># SLR model
+s_fit = lm(suicide_deaths ~ age_group, data = predictor_age)
+
+ s_fit %&gt;% 
+  broom::tidy() %&gt;% 
+  filter(p.value &lt; 0.05) %&gt;%
+   select(term, estimate, p.value) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age_group10-19</td>
+<td align="right">4.467532</td>
+<td align="right">0.0408606</td>
+</tr>
+<tr class="even">
+<td align="left">age_group20-24</td>
+<td align="right">7.934210</td>
+<td align="right">0.0003048</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group25-34</td>
+<td align="right">17.797619</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group35-44</td>
+<td align="right">16.229885</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group45-54</td>
+<td align="right">18.197802</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group55-64</td>
+<td align="right">15.088889</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group65-74</td>
+<td align="right">7.316832</td>
+<td align="right">0.0003647</td>
+</tr>
+<tr class="even">
+<td align="left">age_group75-84</td>
+<td align="right">4.699029</td>
+<td align="right">0.0212500</td>
+</tr>
+</tbody>
+</table>
+<p>At a <span class="math inline">\(\alpha = 0.5\)</span> level, all age
+groups except the age group of 1-9 and 85+ are significant predictors of
+suicide_death.</p>
+</div>
+<div
+id="fitting-a-slr-model-for-age-group-as-a-predictor-for-opioid-poisoning-deaths"
+class="section level3">
+<h3>Fitting a SLR model for Age Group as a predictor for Opioid
+Poisoning Deaths</h3>
+<pre class="r"><code># SLR model
+o_fit = lm(opioid_poisoning_deaths ~ age_group, data = predictor_age)
+
+ o_fit %&gt;% 
+  broom::tidy() %&gt;% 
+  filter(p.value &lt; 0.05) %&gt;%
+   select(term, estimate, p.value) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age_group20-24</td>
+<td align="right">3.106544</td>
+<td align="right">0.0122307</td>
+</tr>
+<tr class="even">
+<td align="left">age_group25-34</td>
+<td align="right">11.775183</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group35-44</td>
+<td align="right">14.235294</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">age_group45-54</td>
+<td align="right">18.782353</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">age_group55-64</td>
+<td align="right">11.123529</td>
+<td align="right">0.0000000</td>
+</tr>
+</tbody>
+</table>
+<p>At a <span class="math inline">\(\alpha = 0.5\)</span> level, those
+among the age groups of 20-64 are significant predictors of an opioid
+poisoning related death.</p>
+<p><br></p>
+</div>
+</div>
+<div id="limitations-to-analysis" class="section level2">
+<h2>Limitations to Analysis</h2>
+<p>The datasets used in this analysis contain NA values, and by default
+the <code>lm()</code> function disregards observations containing NA
+values, which may limit the predictive capacity of our analysis.</p>
 </div>
 
 
