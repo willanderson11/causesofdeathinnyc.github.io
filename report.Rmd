@@ -6,6 +6,7 @@ output:
     toc_float: true
 ---
 ```{r include = FALSE}
+knitr::opts_chunk$set(message = FALSE , warning = FALSE)
 library(tidyverse)
 library(dplyr)
 library(ggplot2)
@@ -57,13 +58,13 @@ For this project, we started with a general question: What are the leading cause
 
 Each team member decided to focus on a specific cause of death and an individual-level factor (i.e., age, income, education level, etc.) that contributed to the changes in leading causes of death observed in the past 12 years. Below are some of the specific questions we explore in our analysis: 
 
-1. Heart Disease Related Death is one of the top leading causes of death in New York City. What is the relationship between age groups, sex, race, and Heart Disease Related Death?
+1. Heart Disease Related Death is one of the top leading causes of death in New York City. What is the relationship between age groups, sex, race, and heart disease related death?
 
 2. There has been a notable stark discrepancy in maternal mortality (pregnancy-related deaths) in minority women. Is there a relationship between pregnancy-related deaths and the predictors of race and other factors?
 
 3. We were also interested in examining cancer incidence and mortality rates as cancer of all forms is the second leading cause of death in New York City. What are the different social factors that can play a role in cancer rates we examined income levels across New York City? Are these predictors of cancer incidence and mortality rates across the city?
 
-4. There has been a sharp decline in HIV/AIDs related mortality in NYC. This steep decline is explained by the significant scientific and medical advances in HIV diagnosis and treatment in early 2000. However, the general trends in the city vary significantly by race/ethnicity and borough. Black and Latino men continue to be disproportionately burdened by HIV/AIDS. The number of HIV/AIDS-related deaths is significantly higher in Brox, Brooklyn, and Queens, predominantly black and Latino boroughs, compared to Manhattan and Staten Island. However, our SLR and MLR indicate that these differences aren't explained by race but are primarily driven by other socioeconomic factors, such as borough of residence and access to early HIV treatment. This result suggests that differences observed by race/ethnicity in HIV/AIDs deaths could result from inequities in access to medical care, information, and resources available in each NYC borough.
+4. HIV/AIDS is no longer a death sentence, but it still disproportionately affects low-and-middle-income countries and minority communities in the USA. What are the current trends in HIV/AIDS diagnosis and mortality rate in NYC? Do these trends vary by race and ethnicity? Is the HIV/AIDS mortality rate the same in all NYC neighborhoods?   
 
 5. There are stark differences between the leading causes of death among age groups. What were the leading causes of death by age group? Is there a relationship between age group as a predictor of Suicide Deaths and Opioid Poisoning Deaths? 
 
@@ -290,17 +291,15 @@ nyc_cancer_rates = read_excel("data/nyc_cancer_data.xlsx", sheet = "all NYC", sk
   cbind(income_data_nyc["median_income"])
 ```
 
-4. Trends in HIV/AIDS Related Deaths 
+4. Trends in HIV/AIDS Related Deaths [(Dataset)](https://data.cityofnewyork.us/Health/DOHMH-HIV-AIDS-Annual-Report/fju2-rdad)  
 
-[(Dataset)](https://data.cityofnewyork.us/Health/DOHMH-HIV-AIDS-Annual-Report/fju2-rdad)  
+For the HIV analysis, we used the data reported to the HIV Epidemiology and Field Services Program in 2016. All data shown is for people ages 13 and older. Working with this data was challenging, as borough-wide and citywide totals sometimes included cases assigned to a borough with an unknown neighborhood or NYC with an unknown borough. Therefore, UHF totals didn't sum to borough totals, and the borough didn't add to citywide totals. This made calculating averages and the total number of deaths challenging. We had to be especially careful when using `select` and `filter` to analyze the data, as we had to ensure we had extracted the correct data and had the expected number of cells and rows to make each plot.  
 
-For the HIV analysis, we used the data reported to the HIV Epidemiology and Field Services Program in 2016. All data shown is for people ages 13 and older. Working with this data was challenging, as borough-wide and citywide totals sometimes included cases assigned to a borough with an unknown UHF or NYC with an unknown borough. Therefore, UHF totals didn't sum to borough totals, and the borough didn't add to citywide totals. This made calculating averages and the total number of deaths challenging. We had to be especially careful when using `select` and `filter` to analyze the data, as we had to ensure we had the correct/expected number of cells and rows.  
-
-The columns of interest for our analysis are:  
+The main columns of interest for our analysis are:  
 
 `year`: calendar year  
 
-'borough`: borough of residence 
+`borough`: borough of residence 
 
 `age`: age at death 
 
@@ -308,6 +307,15 @@ The columns of interest for our analysis are:
 
 `sex`: Female, Male 
 
+```{r}
+#Import data set and clean data
+
+hiv_data = read.csv("data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
+   janitor::clean_names() %>%
+    na_if(., 99999) %>%   #na_if missing data
+  rename(., sex = gender)
+
+```
 
 
 5. Age as a Predictor of Death (in relation to Suicide and Opioid Related Deaths): 
@@ -685,6 +693,8 @@ plot.title.position = "plot"
 
 3. Trends in HIV/AIDS Related Deaths 
 
+New York City was affected by the HIV/AIDS epidemic more than any other U.S. city. When AIDS was first discovered in 1891, little was known about the mysterious disease rapidly spreading through the city and disproportionately affecting gay men. Doctors had no clue about the diseases' origin, and there was no medical treatment. As a result, people with AIDS were essentially given a death sentence. A CDC report from 1987 estimated that 70,000 people in NYC had AIDS, and AIDS cases in NYC accounted for 30% of AIDS cases in the USA. The same report stated that of all AIDS cases in reported in NYC, 51% of adults and 59% of children have died. By the end of 192,  AIDS had become the number one cause of death for U.S. men ages 25 to 44. More than one million Americans were infected with HIV, and nearly 10 million people were infected with HIV worldwide. Given New York City's history with HIV/AIDS, we wanted to explore recent HIV/AIDS data mortality data. Since access to diagnosis and treatment is now widely available throughout the city, we were interested in analyzing trends in HIV-related deaths accounting by sociodemographic factors such as race, age, sex, and NYC borough. 
+
 We first plotted the number the total number of HIV-related Deaths in NYC between the years 2011-2015: 
 
 ```{r}
@@ -714,7 +724,7 @@ ggplot(data=hiv_deaths, aes(x=year, y= sum_deaths, group=1)) +
 
 ```
 
-Not everyone has the same access to HIV/AIDS care and early diagnosis, and access to medical services, in general, differs substantially by race, income, and neighborhood. Therefore, in the following code chcucke, will analysis differences trendes in HIV/AIDS-related deaths by race/ethnicity, age, sex, and NYC borough, as a proxy of income and SES:
+Not everyone has the same access to HIV/AIDS care and early diagnosis, and access to medical services, in general, differs substantially by race, income, and neighborhood. Therefore, in the following sections, we will focus on our analysis of how the decline in HIV/AIDS-related deaths varies by race/ethnicity, age, sex, and NYC borough.
 
 ```{r}
 #Boxplot Hiv-Related Deaths by Race 
@@ -761,7 +771,7 @@ hiv_data %>%
   theme(plot.title = element_text(hjust = 0.7))  
 ```
 
-Now we will visualize the trends in number of HIV/AIDS related deaths for each one of the five NYC `borough`: 
+Now we will visualize the trends in number of HIV/AIDS related deaths for each one of the five NYC borough: 
 
 ```{r}
 #HIV-related deaths in NYC by race 
@@ -973,7 +983,7 @@ Brooklyn is the NYC borough with the highest mortality, with Staten island with 
 
 *  We determined that median household income is not a significant predictor for cancer incidence rates being evidenced by the linear regression results obtained in the analysis. The various plots and statistical tests in our analysis between median household income levels and cancer incidence/mortality rates did not show a correlation between the two variables or showed that median household income level as an insignificant predictor for cancer incidence rates.  
 
-* There has been a sharp decline in HIV/AIDs related mortality in NYC. This steep decline is explained by the significant scientific and medical advances in HIV diagnosis and treatment in early 2000. However, the general trends in the city vary significantly by race/ethnicity and borough. Black and Latino men continue to be disproportionately burdened by HIV/AIDS. The number of HIV/AIDS-related deaths is significantly higher in Brox, Brooklyn, and Queens, predominantly black and Latino boroughs, compared to Manhattan and Staten Island. However, our SLR and MLR indicate that these differences aren't explained by race but are primarily driven by other socioeconomic factors, such as borough of residence and access to early HIV treatment. This result suggests that differences observed by race/ethnicity in HIV/AIDs deaths could result from inequities in access to medical care, information, and resources available in each NYC borough. 
+* There has been a sharp decline in HIV/AIDs related mortality in NYC. This steep decline is explained by the significant scientific and medical advances in HIV diagnosis and treatment in early 2000. However, the general trends in the city vary significantly by race/ethnicity and borough. Black and Latino men continue to be disproportionately burdened by HIV/AIDS. The number of HIV/AIDS-related deaths is significantly higher in Brox, Brooklyn, and Queens, predominantly black and Latino boroughs, compared to Manhattan and Staten Island. However, our prelimary SLR and MLR model indicate that these differences aren't explained by race but are primarily driven by other factors, such as borough of residence and access to early HIV treatment. This result suggests that differences observed by race/ethnicity in HIV/AIDs deaths could result from inequities in access to medical care, information, and resources available in each NYC borough. 
 
 * Leading causes of death differ drastically by age group in New York, accidents leading to death are far more common in the youth than the elderly.  Accidents and Malignant Neoplasms are the leading causes of death for those in the age groups of 1-44. While there is a shift to the leading causes of Diseases of the Heart and Malignant Neoplasms as the leading causes of death for those that are 44+ years of age.  From the simple linear regression, the age group is a significant predictor of death by suicide and opioid poisoning. In the case of age group as a predictor for deaths by opioid poisoning, it was a significant factor for the age groups of 20-64. In the case of age group as a predictor for suicide deaths, age group was a significant factor for all age groups except young children between 1 to 9 years of age and those of old age of 85+ years. 
 
@@ -985,7 +995,7 @@ Often death rates are calculated as an age-adjusted death rate, controlling for 
 
 From this analysis, there is not enough evidence to determine that median household income in New York City influences cancer incidence rates. This could be due to a multitude of reasons, the modeling is rudimentary as the only predictor for cancer incidence rates was median household income. It is reasonable to suggest that cancer incidence should have multiple predictors to be accurately modeled as the development of cancer is often a multi-faceted occurrence. Additionally, income may not have any effect on cancer incidence regardless of better modeling techniques or more robust datasets but a more in-depth analysis is needed before drawing strict conclusions on the effect of income on cancer rates.  
 
-Lastly, as explained in the results section, differences observed by race and age in HIV/AIDs related deaths could result from inequities in access to medical care, information, and resources depending on NYC borough of residence. Therefore, the next step is to analyze the observed trends by UHF (aka. neighborhood) and income, as well as changes in mortality rates and diagnosis across years, to see if these factors can better explain the differences observed in our exploratory analysis. 
+Lastly, as discussed in the results section, the differences observed by race and borough in HIV/AIDs related deaths could result from inequities in income and access to medical care, information, and resources depending on the NYC borough of residence. Therefore, the next step is to analyze the observed trends by neighborhood and income and analyze changes in mortality rates and diagnosis across years to see if these factors can better explain the differences observed in our exploratory analysis.  
 
 <br>
 
@@ -1012,5 +1022,6 @@ https://www1.nyc.gov/assets/doh/downloads/pdf/episrv/disparitiestwosum_breast.pd
 
 Hashim, D., et al., (2016, July). Standardized cancer incidence disparities in upper Manhattan New York City neighborhoods: The role of race/ethnicity, socioeconomic status, and known risk factors. European journal of cancer prevention : the official journal of the European Cancer Prevention Organisation (ECP). Retrieved December 9, 2022, from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4715792/ 
 
-https://www.cdc.gov/nchs/pressroom/states/newyork/newyork.htm 
+CDC: Stats for the state of NY https://www.cdc.gov/nchs/pressroom/states/newyork/newyork.htm 
 
+NYC AIDS Memorial: HIV/AIDS timeline - https://www.nycaidsmemorial.org/timeline

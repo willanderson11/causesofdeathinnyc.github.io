@@ -404,27 +404,10 @@ hiv_data = read.csv(&quot;data/DOHMH_HIV_AIDS_Annual_Report.csv&quot;) %&gt;%
    janitor::clean_names() %&gt;%
     na_if(., 99999) %&gt;%
   rename(., sex = gender)</code></pre>
-<p>The sharp decline in HIV/AIDs related mortality in NYC observed in
-our data coincides with USA’s mortality trends reported by the CDC in
-2014. This steep decline in the registered number of deaths is explained
-by the significant scientific and medical advances in HIV diagnosis and
-treatment of early 2000. In 2011, a landmark research study showed that
-putting healthy individuals living with HIV on antiretrovirals can limit
-their virus transmission by 96%. The same FDA approved the first at-home
-HIV test, and considerable advances were made in treatment. NYC’s
-success in fighting the HIV/AIDS epidemic results from the courageous
-work of activists, medical advocates, scientists, and brave gay men and
-women throughout NYC and the world.</p>
 </div>
 <div id="exploring-hivaids-related-deaths-in-nyc-by-race-age-and-sex"
 class="section level2">
 <h2>Exploring HIV/Aids Related Deaths in NYC by Race, Age, and Sex</h2>
-<p>Not everyone has the same access to HIV/AIDS care and early
-diagnosis, and access to medical services, in general, differs
-substantially by race, income, and neighborhood. Therefore, in the
-following sections, we will focus on our analysis of how the decline in
-HIV/AIDS-related deaths varies by race/ethnicity, age, sex, and NYC
-borough, as a proxy of income and SES.</p>
 <pre class="r"><code>#Number of HIV-related Deaths in NYC (2011-2015)
 
 hiv_deaths = hiv_data %&gt;% 
@@ -441,6 +424,23 @@ ggplot(data=hiv_deaths, aes(x=year, y= sum_deaths, group=1)) +
     y = &quot;Number of deaths&quot;) +
   theme(plot.title = element_text(hjust = 0.5))</code></pre>
 <p><img src="hiv_analysis_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<p>The sharp decline in HIV/AIDs related mortality in NYC observed in
+our data coincides with USA’s mortality trends reported by the CDC in
+2014. This steep decline in the registered number of deaths is explained
+by the significant scientific and medical advances in HIV diagnosis and
+treatment of early 2000. In 2011, a landmark research study showed that
+putting healthy individuals living with HIV on antiretrovirals can limit
+their virus transmission by 96%. The same FDA approved the first at-home
+HIV test, and considerable advances were made in treatment. NYC’s
+success in fighting the HIV/AIDS epidemic results from the courageous
+work of activists, medical advocates, scientists, and brave gay men and
+women throughout NYC and the world.</p>
+<p>Not everyone has the same access to HIV/AIDS care and early
+diagnosis, and access to medical services, in general, differs
+substantially by race, income, and neighborhood. Therefore, in the
+following sections, we will focus on our analysis of how the decline in
+HIV/AIDS-related deaths varies by <code>race</code>, <code>age</code>,
+and <code>sex</code>:</p>
 <pre class="r"><code>#Boxplot Hiv-Related Deaths by Race 
 hiv_data %&gt;% 
   filter(race != &quot;All&quot; &amp; race != &quot;Other/Unknown&quot;) %&gt;% 
@@ -541,11 +541,10 @@ summarise(sum_deaths = sum(deaths, na.rm = T)) %&gt;%
 </div>
 <div id="further-analysis" class="section level2">
 <h2>Further Analysis</h2>
-<div
-id="fitting-a-slr-model-analysing-the-relationship-between-race-and-of-hiv-related-death-rate-in-nyc"
-class="section level3">
-<h3>Fitting a SLR Model: Analysing the relationship between race and of
-hiv-related death rate in NYC</h3>
+<div id="fitting-a-slr-model" class="section level3">
+<h3>Fitting a SLR Model:</h3>
+<p>Analysing the relationship between race and HIV/AIDS related deaths
+in NYC</p>
 <pre class="r"><code>hiv_race_slr = lm(deaths ~ race, data = hiv_data)
 
 hiv_race_result = hiv_race_slr %&gt;% 
@@ -587,12 +586,12 @@ hiv_race_result </code></pre>
 </tbody>
 </table>
 </div>
-<div
-id="fitting-a-mlr-model-finding-the-fiiting-model-of-hiv-related-death-rate-in-nyc"
-class="section level3">
-<h3>Fitting a MLR Model: Finding the fiiting model of hiv-related death
-rate in NYC</h3>
-<p><em>The best fit model is</em>:</p>
+<div id="fitting-a-mlr-model" class="section level3">
+<h3>Fitting a MLR Model:</h3>
+<p><em>Fitting a model to explain recent treands HIV/AIDS related deaths
+in NYC.</em></p>
+<p>First, we fit a large model with the most relevant variables based on
+our previous analysis.</p>
 <pre class="r"><code>hiv_mlr = lm(deaths ~ race + age + sex + borough + concurrent_diagnoses + x_linked_to_care_within_3_months, data = hiv_data)
 
 hiv_mlr_result = hiv_mlr %&gt;% 
@@ -678,6 +677,10 @@ hiv_mlr_result </code></pre>
 </tr>
 </tbody>
 </table>
+<p>Now we do backward elimitation, we take out nonsignificant variables
+one at a time starting with the highest p-value, and use Mallow’s CP
+Criterion and Adjusted R2 to guide our selection of the ‘best’
+model.</p>
 <pre class="r"><code>
 #stepwise regression
 
@@ -763,6 +766,8 @@ mallow_cp
 ##  FPE: Final Prediction Error 
 ##  HSP: Hocking&#39;s Sp 
 ##  APC: Amemiya Prediction Criteria</code></pre>
+<p>Lastly, we test the model predictive ability using a 10-fold
+cross-validation.</p>
 <pre class="r"><code>library(caret)
 
 set.seed(1)
@@ -813,6 +818,14 @@ summary(model_caret)
 ## Residual standard error: 25.96 on 4466 degrees of freedom
 ## Multiple R-squared:  0.9214, Adjusted R-squared:  0.9211 
 ## F-statistic:  3273 on 16 and 4466 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p><em>The best fit model is</em>:</p>
+<p>The resulting model from our model selection has 4 predictors: age,
+sex, borough, concurrent diagnosis, and reciving treatment within 3
+months of diagnosis. Race was not included as a predictor. The results
+of this 10-fold cross-validation indicate a low RMS of 0.921, which
+suggests that the model is accurate, and the R2 is 0.92, which means
+that the selected model can explain about 92% of the variation in
+HIV/AIDS related deaths.</p>
 </div>
 </div>
 <div id="results-and-interpretation" class="section level2">
