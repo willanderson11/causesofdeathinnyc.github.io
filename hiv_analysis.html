@@ -366,16 +366,51 @@ City</h1>
 <div id="motivation-to-investiagate-hivaids-related-deaths"
 class="section level2">
 <h2>Motivation to Investiagate HIV/Aids Related Deaths</h2>
+<p>New York City was affected by the HIV/AIDS epidemic more than any
+other U.S. city. When AIDS was first discovered in 1891, little was
+known about the mysterious disease rapidly spreading through the city
+and disproportionately affecting gay men. Doctors had no clue about the
+diseases’ origin, and there was no medical treatment. As a result,
+people with AIDS were essentially given a death sentence. A CDC report
+from 1987 estimated that 70,000 people in NYC had AIDS, and AIDS cases
+in NYC accounted for 30% of AIDS cases in the USA. The same report
+stated that of all AIDS cases in reported in NYC, 51% of adults and 59%
+of children have died. By the end of 192, AIDS had become the number one
+cause of death for U.S. men ages 25 to 44. More than one million
+Americans were infected with HIV, and nearly 10 million people were
+infected with HIV worldwide. Given New York City’s history with
+HIV/AIDS, we wanted to explore recent HIV/AIDS data mortality data.
+Since access to diagnosis and treatment is now widely available
+throughout the city, we were interested in analyzing trends in
+HIV-related deaths accounting by sociodemographic factors such as race,
+age, sex, and NYC borough.</p>
 <pre class="r"><code>#Import data set and clean data
 
 hiv_data = read.csv(&quot;data/DOHMH_HIV_AIDS_Annual_Report.csv&quot;) %&gt;%
    janitor::clean_names() %&gt;%
     na_if(., 99999) %&gt;%
   rename(., sex = gender)</code></pre>
+<p>The sharp decline in HIV/AIDs related mortality in NYC observed in
+our data coincides with USA’s mortality trends reported by the CDC in
+2014. This steep decline in the registered number of deaths is explained
+by the significant scientific and medical advances in HIV diagnosis and
+treatment of early 2000. In 2011, a landmark research study showed that
+putting healthy individuals living with HIV on antiretrovirals can limit
+their virus transmission by 96%. The same FDA approved the first at-home
+HIV test, and considerable advances were made in treatment. NYC’s
+success in fighting the HIV/AIDS epidemic results from the courageous
+work of activists, medical advocates, scientists, and brave gay men and
+women throughout NYC and the world.</p>
 </div>
 <div id="exploring-hivaids-related-deaths-in-nyc-by-race-age-and-sex"
 class="section level2">
 <h2>Exploring HIV/Aids Related Deaths in NYC by Race, Age, and Sex</h2>
+<p>Not everyone has the same access to HIV/AIDS care and early
+diagnosis, and access to medical services, in general, differs
+substantially by race, income, and neighborhood. Therefore, in the
+following sections, we will focus on our analysis of how the decline in
+HIV/AIDS-related deaths varies by race/ethnicity, age, sex, and NYC
+borough, as a proxy of income and SES.</p>
 <pre class="r"><code>#Number of HIV-related Deaths in NYC (2011-2015)
 
 hiv_deaths = hiv_data %&gt;% 
@@ -387,7 +422,7 @@ hiv_deaths = hiv_data %&gt;%
 ggplot(data=hiv_deaths, aes(x=year, y= sum_deaths, group=1)) +
     geom_line() +
     geom_point()+
-  labs (title = &quot;Number of HIV/Aids Related deaths in NYC (2011-2015)&quot;,
+  labs (title = &quot;Number of HIV/AIDS Related deaths in NYC (2011-2015)&quot;,
     x = &quot;Year&quot;,
     y = &quot;Number of deaths&quot;) +
   theme(plot.title = element_text(hjust = 0.5))</code></pre>
@@ -403,7 +438,7 @@ hiv_data %&gt;%
   theme_classic() +
   labs(x = &quot;Race&quot;,
        y = &quot;Number of Deaths&quot;,
-       title = &quot;HIV-related Deaths by Race&quot;) +
+       title = &quot;HIV/AIDS related Deaths by Race&quot;) +
   theme(plot.title = element_text(hjust = 0.7))  </code></pre>
 <p><img src="hiv_analysis_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
 <pre class="r"><code>#Boxplot Hiv-related Deaths in NYCby Age 
@@ -416,7 +451,7 @@ hiv_data %&gt;%
   geom_boxplot() +
   labs(x = &quot;Age Group&quot;,
        y = &quot;Number of Deaths&quot;,
-       title = &quot;HIV/Aids Related Deaths by Age&quot;) +
+       title = &quot;HIV/AIDS Related Deaths by Age&quot;) +
   theme(plot.title = element_text(hjust = 0.7))  </code></pre>
 <p><img src="hiv_analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <pre class="r"><code>#Boxplot Hiv-related Deaths in NYC by Sex 
@@ -428,13 +463,15 @@ hiv_data %&gt;%
   geom_boxplot() +
   labs(x = &quot;Sex&quot;,
        y = &quot;Number of Deaths&quot;,
-       title = &quot;HIV/Aids Related Deaths by Sex&quot;) +
+       title = &quot;HIV/AIDS Related Deaths by Sex&quot;) +
   theme(plot.title = element_text(hjust = 0.7))  </code></pre>
 <p><img src="hiv_analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
 </div>
 <div id="visualiazing-hivaids-related-deaths-by-nyc-borough"
 class="section level2">
 <h2>Visualiazing HIV/Aids Related Deaths by NYC Borough</h2>
+<p>Now we will visualize the trends in number of HIV/AIDS related deaths
+for each one of the five NYC <code>borough</code>:</p>
 <pre class="r"><code>#HIV-related deaths in NYC by race 
 
 hiv_data %&gt;% # Filter hiv data by borough
@@ -446,7 +483,7 @@ hiv_data %&gt;% # Filter hiv data by borough
  ggplot(aes(x = year, y = sum_deaths, color = race)) +
     geom_line() +
   facet_grid(~borough) +
-  labs (title = &quot;HIV-related deaths in NYC Boroughs by Race (2011-2015)&quot;,  
+  labs (title = &quot;HIV/AIDS related deaths in NYC Boroughs by Race (2011-2015)&quot;,  
     x = &quot;Year&quot;,
     y = &quot;Number of deaths&quot;) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -463,7 +500,7 @@ summarise(sum_deaths = sum(deaths, na.rm = T)) %&gt;%
  ggplot(aes(x = year, y = sum_deaths, fill = age)) +
   geom_bar(stat= &quot;identity&quot;) +
   facet_grid(~borough) +
-  labs(title = &quot;HIV/Aids related deaths in NYC by Sex (2011-2015)&quot;,  
+  labs(title = &quot;HIV/AIDS related deaths in NYC by Sex (2011-2015)&quot;,  
     x = &quot;Year&quot;,
     y = &quot;Average Number of deaths&quot;) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -481,7 +518,7 @@ summarise(sum_deaths = sum(deaths, na.rm = T)) %&gt;%
  ggplot(aes(x = year, y = sum_deaths, fill = sex)) +
   geom_bar(stat= &quot;identity&quot;) +
   facet_grid(~borough) +
-  labs(title = &quot;HIV/Aids related deaths in NYC by Sex (2011-2015)&quot;,  
+  labs(title = &quot;HIV/AIDS related deaths in NYC by Sex (2011-2015)&quot;,  
     x = &quot;Year&quot;,
     y = &quot;Average Number of deaths&quot;) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -541,6 +578,7 @@ id="fitting-a-mlr-model-finding-the-fiiting-model-of-hiv-related-death-rate-in-n
 class="section level3">
 <h3>Fitting a MLR Model: Finding the fiiting model of hiv-related death
 rate in NYC</h3>
+<p><em>The best fit model is</em>:</p>
 <pre class="r"><code>hiv_mlr = lm(deaths ~ race + age + sex + borough + concurrent_diagnoses + x_linked_to_care_within_3_months, data = hiv_data)
 
 hiv_mlr_result = hiv_mlr %&gt;% 
@@ -711,8 +749,7 @@ mallow_cp
 ##  FPE: Final Prediction Error 
 ##  HSP: Hocking&#39;s Sp 
 ##  APC: Amemiya Prediction Criteria</code></pre>
-<pre class="r"><code>
-library(caret)
+<pre class="r"><code>library(caret)
 
 set.seed(1)
 # Use 10-fold validation and create the training sets
@@ -728,25 +765,58 @@ model_caret = train(deaths ~ age + sex + borough + concurrent_diagnoses + x_link
 model_caret$hiv_mlr 
 ## NULL
 
-model_caret
-## Linear Regression 
+summary(model_caret)
 ## 
-## 6005 samples
-##    5 predictor
+## Call:
+## lm(formula = .outcome ~ ., data = dat)
 ## 
-## No pre-processing
-## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 4034, 4035, 4035, 4035, 4035, 4034, ... 
-## Resampling results:
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -318.76   -5.58    0.69    6.08  374.69 
 ## 
-##   RMSE     Rsquared   MAE     
-##   26.0741  0.8634017  11.18847
+## Coefficients:
+##                                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                       30.79694    3.86151   7.975 1.92e-15 ***
+## `age20 - 29`                      -7.60972    2.02119  -3.765 0.000169 ***
+## `age30 - 39`                      -8.19925    2.01508  -4.069 4.80e-05 ***
+## `age40 - 49`                      -2.24204    2.01958  -1.110 0.266994    
+## `age50 - 59`                      12.74074    2.04866   6.219 5.46e-10 ***
+## `age60+`                          17.96155    2.14661   8.367  &lt; 2e-16 ***
+## ageAll                             2.23220    1.67043   1.336 0.181519    
+## sexFemale                         -0.65472    1.89458  -0.346 0.729676    
+## sexMale                           -4.68766    1.84748  -2.537 0.011204 *  
+## sexTransgender                   -34.13322   12.09001  -2.823 0.004775 ** 
+## boroughBronx                     -20.31493    2.83194  -7.174 8.52e-13 ***
+## boroughBrooklyn                  -28.71927    2.79251 -10.284  &lt; 2e-16 ***
+## boroughManhattan                 -27.89941    2.81461  -9.912  &lt; 2e-16 ***
+## boroughQueens                    -32.70025    2.82767 -11.564  &lt; 2e-16 ***
+## `boroughStaten Island`           -24.71673    3.05037  -8.103 6.87e-16 ***
+## concurrent_diagnoses               3.05870    0.01642 186.279  &lt; 2e-16 ***
+## x_linked_to_care_within_3_months  -0.03470    0.01543  -2.248 0.024604 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Tuning parameter &#39;intercept&#39; was held constant at a value of TRUE</code></pre>
+## Residual standard error: 25.96 on 4466 degrees of freedom
+## Multiple R-squared:  0.9214, Adjusted R-squared:  0.9211 
+## F-statistic:  3273 on 16 and 4466 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
-<div id="limitations-to-analysis" class="section level2">
-<h2>Limitations to Analysis</h2>
+<div id="results-and-interpretation" class="section level2">
+<h2>Results and Interpretation</h2>
+<p>There has been a sharp decline in HIV/AIDs related mortality in NYC.
+This steep decline is explained by the significant scientific and
+medical advances in HIV diagnosis and treatment in early 2000. However,
+the general trends in the city vary significantly by race/ethnicity and
+borough. Black and Latino men continue to be disproportionately burdened
+by HIV/AIDS. The number of HIV/AIDS-related deaths is significantly
+higher in Brox, Brooklyn, and Queens, predominantly black and Latino
+boroughs, compared to Manhattan and Staten Island. However, our SLR and
+MLR indicate that these differences aren’t explained by race but are
+primarily driven by other socioecnomic factors, such as borough of
+residence and access to early HIV treatment. This result suggests that
+differences observed by race/ethnicity in HIV/AIDs deaths could result
+from inequities in access to medical care, information, and resources
+available in each NYC borough.</p>
 </div>
 
 

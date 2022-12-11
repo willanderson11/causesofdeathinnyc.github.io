@@ -38,6 +38,9 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ## Motivation to Investiagate HIV/Aids Related Deaths
 
+New York City was affected by the HIV/AIDS epidemic more than any other U.S. city. When AIDS was first discovered in 1891, little was known about the mysterious disease rapidly spreading through the city and disproportionately affecting gay men. Doctors had no clue about the diseases' origin, and there was no medical treatment. As a result, people with AIDS were essentially given a death sentence. A CDC report from 1987 estimated that 70,000 people in NYC had AIDS, and AIDS cases in NYC accounted for 30% of AIDS cases in the USA. The same report stated that of all AIDS cases in reported in NYC, 51% of adults and 59% of children have died. By the end of 192,  AIDS had become the number one cause of death for U.S. men ages 25 to 44. More than one million Americans were infected with HIV, and nearly 10 million people were infected with HIV worldwide. Given New York City's history with HIV/AIDS, we wanted to explore recent HIV/AIDS data mortality data. Since access to diagnosis and treatment is now widely available throughout the city, we were interested in analyzing trends in HIV-related deaths accounting by sociodemographic factors such as race, age, sex, and NYC borough. 
+
+
 ```{r}
 #Import data set and clean data
 
@@ -48,7 +51,11 @@ hiv_data = read.csv("data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
 
 ```
 
+The sharp decline in HIV/AIDs related mortality in NYC observed in our data coincides with USA's mortality trends reported by the CDC in 2014. This steep decline in the registered number of deaths is explained by the significant scientific and medical advances in HIV diagnosis and treatment of early 2000. In 2011, a landmark research study showed that putting healthy individuals living with HIV on antiretrovirals can limit their virus transmission by 96%. The same FDA approved the first at-home HIV test, and considerable advances were made in treatment. NYC's success in fighting the HIV/AIDS epidemic results from the courageous work of activists, medical advocates, scientists, and brave gay men and women throughout NYC and the world. 
+
 ## Exploring HIV/Aids Related Deaths in NYC by Race, Age, and Sex
+
+Not everyone has the same access to HIV/AIDS care and early diagnosis, and access to medical services, in general, differs substantially by race, income, and neighborhood. Therefore, in the following sections, we will focus on our analysis of how the decline in HIV/AIDS-related deaths varies by race/ethnicity, age, sex, and NYC borough, as a proxy of income and SES.   
 
 ```{r}
 #Number of HIV-related Deaths in NYC (2011-2015)
@@ -62,7 +69,7 @@ hiv_deaths = hiv_data %>%
 ggplot(data=hiv_deaths, aes(x=year, y= sum_deaths, group=1)) +
     geom_line() +
     geom_point()+
-  labs (title = "Number of HIV/Aids Related deaths in NYC (2011-2015)",
+  labs (title = "Number of HIV/AIDS Related deaths in NYC (2011-2015)",
     x = "Year",
     y = "Number of deaths") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -81,7 +88,7 @@ hiv_data %>%
   theme_classic() +
   labs(x = "Race",
        y = "Number of Deaths",
-       title = "HIV-related Deaths by Race") +
+       title = "HIV/AIDS related Deaths by Race") +
   theme(plot.title = element_text(hjust = 0.7))  
 
 ```
@@ -98,7 +105,7 @@ hiv_data %>%
   geom_boxplot() +
   labs(x = "Age Group",
        y = "Number of Deaths",
-       title = "HIV/Aids Related Deaths by Age") +
+       title = "HIV/AIDS Related Deaths by Age") +
   theme(plot.title = element_text(hjust = 0.7))  
 
 ```
@@ -113,12 +120,13 @@ hiv_data %>%
   geom_boxplot() +
   labs(x = "Sex",
        y = "Number of Deaths",
-       title = "HIV/Aids Related Deaths by Sex") +
+       title = "HIV/AIDS Related Deaths by Sex") +
   theme(plot.title = element_text(hjust = 0.7))  
 ```
 
 ## Visualiazing HIV/Aids Related Deaths by NYC Borough
 
+Now we will visualize the trends in number of HIV/AIDS related deaths for each one of the five NYC `borough`: 
 
 ```{r}
 #HIV-related deaths in NYC by race 
@@ -132,7 +140,7 @@ hiv_data %>% # Filter hiv data by borough
  ggplot(aes(x = year, y = sum_deaths, color = race)) +
     geom_line() +
   facet_grid(~borough) +
-  labs (title = "HIV-related deaths in NYC Boroughs by Race (2011-2015)",  
+  labs (title = "HIV/AIDS related deaths in NYC Boroughs by Race (2011-2015)",  
     x = "Year",
     y = "Number of deaths") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -151,7 +159,7 @@ summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
  ggplot(aes(x = year, y = sum_deaths, fill = age)) +
   geom_bar(stat= "identity") +
   facet_grid(~borough) +
-  labs(title = "HIV/Aids related deaths in NYC by Sex (2011-2015)",  
+  labs(title = "HIV/AIDS related deaths in NYC by Sex (2011-2015)",  
     x = "Year",
     y = "Average Number of deaths") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -171,7 +179,7 @@ summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
  ggplot(aes(x = year, y = sum_deaths, fill = sex)) +
   geom_bar(stat= "identity") +
   facet_grid(~borough) +
-  labs(title = "HIV/Aids related deaths in NYC by Sex (2011-2015)",  
+  labs(title = "HIV/AIDS related deaths in NYC by Sex (2011-2015)",  
     x = "Year",
     y = "Average Number of deaths") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -197,6 +205,7 @@ hiv_race_result
 
 ### Fitting a MLR Model: Finding the fiiting model of hiv-related death rate in NYC
 
+*The best fit model is*:
 
 ```{r}
 hiv_mlr = lm(deaths ~ race + age + sex + borough + concurrent_diagnoses + x_linked_to_care_within_3_months, data = hiv_data)
@@ -211,6 +220,7 @@ hiv_mlr_result
 
 ```
 
+
 ```{r}
 
 #stepwise regression
@@ -223,7 +233,6 @@ mallow_cp
 ```
 
 ```{r}
-
 library(caret)
 
 set.seed(1)
@@ -239,8 +248,11 @@ model_caret = train(deaths ~ age + sex + borough + concurrent_diagnoses + x_link
 
 model_caret$hiv_mlr 
 
-model_caret
+summary(model_caret)
 
 ```
 
-## Limitations to Analysis
+
+## Results and Interpretation
+
+There has been a sharp decline in HIV/AIDs related mortality in NYC. This steep decline is explained by the significant scientific and medical advances in HIV diagnosis and treatment in early 2000. However, the general trends in the city vary significantly by race/ethnicity and borough. Black and Latino men continue to be disproportionately burdened by HIV/AIDS. The number of HIV/AIDS-related deaths is significantly higher in Brox, Brooklyn, and Queens, predominantly black and Latino boroughs, compared to Manhattan and Staten Island. However, our SLR and MLR indicate that these differences aren't explained by race but are primarily driven by other socioecnomic factors, such as borough of residence and access to early HIV treatment. This result suggests that differences observed by race/ethnicity in HIV/AIDs deaths could result from inequities in access to medical care, information, and resources available in each NYC borough.

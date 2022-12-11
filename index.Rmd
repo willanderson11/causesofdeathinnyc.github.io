@@ -22,6 +22,15 @@ library(stringr)
 library(ggridges)
 library(readxl)
 library(ggtext)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(ggridges)
+library(ggcorrplot)
+library(glmnet)
+library(olsrr)
+
 knitr::opts_chunk$set(
   fig.width = 6,
   fig.asp = .6,
@@ -54,7 +63,7 @@ Each team member decided to focus on a specific cause of death and an individual
 
 3. We were also interested in examining cancer incidence and mortality rates as cancer of all forms is the second leading cause of death in New York City. What are the different social factors that can play a role in cancer rates we examined income levels across New York City? Are these predictors of cancer incidence and mortality rates across the city?
 
-4. (Angelica's Questions)
+4. There has been a sharp decline in HIV/AIDs related mortality in NYC. This steep decline is explained by the significant scientific and medical advances in HIV diagnosis and treatment in early 2000. However, the general trends in the city vary significantly by race/ethnicity and borough. Black and Latino men continue to be disproportionately burdened by HIV/AIDS. The number of HIV/AIDS-related deaths is significantly higher in Brox, Brooklyn, and Queens, predominantly black and Latino boroughs, compared to Manhattan and Staten Island. However, our SLR and MLR indicate that these differences aren't explained by race but are primarily driven by other socioeconomic factors, such as borough of residence and access to early HIV treatment. This result suggests that differences observed by race/ethnicity in HIV/AIDs deaths could result from inequities in access to medical care, information, and resources available in each NYC borough.
 
 5. There are stark differences between the leading causes of death among age groups. What were the leading causes of death by age group? Is there a relationship between age group as a predictor of Suicide Deaths and Opioid Poisoning Deaths? 
 
@@ -264,9 +273,26 @@ nyc_cancer_rates = read_excel("data/nyc_cancer_data.xlsx", sheet = "all NYC", sk
   cbind(income_data_nyc["median_income"])
 ```
 
-4. (Angelica's Datasets)
+4. Trends in HIV/AIDS Related Deaths 
 
-<br>
+[(Dataset)](https://data.cityofnewyork.us/Health/DOHMH-HIV-AIDS-Annual-Report/fju2-rdad)  
+
+For the HIV analysis, we used the data reported to the HIV Epidemiology and Field Services Program in 2016. All data shown is for people ages 13 and older. Working with this data was challenging, as borough-wide and citywide totals sometimes included cases assigned to a borough with an unknown UHF or NYC with an unknown borough. Therefore, UHF totals didn't sum to borough totals, and the borough didn't add to citywide totals. This made calculating averages and the total number of deaths challenging. We had to be especially careful when using `select` and `filter` to analyze the data, as we had to ensure we had the correct/expected number of cells and rows.  
+
+The columns of interest for our analysis are:  
+
+`year`: calendar year  
+
+'borough`: borough of residence 
+
+`age`: age at death 
+
+`race`: race/ethnicity 
+
+`sex`: Female, Male 
+
+
+
 5. Age as a Predictor of Death (in relation to Suicide and Opioid Related Deaths): 
 
 * Death by Age [(Dataset)](https://health.data.ny.gov/Health/Vital-Statistics-Deaths-by-Resident-County-Region-/xit9-mprv) 
@@ -595,7 +621,145 @@ plot.title.position = "plot"
 ) 
 ``` 
 
-3. (Angelica's EDA)
+3. Trends in HIV/AIDS Related Deaths 
+
+We first plotted the number the total number of HIV-related Deaths in NYC between the years 2011-2015: 
+
+```{r}
+#Import data set and clean data
+
+hiv_data = read.csv("data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
+   janitor::clean_names() %>%
+    na_if(., 99999) %>%
+  rename(., sex = gender)
+
+
+#Number of HIV-related Deaths in NYC (2011-2015)
+
+hiv_deaths = hiv_data %>% 
+  filter(borough == "All") %>% # Filter hiv data by borough
+  select(.data = ., year, deaths) %>%
+  group_by(year) %>%
+  summarise(sum_deaths = sum(deaths))
+  
+ggplot(data=hiv_deaths, aes(x=year, y= sum_deaths, group=1)) +
+    geom_line() +
+    geom_point()+
+  labs (title = "Number of HIV/AIDS Related deaths in NYC (2011-2015)",
+    x = "Year",
+    y = "Number of deaths") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+Not everyone has the same access to HIV/AIDS care and early diagnosis, and access to medical services, in general, differs substantially by race, income, and neighborhood. Therefore, in the following code chcucke, will analysis differences trendes in HIV/AIDS-related deaths by race/ethnicity, age, sex, and NYC borough, as a proxy of income and SES:
+
+```{r}
+#Boxplot Hiv-Related Deaths by Race 
+hiv_data %>% 
+  filter(race != "All" & race != "Other/Unknown") %>% 
+  filter(year != "All") %>% 
+  filter(borough == "All") %>% 
+  select(.data = ., deaths, race, year) %>% 
+  ggplot(aes(y = deaths, x = reorder(race, -deaths), color = race)) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = "Race",
+       y = "Number of Deaths",
+       title = "HIV/AIDS related Deaths by Race") +
+  theme(plot.title = element_text(hjust = 0.7))  
+```
+
+```{r}
+#Boxplot Hiv-related Deaths in NYC by Age 
+hiv_data %>% 
+  filter(age != "All") %>% 
+  filter(year != "All") %>%
+  filter(borough == "All") %>% 
+  select(.data = ., deaths, age, year) %>% 
+  ggplot(aes(y = deaths, x = reorder(age, -deaths), color = age)) +
+  geom_boxplot() +
+  labs(x = "Age Group",
+       y = "Number of Deaths",
+       title = "HIV/AIDS Related Deaths by Age") +
+  theme(plot.title = element_text(hjust = 0.7))  
+```
+
+```{r}
+#Boxplot Hiv-related Deaths in NYC by Sex 
+hiv_data %>% 
+  filter(sex != "All" & sex != "Transgender") %>% 
+  filter(borough == "All") %>% 
+  select(.data = ., deaths, sex, year) %>% 
+  ggplot(aes(y = deaths, x = reorder(sex, -deaths), color = sex)) +
+  geom_boxplot() +
+  labs(x = "Sex",
+       y = "Number of Deaths",
+       title = "HIV/AIDS Related Deaths by Sex") +
+  theme(plot.title = element_text(hjust = 0.7))  
+```
+
+Now we will visualize the trends in number of HIV/AIDS related deaths for each one of the five NYC `borough`: 
+
+```{r}
+#HIV-related deaths in NYC by race 
+
+hiv_data %>% # Filter hiv data by borough
+  filter(borough != "All") %>% # Filter hiv data by borough
+  filter(race != "All" & race != 'Other/Unknown') %>% # Filter hiv data by race
+  select(.data = ., year, deaths, race, borough)   %>% 
+      group_by(year, race, borough) %>%
+         summarise(sum_deaths = sum(deaths)) %>% #total number of deaths  
+ ggplot(aes(x = year, y = sum_deaths, color = race)) +
+    geom_line() +
+  facet_grid(~borough) +
+  labs (title = "HIV/AIDS related deaths in NYC Boroughs by Race (2011-2015)",  
+    x = "Year",
+    y = "Number of deaths") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  
+
+```
+
+```{r}
+#Number of HIV-related deaths in NYC by Age
+hiv_data %>% 
+  filter(age != "All") %>% # Filter hiv data by gender
+  filter(borough != "All") %>% # Filter hiv data by borough
+  select(.data = ., year, deaths, age, borough)  %>%
+  na_if(., 0) %>%
+  group_by(year, borough, age)  %>%
+summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
+ ggplot(aes(x = year, y = sum_deaths, fill = age)) +
+  geom_bar(stat= "identity") +
+  facet_grid(~borough) +
+  labs(title = "HIV/AIDS related deaths in NYC by Sex (2011-2015)",  
+    x = "Year",
+    y = "Average Number of deaths") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  
+```
+
+```{r}
+#Number of HIV-related deaths in NYC by Sex 
+hiv_data %>% 
+  filter(sex != "All") %>% # Filter hiv data by gender
+  filter(sex != "Transgender") %>% # Filter hiv data by gender
+  filter(borough != "All") %>% # Filter hiv data by borough
+  select(.data = ., year, deaths, sex, borough)  %>%
+  na_if(., 0) %>%
+  group_by(year, borough, sex)  %>%
+summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
+ ggplot(aes(x = year, y = sum_deaths, fill = sex)) +
+  geom_bar(stat= "identity") +
+  facet_grid(~borough) +
+  labs(title = "HIV/AIDS related deaths in NYC by Sex (2011-2015)",  
+    x = "Year",
+    y = "Average Number of deaths") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(plot.title = element_text(hjust = 0.5))  
+```
+
 
 4. Suicide and Opioid Poisonings
 
@@ -746,7 +910,7 @@ At a $\alpha = 0.5$ level, those among the age groups of 20-64 are significant p
 
 *  We determined that median household income is not a significant predictor for cancer incidence rates being evidenced by the linear regression results obtained in the analysis. The various plots and statistical tests in our analysis between median household income levels and cancer incidence/mortality rates did not show a correlation between the two variables or showed that median household income level as an insignificant predictor for cancer incidence rates.  
 
-* (Angelica's Findings)
+* There has been a sharp decline in HIV/AIDs related mortality in NYC. This steep decline is explained by the significant scientific and medical advances in HIV diagnosis and treatment in early 2000. However, the general trends in the city vary significantly by race/ethnicity and borough. Black and Latino men continue to be disproportionately burdened by HIV/AIDS. The number of HIV/AIDS-related deaths is significantly higher in Brox, Brooklyn, and Queens, predominantly black and Latino boroughs, compared to Manhattan and Staten Island. However, our SLR and MLR indicate that these differences aren't explained by race but are primarily driven by other socioeconomic factors, such as borough of residence and access to early HIV treatment. This result suggests that differences observed by race/ethnicity in HIV/AIDs deaths could result from inequities in access to medical care, information, and resources available in each NYC borough. 
 
 * Leading causes of death differ drastically by age group in New York, accidents leading to death are far more common in the youth than the elderly.  Accidents and Malignant Neoplasms are the leading causes of death for those in the age groups of 1-44. While there is a shift to the leading causes of Diseases of the Heart and Malignant Neoplasms as the leading causes of death for those that are 44+ years of age.  From the simple linear regression, the age group is a significant predictor of death by suicide and opioid poisoning. In the case of age group as a predictor for deaths by opioid poisoning, it was a significant factor for the age groups of 20-64. In the case of age group as a predictor for suicide deaths, age group was a significant factor for all age groups except young children between 1 to 9 years of age and those of old age of 85+ years. 
 
@@ -757,6 +921,8 @@ At a $\alpha = 0.5$ level, those among the age groups of 20-64 are significant p
 Often death rates are calculated as an age-adjusted death rate, controlling for the effects of differences in population age distributions, hence it was interesting to see a stratified analysis of causes of death by age and to see if the age group of an individual impacts their likelihood of dying from suicide or drug poisoning. The results that we found were consistent with the literature, as our analysis concentrates on pre-COVID era data, it would be interesting to compare our results to data collected since the pandemic started as suicide and drug poisoning rates have further increased due to the pandemic.  
 
 From this analysis, there is not enough evidence to determine that median household income in New York City influences cancer incidence rates. This could be due to a multitude of reasons, the modeling is rudimentary as the only predictor for cancer incidence rates was median household income. It is reasonable to suggest that cancer incidence should have multiple predictors to be accurately modeled as the development of cancer is often a multi-faceted occurrence. Additionally, income may not have any effect on cancer incidence regardless of better modeling techniques or more robust datasets but a more in-depth analysis is needed before drawing strict conclusions on the effect of income on cancer rates.  
+
+Lastly, as explained in the results section, differences observed by race and age in HIV/AIDs related deaths could result from inequities in access to medical care, information, and resources depending on NYC borough of residence. Therefore, the next step is to analyze the observed trends by UHF (aka. neighborhood) and income, as well as changes in mortality rates and diagnosis across years, to see if these factors can better explain the differences observed in our exploratory analysis. 
 
 <br>
 
