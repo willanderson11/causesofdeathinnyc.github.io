@@ -312,7 +312,7 @@ The main columns of interest for our analysis are:
 
 hiv_data = read.csv("data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
    janitor::clean_names() %>%
-    na_if(., 99999) %>%   #na_if missing data
+    #na_if(., 99999) %>%   #na_if missing data
   rename(., sex = gender)
 
 ```
@@ -702,7 +702,7 @@ We first plotted the number the total number of HIV-related Deaths in NYC betwee
 
 hiv_data = read.csv("data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
    janitor::clean_names() %>%
-    na_if(., 99999) %>%
+    #na_if(., 99999) %>%
   rename(., sex = gender)
 
 
@@ -799,7 +799,7 @@ hiv_data %>%
   filter(age != "All") %>% # Filter hiv data by gender
   filter(borough != "All") %>% # Filter hiv data by borough
   select(.data = ., year, deaths, age, borough)  %>%
-  na_if(., 0) %>%
+  #na_if(., 0) %>%
   group_by(year, borough, age)  %>%
 summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
  ggplot(aes(x = year, y = sum_deaths, fill = age)) +
@@ -819,7 +819,7 @@ hiv_data %>%
   filter(sex != "Transgender") %>% # Filter hiv data by gender
   filter(borough != "All") %>% # Filter hiv data by borough
   select(.data = ., year, deaths, sex, borough)  %>%
-  na_if(., 0) %>%
+  #na_if(., 0) %>%
   group_by(year, borough, sex)  %>%
 summarise(sum_deaths = sum(deaths, na.rm = T)) %>%
  ggplot(aes(x = year, y = sum_deaths, fill = sex)) +
